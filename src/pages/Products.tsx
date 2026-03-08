@@ -1,8 +1,23 @@
-import { useState } from 'react';
-import { Shield, Wrench, Shirt, Cog } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Shield, Wrench, Shirt, Cog, ShoppingCart } from 'lucide-react';
+import { getProducts } from '../utils/storage';
+import { Product } from '../types';
 
-export default function Products() {
+interface ProductsProps {
+  onNavigate: (page: string) => void;
+}
+
+export default function Products({ }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const data = await getProducts();
+      setProducts(data);
+    };
+    fetchProducts();
+  }, []);
 
   const categories = [
     { id: 'all', name: 'All Products', icon: Cog },
@@ -12,96 +27,13 @@ export default function Products() {
     { id: 'mods', name: 'Modification Parts', icon: Cog },
   ];
 
-  const products = [
-    {
-      category: 'helmets',
-      name: 'MT Revenge 2 Full-Face Helmet',
-      description: 'Aerodynamic design with superior ventilation',
-      price: '₹4,999',
-      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'helmets',
-      name: 'SMK Twister Captain Helmet',
-      description: 'DOT certified with anti-fog visor',
-      price: '₹3,499',
-      image: 'https://images.pexels.com/photos/163210/motorcycles-race-helmets-pilots-163210.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'helmets',
-      name: 'Axor Apex Hunter Helmet',
-      description: 'Lightweight with dual visor system',
-      price: '₹5,499',
-      image: 'https://images.pexels.com/photos/4488662/pexels-photo-4488662.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'accessories',
-      name: 'LED Headlight Kit',
-      description: 'Ultra-bright 6000K white light',
-      price: '₹1,999',
-      image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'accessories',
-      name: 'Custom Exhaust System',
-      description: 'Enhanced sound and performance',
-      price: '₹3,999',
-      image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'accessories',
-      name: 'Mobile Holder Mount',
-      description: '360° rotation with secure grip',
-      price: '₹499',
-      image: 'https://images.pexels.com/photos/1127133/pexels-photo-1127133.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'gear',
-      name: 'Riding Gloves Pro',
-      description: 'Knuckle protection with touchscreen compatibility',
-      price: '₹899',
-      image: 'https://images.pexels.com/photos/6873876/pexels-photo-6873876.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'gear',
-      name: 'Riding Jacket',
-      description: 'Waterproof with CE approved armor',
-      price: '₹4,499',
-      image: 'https://images.pexels.com/photos/6873871/pexels-photo-6873871.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'gear',
-      name: 'Knee & Elbow Guards',
-      description: 'Adjustable straps with impact protection',
-      price: '₹1,299',
-      image: 'https://images.pexels.com/photos/7243409/pexels-photo-7243409.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'mods',
-      name: 'Performance Air Filter',
-      description: 'Increased airflow and engine efficiency',
-      price: '₹1,799',
-      image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'mods',
-      name: 'LED Strip Lights',
-      description: 'RGB color changing with remote',
-      price: '₹899',
-      image: 'https://images.pexels.com/photos/3311574/pexels-photo-3311574.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-      category: 'mods',
-      name: 'Carbon Fiber Tank Pad',
-      description: 'Premium look with scratch protection',
-      price: '₹699',
-      image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-  ];
-
   const filteredProducts = selectedCategory === 'all'
     ? products
     : products.filter(p => p.category === selectedCategory);
+
+  const handleBuyNow = (productId: string) => {
+    window.location.hash = `payment?productId=${productId}`;
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950">
@@ -121,11 +53,10 @@ export default function Products() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-md font-semibold transition-all ${
-                  selectedCategory === cat.id
-                    ? 'bg-red-600 text-white'
-                    : 'bg-black text-gray-400 hover:bg-zinc-800 hover:text-white border-2 border-zinc-800'
-                }`}
+                className={`flex items-center gap-2 px-6 py-3 rounded-md font-semibold transition-all ${selectedCategory === cat.id
+                  ? 'bg-red-600 text-white'
+                  : 'bg-black text-gray-400 hover:bg-zinc-800 hover:text-white border-2 border-zinc-800'
+                  }`}
               >
                 <cat.icon size={20} />
                 {cat.name}
@@ -145,7 +76,7 @@ export default function Products() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {filteredProducts.map((product, index) => (
                 <div
-                  key={index}
+                  key={product.id || index}
                   className="bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-800 hover:border-red-600 transition-all transform hover:scale-105 cursor-pointer group"
                 >
                   <div className="h-64 overflow-hidden bg-black">
@@ -157,11 +88,17 @@ export default function Products() {
                   </div>
                   <div className="p-6">
                     <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
-                    <p className="text-gray-400 text-sm mb-4">{product.description}</p>
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-2xl font-bold text-red-600">{product.price}</span>
-                      <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors">
-                        Enquire
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBuyNow(product.id);
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2"
+                      >
+                        <ShoppingCart size={16} /> Buy Now
                       </button>
                     </div>
                   </div>

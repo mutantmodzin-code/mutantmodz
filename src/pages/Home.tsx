@@ -1,30 +1,22 @@
+import { useState, useEffect } from 'react';
 import { ArrowRight, Star, Shield, Wrench, Users, TrendingUp } from 'lucide-react';
+import { getProducts } from '../utils/storage';
+import { Product } from '../types';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
 }
 
 export default function Home({ onNavigate }: HomeProps) {
-  const featuredProducts = [
-    {
-      name: 'Premium Full-Face Helmets',
-      description: 'DOT certified, aerodynamic design, superior protection',
-      price: '₹3,999',
-      image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=800',
-    },
-    {
-      name: 'Bike Modification Parts',
-      description: 'Custom exhaust, LED lights, performance upgrades',
-      price: '₹1,499',
-      image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=800',
-    },
-    {
-      name: 'Riding Gear & Accessories',
-      description: 'Gloves, jackets, knee guards, premium quality',
-      price: '₹2,499',
-      image: 'https://images.pexels.com/photos/163210/motorcycles-race-helmets-pilots-163210.jpeg?auto=compress&cs=tinysrgb&w=800',
-    },
-  ];
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const products = await getProducts();
+      setFeaturedProducts(products.slice(0, 3));
+    };
+    fetchProducts();
+  }, []);
 
   const reviews = [
     {
@@ -109,7 +101,7 @@ export default function Home({ onNavigate }: HomeProps) {
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
               Your one-stop shop for premium bike accessories, helmets, and riding gear in Coimbatore.
-              We bring passion and expertise to every rider who walks through our doors.
+              We bring passion and expertise to any rider who walks through our doors.
             </p>
           </div>
         </div>
@@ -127,7 +119,7 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredProducts.map((product, index) => (
               <div
-                key={index}
+                key={product.id || index}
                 className="bg-black rounded-lg overflow-hidden border-2 border-zinc-800 hover:border-red-600 transition-all transform hover:scale-105 cursor-pointer"
                 onClick={() => onNavigate('products')}
               >
@@ -140,11 +132,17 @@ export default function Home({ onNavigate }: HomeProps) {
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-white mb-2">{product.name}</h3>
-                  <p className="text-gray-400 mb-4">{product.description}</p>
+                  <p className="text-gray-400 mb-4 line-clamp-2">{product.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-2xl font-bold text-red-600">{product.price}</span>
-                    <button className="text-white hover:text-red-600 font-semibold flex items-center gap-1 transition-colors">
-                      View Details <ArrowRight size={16} />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.hash = `payment?productId=${product.id}`;
+                      }}
+                      className="text-white hover:text-red-600 font-semibold flex items-center gap-1 transition-colors"
+                    >
+                      Buy Now <ArrowRight size={16} />
                     </button>
                   </div>
                 </div>

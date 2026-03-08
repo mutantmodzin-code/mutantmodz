@@ -42,15 +42,14 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`text-sm font-semibold tracking-wide uppercase transition-all duration-300 hover:text-red-600 ${
-                  currentPage === item.id ? 'text-red-600 border-b-2 border-red-600' : 'text-white'
-                }`}
+                className={`text-sm font-semibold tracking-wide uppercase transition-all duration-300 hover:text-red-600 ${currentPage === item.id ? 'text-red-600 border-b-2 border-red-600' : 'text-white'
+                  }`}
               >
                 {item.label}
               </button>
             ))}
             <a
-              href="tel:+919876543210"
+              href="tel:+919342637975"
               className="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md transition-colors"
             >
               <Phone size={18} />
@@ -74,11 +73,10 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`block w-full text-left px-4 py-3 rounded-md text-sm font-semibold uppercase transition-colors ${
-                  currentPage === item.id
-                    ? 'bg-red-600 text-white'
-                    : 'text-gray-300 hover:bg-zinc-800 hover:text-red-600'
-                }`}
+                className={`block w-full text-left px-4 py-3 rounded-md text-sm font-semibold uppercase transition-colors ${currentPage === item.id
+                  ? 'bg-red-600 text-white'
+                  : 'text-gray-300 hover:bg-zinc-800 hover:text-red-600'
+                  }`}
               >
                 {item.label}
               </button>

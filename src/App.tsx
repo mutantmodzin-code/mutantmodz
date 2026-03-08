@@ -7,6 +7,7 @@ import About from './pages/About';
 import Products from './pages/Products';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
+import ProductDetails from './pages/ProductDetails';
 
 import Payment from './pages/Payment';
 
@@ -42,7 +43,8 @@ function App() {
         return <Gallery />;
       case 'contact':
         return <Contact />;
-
+      case 'productDetails':
+        return <ProductDetails />;
       case 'payment':
         return <Payment />;
       default:

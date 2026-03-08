@@ -77,9 +77,10 @@ export default function Products({ }: ProductsProps) {
               {filteredProducts.map((product, index) => (
                 <div
                   key={product.id || index}
+                  onClick={() => window.location.hash = `productDetails?productId=${product.id}`}
                   className="bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-800 hover:border-red-600 transition-all transform hover:scale-105 cursor-pointer group"
                 >
-                  <div className="h-64 overflow-hidden bg-black">
+                  <div className="h-64 overflow-hidden bg-white flex items-center justify-center p-4">
                     <img
                       src={product.image}
                       alt={product.name}

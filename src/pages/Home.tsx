@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, Star, Shield, Wrench, Users, TrendingUp } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
+import { HeroSlideshow } from '../components/HeroSlideshow';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -61,39 +62,10 @@ export default function Home({ onNavigate }: HomeProps) {
 
   return (
     <div className="min-h-screen bg-zinc-950">
-      <section
-        className="relative h-screen flex items-center justify-center bg-cover bg-center"
-        style={{
-          backgroundImage: 'url(https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=1920)',
-        }}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-70"></div>
-        <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-            Upgrade Your Ride with
-            <span className="block text-red-600 mt-2">Premium Bike Accessories</span>
-          </h1>
-          <p className="text-xl sm:text-2xl text-gray-300 mb-8 leading-relaxed">
-            Coimbatore's trusted destination for helmets, riding gear, and custom bike modifications
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => onNavigate('products')}
-              className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-md text-lg font-semibold flex items-center justify-center gap-2 transition-all transform hover:scale-105"
-            >
-              Explore Products <ArrowRight size={20} />
-            </button>
-            <button
-              onClick={() => onNavigate('contact')}
-              className="bg-white hover:bg-gray-200 text-black px-8 py-4 rounded-md text-lg font-semibold transition-all transform hover:scale-105"
-            >
-              Visit Our Store
-            </button>
-          </div>
-        </div>
-      </section>
+      <HeroSlideshow onNavigate={onNavigate} />
 
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/50 to-transparent" />
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">

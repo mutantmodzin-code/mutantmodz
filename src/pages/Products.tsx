@@ -9,6 +9,7 @@ interface ProductsProps {
 
 export default function Products({ }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -19,6 +20,22 @@ export default function Products({ }: ProductsProps) {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      const brandMatch = hash.match(/[?&]brand=([^&]+)/);
+      if (brandMatch) {
+        setSelectedBrand(brandMatch[1].toLowerCase());
+      } else {
+        setSelectedBrand(null);
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   const categories = [
     { id: 'all', name: 'All Products', icon: Cog },
     { id: 'helmets', name: 'Helmets', icon: Shield },
@@ -27,9 +44,14 @@ export default function Products({ }: ProductsProps) {
     { id: 'mods', name: 'Modification Parts', icon: Cog },
   ];
 
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter(p => p.category === selectedCategory);
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
+    const matchesBrand = !selectedBrand ||
+      p.name.toLowerCase().includes(selectedBrand) ||
+      p.description.toLowerCase().includes(selectedBrand) ||
+      (p as any).brand?.toLowerCase() === selectedBrand;
+    return matchesCategory && matchesBrand;
+  });
 
   const handleBuyNow = (productId: string) => {
     window.location.hash = `payment?productId=${productId}`;
@@ -43,6 +65,17 @@ export default function Products({ }: ProductsProps) {
             Our <span className="text-red-600">Products</span>
           </h1>
           <p className="text-xl text-gray-400">Premium bike accessories for passionate riders</p>
+          {selectedBrand && (
+            <div className="mt-6 inline-flex items-center gap-3 bg-red-600/20 border border-red-600/30 px-4 py-2 rounded-full">
+              <span className="text-red-600 font-bold uppercase text-xs tracking-widest">Brand: {selectedBrand}</span>
+              <button
+                onClick={() => window.location.hash = 'products'}
+                className="text-white hover:text-red-600 transition-colors text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

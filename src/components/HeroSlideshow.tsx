@@ -41,7 +41,7 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
     }, []);
 
     useEffect(() => {
-        const timer = setInterval(nextSlide, 2000);
+        const timer = setInterval(nextSlide, 4000);
         return () => clearInterval(timer);
     }, [nextSlide]);
 

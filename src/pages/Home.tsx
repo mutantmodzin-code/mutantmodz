@@ -3,6 +3,7 @@ import { ArrowRight, Star, Shield, Wrench, Users, TrendingUp } from 'lucide-reac
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import { HeroSlideshow } from '../components/HeroSlideshow';
+import { BrandCarousel } from '../components/BrandCarousel';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -63,6 +64,7 @@ export default function Home({ onNavigate }: HomeProps) {
   return (
     <div className="min-h-screen bg-zinc-950">
       <HeroSlideshow onNavigate={onNavigate} />
+      <BrandCarousel onNavigate={onNavigate} />
 
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/50 to-transparent" />

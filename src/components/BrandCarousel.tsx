@@ -1,15 +1,51 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 const brands = [
-    { name: 'KTM', logo: 'https://companieslogo.com/img/orig/KTM.VI-5110996c.png?t=1632517855' },
-    { name: 'Yamaha', logo: 'https://companieslogo.com/img/orig/7272.T-7e04058d.png?t=1633519391' },
-    { name: 'Suzuki', logo: 'https://companieslogo.com/img/orig/7269.T-2f085c8e.png?t=1633512399' },
-    { name: 'Bajaj', logo: 'https://companieslogo.com/img/orig/BAJAJ-AUTO.NS-7e5c54e6.png?t=1632543940' },
-    { name: 'Honda', logo: 'https://companieslogo.com/img/orig/HMC-4054a10c.png?t=1633439405' },
-    { name: 'Hero', logo: 'https://companieslogo.com/img/orig/HEROMOTOCO.NS-12c82305.png?t=1633481498' },
-    { name: 'Triumph', logo: 'https://companieslogo.com/img/orig/Triumph_Motorcycles-f3e1b1d3.png?t=1633515437' },
-    { name: 'Kawasaki', logo: 'https://companieslogo.com/img/orig/7012.T-05e80816.png?t=1633501490' },
-    { name: 'BMW', logo: 'https://companieslogo.com/img/orig/BMW.DE-d4a97401.png?t=1633190835' },
+    {
+        name: 'KTM',
+        logo: 'https://www.carlogos.org/logo/KTM-logo-2560x1440.png',
+        image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'Yamaha',
+        logo: 'https://www.carlogos.org/logo/Yamaha-logo-1920x1080.png',
+        image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'Suzuki',
+        logo: 'https://www.carlogos.org/logo/Suzuki-logo-1920x1080.png',
+        image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'Bajaj',
+        logo: 'https://www.carlogos.org/logo/Bajaj-logo-640x334.png',
+        image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=400'
+    },
+    {
+        name: 'Honda',
+        logo: 'https://www.carlogos.org/car-logos/honda-logo.png',
+        image: 'https://images.pexels.com/photos/4006151/pexels-photo-4006151.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'Hero',
+        logo: 'https://www.carlogos.org/logo/Hero-MotoCorp-logo.png',
+        image: 'https://images.pexels.com/photos/2790396/pexels-photo-2790396.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'Triumph',
+        logo: 'https://www.carlogos.org/logo/Triumph-logo.png',
+        image: 'https://images.pexels.com/photos/2088210/pexels-photo-2088210.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'Kawasaki',
+        logo: 'https://www.carlogos.org/logo/Kawasaki-logo.png',
+        image: 'https://images.pexels.com/photos/1029141/pexels-photo-1029141.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
+    {
+        name: 'BMW',
+        logo: 'https://www.carlogos.org/car-logos/bmw-logo.png',
+        image: 'https://images.pexels.com/photos/104842/bmw-vehicle-ride-bike-104842.jpeg?auto=compress&cs=tinysrgb&w=600'
+    },
 ];
 
 interface BrandCarouselProps {
@@ -37,13 +73,13 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({ onNavigate }) => {
             <div className="flex select-none">
                 <motion.div
                     animate={{
-                        x: [0, -(140 + 24) * brands.length],
+                        x: [0, -(180 + 24) * brands.length],
                     }}
                     transition={{
                         x: {
                             repeat: Infinity,
                             repeatType: "loop",
-                            duration: 25,
+                            duration: 35, // Slightly slower for larger cards
                             ease: "linear",
                         },
                     }}
@@ -55,17 +91,39 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({ onNavigate }) => {
                             onClick={() => handleBrandClick(brand.name)}
                             whileHover={{
                                 scale: 1.05,
-                                borderColor: 'rgba(220, 38, 38, 0.5)', // red-600
-                                boxShadow: '0 0 20px rgba(220, 38, 38, 0.2)'
+                                borderColor: 'rgba(220, 38, 38, 0.8)', // red-600
+                                boxShadow: '0 0 30px rgba(220, 38, 38, 0.4)'
                             }}
-                            className="bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 rounded-2xl w-[140px] h-[100px] flex items-center justify-center p-6 cursor-pointer transition-all group shrink-0"
+                            className="relative overflow-hidden bg-zinc-900 border border-zinc-800 rounded-2xl w-[180px] h-[120px] cursor-pointer transition-all group shrink-0"
                         >
+                            {/* Bike Background Image */}
                             <img
-                                src={brand.logo}
-                                alt={`${brand.name} logo`}
-                                className="max-w-full max-h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300 opacity-70 group-hover:opacity-100"
+                                src={brand.image}
+                                alt={`${brand.name} bike`}
+                                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-500"
                                 loading="lazy"
                             />
+
+                            {/* Overlay Gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-60" />
+
+                            {/* Logo and Name Overlay */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 z-10">
+                                <img
+                                    src={brand.logo}
+                                    alt={`${brand.name} logo`}
+                                    className="max-w-[70%] max-h-[50%] object-contain filter brightness-0 invert opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                        (e.target as HTMLImageElement).nextElementSibling?.classList.remove('opacity-0');
+                                        (e.target as HTMLImageElement).nextElementSibling?.classList.add('opacity-100', 'text-xl');
+                                    }}
+                                    loading="lazy"
+                                />
+                                <span className="mt-2 text-[10px] font-black text-white uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                    {brand.name}
+                                </span>
+                            </div>
                         </motion.div>
                     ))}
                 </motion.div>

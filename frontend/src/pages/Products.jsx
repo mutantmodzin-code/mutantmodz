@@ -1,0 +1,289 @@
+import React, { useState, useEffect } from 'react';
+import api from '../api';
+import { Plus, Edit, Trash, Search, PackageMinus, PackagePlus, AlertCircle } from 'lucide-react';
+
+const Products = () => {
+    const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [vendors, setVendors] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '', brand: '', category_id: '',
+        price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
+        image_urls: ['', '', '', '']
+    });
+
+    useEffect(() => {
+        fetchProducts();
+        fetchCategories();
+        fetchVendors();
+    }, [searchTerm, selectedCategory]);
+
+    const fetchProducts = async () => {
+        const res = await api.get(`/products?search=${searchTerm}&category=${selectedCategory}`);
+        setProducts(res.data);
+    };
+
+    const fetchCategories = async () => {
+        const res = await api.get('/products/categories');
+        setCategories(res.data);
+    };
+
+    const fetchVendors = async () => {
+        const res = await api.get('/vendors');
+        setVendors(res.data);
+    };
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        try {
+            // Save as JSON string in the database column
+            const dataToSave = { ...formData, image_url: JSON.stringify(formData.image_urls) };
+            if (editingProduct) {
+                await api.put(`/products/${editingProduct.id}`, dataToSave);
+            } else {
+                await api.post('/products', dataToSave);
+            }
+            setIsModalOpen(false);
+            fetchProducts();
+            setEditingProduct(null);
+            setFormData({
+                name: '', brand: '', category_id: '',
+                price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
+                image_urls: ['', '', '', '']
+            });
+        } catch (error) {
+            console.error(error);
+            alert('Error saving product: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure?')) return;
+        await api.delete(`/products/${id}`);
+        fetchProducts();
+    };
+
+    const uploadImage = (file) => {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 800;
+                    let { width, height } = img;
+                    if (width > height) { if (width > MAX_SIZE) { height = (height * MAX_SIZE) / width; width = MAX_SIZE; } }
+                    else { if (height > MAX_SIZE) { width = (width * MAX_SIZE) / height; height = MAX_SIZE; } }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = async (e, index) => {
+        const file = e.target.files[0];
+        if (file) {
+            const base64 = await uploadImage(file);
+            const newUrls = [...formData.image_urls];
+            newUrls[index] = base64;
+            setFormData({ ...formData, image_urls: newUrls });
+        }
+    };
+
+    const openEdit = (p) => {
+        let urls = ['', '', '', ''];
+        try {
+            if (p.image_url) {
+                const parsed = JSON.parse(p.image_url);
+                if (Array.isArray(parsed)) urls = [...parsed, '', '', '', ''].slice(0, 4);
+                else urls = [p.image_url, '', '', ''];
+            }
+        } catch (e) {
+            urls = [p.image_url || '', '', '', ''];
+        }
+
+        setEditingProduct(p);
+        setFormData({
+            name: p.name,
+            brand: p.brand,
+            category_id: p.category_id,
+            price: p.price,
+            stock: p.stock,
+            vendor_id: p.vendor_id,
+            sku: p.sku || '',
+            purchase_price: p.purchase_price || '',
+            image_urls: urls
+        });
+        setIsModalOpen(true);
+    };
+
+    return (
+        <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1 style={{ fontSize: '1.875rem', fontWeight: 700 }}>Inventory Management</h1>
+                <button className="btn btn-primary" onClick={() => {
+                    setEditingProduct(null);
+                    setFormData({
+                        name: '', brand: '', category_id: '',
+                        price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
+                        image_urls: ['', '', '', '']
+                    });
+                    setIsModalOpen(true);
+                }}>
+                    <Plus size={20} /> Add New Product
+                </button>
+            </div>
+
+            <div className="card" style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                    <Search style={{ position: 'absolute', top: '10px', left: '10px', color: '#94a3b8' }} size={20} />
+                    <input className="input" style={{ paddingLeft: '3rem' }} placeholder="Search products by name or SKU..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                </div>
+                <select className="input" style={{ maxWidth: '200px' }} value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
+                    <option value="">All Categories</option>
+                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+            </div>
+
+            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>SKU</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Vendor</th>
+                            <th>Purchase Price</th>
+                            <th>Selling Price</th>
+                            <th>Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products.map(p => (
+                            <tr key={p.id}>
+                                <td style={{ fontWeight: 600, color: '#2563eb' }}>{p.sku || 'N/A'}</td>
+                                <td>{p.name}</td>
+                                <td>{p.category_name}</td>
+                                <td>{p.vendor_name || 'N/A'}</td>
+                                <td>₹{p.purchase_price}</td>
+                                <td style={{ fontWeight: 600 }}>₹{p.price}</td>
+                                <td>
+                                    <span style={{
+                                        fontWeight: 600,
+                                        color: p.stock < 10 ? '#ef4444' : '#0f172a',
+                                        backgroundColor: p.stock < 10 ? '#fee2e2' : 'transparent',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '0.25rem'
+                                    }}>
+                                        {p.stock} {p.stock < 10 && <AlertCircle size={14} style={{ display: 'inline', marginTop: -2 }} />}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button className="btn" style={{ padding: '0.25rem' }} onClick={() => openEdit(p)}><Edit size={16} color="#2563eb" /></button>
+                                        <button className="btn" style={{ padding: '0.25rem' }} onClick={() => handleDelete(p.id)}><Trash size={16} color="#ef4444" /></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {isModalOpen && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: '2rem' }}>
+                    <div className="card" style={{ width: '500px' }}>
+                        <h2 style={{ marginBottom: '1.5rem' }}>{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
+                        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Product Name</label>
+                                <input className="input" placeholder="e.g. Full Face helmet" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>SKU (Unique Number)</label>
+                                <input className="input" placeholder="e.g. PROD-001" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Category</label>
+                                <select className="input" value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}>
+                                    <option value="">Select Category</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Vendor</label>
+                                <select className="input" value={formData.vendor_id} onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}>
+                                    <option value="">Select Vendor</option>
+                                    {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Brand</label>
+                                <input className="input" placeholder="Brand" value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Purchase Price (₹)</label>
+                                <input className="input" type="number" step="0.01" placeholder="0.00" value={formData.purchase_price} onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })} />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Selling Price (₹)</label>
+                                <input className="input" type="number" step="0.01" placeholder="0.00" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.75rem', display: 'block' }}>Product Images (Up to 4)</label>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    {[0, 1, 2, 3].map((idx) => (
+                                        <div key={idx} style={{ padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '0.5rem' }}>
+                                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                                <div style={{ width: '40px', height: '40px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                                                    {formData.image_urls[idx] && <img src={formData.image_urls[idx]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                                                </div>
+                                                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Image {idx + 1}</span>
+                                            </div>
+                                            <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, idx)} style={{ fontSize: '0.7rem', display: 'block', width: '100%', marginBottom: '0.25rem' }} />
+                                            <input className="input" placeholder="Or URL..." value={formData.image_urls[idx]} onChange={(e) => {
+                                                const newUrls = [...formData.image_urls];
+                                                newUrls[idx] = e.target.value;
+                                                setFormData({ ...formData, image_urls: newUrls });
+                                            }} style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Initial Stock</label>
+                                <input className="input" type="number" placeholder="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', gridColumn: 'span 2' }}>
+                                <button className="btn btn-primary" style={{ flex: 1 }}>Save Product</button>
+                                <button type="button" className="btn" style={{ backgroundColor: '#e2e8f0', flex: 1 }} onClick={() => setIsModalOpen(false)}>Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Products;

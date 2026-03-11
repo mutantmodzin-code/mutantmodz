@@ -4,7 +4,9 @@ export interface Product {
     name: string;
     description: string;
     price: string;
+    stock: number;
     image: string;
+    images?: string[];
 }
 
 export type Category = {

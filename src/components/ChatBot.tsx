@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { X, Send, Bot, User, Zap } from 'lucide-react';
 
 interface Message {
     id: number;
@@ -13,104 +13,57 @@ const KB: { patterns: RegExp[]; response: string }[] = [
     {
         patterns: [/hello|hi|hey|good\s*(morning|afternoon|evening)|namaste|howdy/i],
         response:
-            "👋 Hey there, rider! Welcome to **Mutant Modz**! I'm your virtual assistant. Ask me anything about our products, store location, timings, or how to reach us. 🏍️",
+            "👋 Welcome to the **Mutant Modz** Command Center. I'm your AI logistics officer. State your objective: products, location, or technical support. 🏍️",
     },
     {
         patterns: [/product|sell|stock|availabl|what.*have|what.*offer|catalog/i],
         response:
-            "🛒 We carry a wide range of products:\n\n• **Helmets** – Full-face, half-face, modular (₹2,499 – ₹7,999)\n• **Riding Gear** – Jackets, gloves, knee & elbow guards\n• **Bike Accessories** – LED lights, exhaust systems, mobile mounts\n• **Modification Parts** – Air filters, LED strips, carbon fibre pads\n\nVisit the **Products** page for the full catalogue!",
+            "🛒 **Hardware Manifest**:\n\n• **Elite Helmets** – MT, SMK, Axor (₹2,499 – ₹7,999)\n• **Riding Hardware** – Jackets, Gloves, Armor\n• **Direct Mods** – LED Hub, Performance Exhaust, Carbon Panels\n\nAccess the **Products** sector for full sequence.",
     },
     {
         patterns: [/helmet/i],
         response:
-            "🪖 Our helmet collection includes:\n\n• **MT Revenge 2 Full-Face** – ₹4,999\n• **SMK Twister Captain** – ₹3,499 (DOT certified, anti-fog visor)\n• **Axor Apex Hunter** – ₹5,499 (dual visor, lightweight)\n\nAll helmets are DOT/ISI certified for your safety! 💪",
+            "🪖 **Ballistic Protection**:\n\n• **MT Revenge 2** – ₹4,999 (Elite Tier)\n• **SMK Twister** – ₹3,499 (Industrial Standard)\n• **Axor Apex** – ₹5,499 (Dual Visor Array)\n\nAll units are DOT/ISI validated.",
     },
     {
         patterns: [/gear|glove|jacket|guard|suit|riding wear/i],
         response:
-            "🧤 Our riding gear lineup:\n\n• **Riding Gloves Pro** – ₹899 (knuckle guard + touchscreen)\n• **Riding Jacket** – ₹4,499 (waterproof, CE-approved armor)\n• **Knee & Elbow Guards** – ₹1,299 (adjustable straps)\n\nStay safe and stylish on every ride! 🏍️",
+            "🧤 **Tactical Gear**:\n\n• **Pro Gloves** – ₹899 (Haptic Ready)\n• **Command Jacket** – ₹4,499 (Weatherproof)\n• **Impact Guards** – ₹1,299 (Adjustable)",
     },
     {
         patterns: [/modif|custom|mod|exhaust|led|light|strip|carbon|air filter|performance/i],
         response:
-            "🔧 Custom modification parts we offer:\n\n• **LED Headlight Kit** – ₹1,999 (6000K ultra-bright)\n• **Custom Exhaust System** – ₹3,999 (enhanced sound & performance)\n• **Performance Air Filter** – ₹1,799\n• **LED Strip Lights (RGB)** – ₹899\n• **Carbon Fibre Tank Pad** – ₹699\n\nTransform your ride with Mutant Modz! ⚡",
-    },
-    {
-        patterns: [/accessory|accessories|mobile holder|mount|charger/i],
-        response:
-            "📱 Popular bike accessories:\n\n• **Mobile Holder Mount** – ₹499 (360° rotation, secure grip)\n• **LED Headlight Kit** – ₹1,999\n• **Custom Exhaust** – ₹3,999\n\nTons more in-store — come visit us! 🏪",
-    },
-    {
-        patterns: [/price|cost|rate|how much|₹|rs\.|rupee/i],
-        response:
-            "💰 Our price range:\n\n• Helmets – ₹2,499 to ₹7,999\n• Riding Gear – ₹499 to ₹4,999\n• Accessories – ₹499 to ₹3,999\n• Modification Parts – ₹699 to ₹3,999\n\nWe offer **competitive prices** with no compromise on quality. Visit us or call for a specific quote!",
+            "🔧 **Modification Protocols**:\n\n• **LED Matrix** – ₹1,999 (6000K)\n• **High-Flow Exhaust** – ₹3,999\n• **Performance Filtration** – ₹1,799\n• **Carbon Accents** – ₹699",
     },
     {
         patterns: [/location|address|where|find|directions?|map|reach|place|shop|store/i],
         response:
-            "📍 You can find us at:\n\n**Mutant Modz**\nOpposite Vibgyor School, Uppilipalayam\nCoimbatore, Tamil Nadu, India\n\nCheck the **Contact** page for a Google Maps embed. We're easy to find! 🗺️",
+            "📍 **Base Coordinates**:\n\n**Mutant Modz HQ**\nOpposite Vibgyor School, Uppilipalayam\nCoimbatore, Tamil Nadu\n\nNavigation data available on **Contact** page.",
     },
     {
         patterns: [/time|hour|open|close|timing|when.*open|schedule|day/i],
         response:
-            "🕐 Our store timings:\n\n• **Monday – Saturday**: 10:00 AM – 8:00 PM\n• **Sunday**: 10:00 AM – 6:00 PM\n\nWe're open all days — come ride over! 🏍️",
+            "🕐 **Operational Window**:\n\n• **Mon – Sat**: 1000 - 2000 HRS\n• **Sunday**: 1000 - 1800 HRS",
     },
     {
         patterns: [/phone|call|number|contact|reach|talk|speak/i],
         response:
-            "📞 Reach us anytime:\n\n• **Phone / WhatsApp**: +91 93426 37975\n• **Email**: info@mutantmodz.com\n• **Store**: Opp. Vibgyor School, Uppilipalayam, Coimbatore\n\nGive us a call or walk into the store — we're always happy to help! 😊",
+            "📞 **Comms Channel**:\n\n• **Direct Line**: +91 93426 37975\n• **Encryption**: info@mutantmodz.com",
     },
     {
-        patterns: [/email|mail/i],
-        response:
-            '📧 You can email us at:\n\n**info@mutantmodz.com**\n\nWe usually reply within a few hours during store hours.',
-    },
-    {
-        patterns: [/whatsapp|wa|chat/i],
-        response:
-            '💬 Send us a WhatsApp message at **+91 93426 37975** and we\'ll get back to you right away!',
-    },
-    {
-        patterns: [/about|who|story|brand|company|mutant modz|history/i],
-        response:
-            "🏍️ **About Mutant Modz**\n\nWe're Coimbatore's favourite one-stop shop for premium bike accessories, helmets, and custom riding gear. Born from a passion for motorcycles, we've been serving the biking community with top-quality products and expert guidance.\n\nFrom first-time riders to seasoned enthusiasts — **Mutant Modz** has got you covered! 🔥",
-    },
-    {
-        patterns: [/instagram|insta|facebook|social|follow/i],
-        response:
-            '📸 Follow us on social media for the latest arrivals, custom builds & community updates!\n\n• **Instagram**: @mutantmodz\n• **Facebook**: Mutant Modz\n\nStay connected with the riding community! 🤝',
-    },
-    {
-        patterns: [/offer|discount|deal|sale|coupon|promo/i],
-        response:
-            '🎉 Visit us in-store or follow us on Instagram **@mutantmodz** to catch our latest offers and seasonal discounts. We love rewarding our loyal riders! 🏍️',
-    },
-    {
-        patterns: [/deliver|ship|online order|buy online/i],
-        response:
-            '🏪 Currently we operate as a **physical store** in Coimbatore. Visit us at Opp. Vibgyor School, Uppilipalayam, or call **+91 93426 37975** to enquire about a specific product!',
-    },
-    {
-        patterns: [/thank|thanks|thankyou|great|perfect|awesome|nice/i],
-        response:
-            "😊 You're welcome! Happy riding! If you have more questions, I'm right here. 🏍️🔥",
-    },
-    {
-        patterns: [/bye|goodbye|see you|later|cya/i],
-        response:
-            '👋 Goodbye! Stay safe on the roads and keep riding! See you at **Mutant Modz**! 🏍️',
-    },
+        patterns: [/thank|thanks|great|perfect|awesome|nice/i],
+        response: "🦾 Objective complete. Happy riding, user. Protocol ending. 🔥"
+    }
 ];
 
 const FALLBACK =
-    "🤖 I'm specifically trained to answer questions about **Mutant Modz** — our products, location, timings, and contact details.\n\nTry asking me:\n• \"What helmets do you sell?\"\n• \"Where is the store?\"\n• \"What are your timings?\"\n• \"How can I contact you?\"";
+    "🤖 Search parameters not recognized. Try querying:\n• \"Hardware list\"\n• \"Base coordinates\"\n• \"Operational hours\"\n• \"Comms channel\"";
 
 const QUICK_PROMPTS = [
-    'What products do you sell?',
-    'Where is the store?',
-    'Store timings?',
-    'How to contact you?',
-    'Helmet prices?',
+    'Hardware list?',
+    'Base coordinates?',
+    'Operational hours?',
+    'Comms channel?',
 ];
 
 function getBotResponse(input: string): string {
@@ -124,24 +77,22 @@ function getBotResponse(input: string): string {
 }
 
 function formatText(text: string) {
-    // Render **bold** and newlines
     const parts = text.split(/(\*\*[^*]+\*\*|\n)/g);
     return parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
-            return <strong key={i}>{part.slice(2, -2)}</strong>;
+            return <strong key={i} className="text-white">{part.slice(2, -2)}</strong>;
         }
         if (part === '\n') return <br key={i} />;
         return <span key={i}>{part}</span>;
     });
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function ChatBot() {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
         {
             id: 0,
-            text: "👋 Hey there, rider! I'm the **Mutant Modz** virtual assistant. Ask me anything about our products, location, store hours, or how to reach us!",
+            text: "👋 AI Logistic Officer online. Ready to decode your inquiries about Mutant Modz hardware and operations.",
             sender: 'bot',
             timestamp: new Date(),
         },
@@ -190,134 +141,113 @@ export default function ChatBot() {
 
     return (
         <>
-            {/* ── Floating toggle button ── */}
+            {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen((v) => !v)}
                 aria-label={isOpen ? 'Close chat' : 'Open chat'}
-                className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group"
+                className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-[1.5rem] bg-red-600 hover:bg-white text-white hover:text-red-600 shadow-2xl flex items-center justify-center transition-all duration-500 hover:rotate-12 group border-4 border-zinc-950"
             >
-                {isOpen ? (
-                    <X size={26} />
-                ) : (
-                    <>
-                        <MessageCircle size={26} />
-                        <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-black text-white px-4 py-2 rounded-md text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-zinc-700">
-                            Chat with us!
-                        </span>
-                    </>
+                {isOpen ? <X size={24} /> : <Zap size={24} className="group-hover:animate-pulse" />}
+                {!isOpen && (
+                    <span className="absolute right-full mr-6 bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 pointer-events-none">
+                        Command Center
+                    </span>
                 )}
             </button>
 
-            {/* ── Chat window ── */}
+            {/* Chat Interface */}
             <div
-                className={`fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-24px)] flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-zinc-700 transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-90 opacity-0 pointer-events-none'
+                className={`fixed bottom-28 right-6 z-50 w-[400px] max-w-[calc(100vw-48px)] flex flex-col rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] border border-white/5 transition-all duration-700 origin-bottom-right glass-card ${isOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-90 opacity-0 pointer-events-none translate-y-20'
                     }`}
-                style={{ height: '520px' }}
+                style={{ height: '600px' }}
             >
-                {/* Header */}
-                <div className="flex items-center gap-3 bg-red-600 px-4 py-3 flex-shrink-0">
-                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                        <Bot size={20} className="text-white" />
+                {/* Header Profile */}
+                <div className="flex items-center gap-4 bg-zinc-900/50 p-6 border-b border-white/5 backdrop-blur-xl">
+                    <div className="w-12 h-12 rounded-2xl bg-red-600 flex items-center justify-center border border-red-500/30">
+                        <Bot size={24} className="text-white" />
                     </div>
-                    <div>
-                        <p className="text-white font-bold text-sm leading-tight">Mutant Modz Assistant</p>
-                        <p className="text-red-100 text-xs flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-green-400 inline-block animate-pulse" />
-                            Online · Always here to help
-                        </p>
+                    <div className="flex-1">
+                        <p className="text-white font-black text-xs uppercase tracking-widest">LOGISTICS AI</p>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Protocol Active</p>
+                        </div>
                     </div>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        className="ml-auto text-white/80 hover:text-white transition-colors"
-                        aria-label="Close"
-                    >
+                    <button onClick={() => setIsOpen(false)} className="text-zinc-600 hover:text-white transition-colors">
                         <X size={20} />
                     </button>
                 </div>
 
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto bg-zinc-900 px-3 py-4 space-y-3">
+                {/* Data Feed */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6 scrollbar-none">
                     {messages.map((msg) => (
                         <div
                             key={msg.id}
-                            className={`flex items-end gap-2 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
+                            className={`flex items-start gap-4 ${msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                         >
-                            {/* Avatar */}
-                            <div
-                                className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center ${msg.sender === 'bot' ? 'bg-red-600' : 'bg-zinc-600'
-                                    }`}
-                            >
-                                {msg.sender === 'bot' ? (
-                                    <Bot size={14} className="text-white" />
-                                ) : (
-                                    <User size={14} className="text-white" />
-                                )}
+                            <div className={`w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center border ${msg.sender === 'bot' ? 'bg-zinc-900 border-zinc-800' : 'bg-red-600 border-red-500'
+                                }`}>
+                                {msg.sender === 'bot' ? <Bot size={14} className="text-zinc-400" /> : <User size={14} className="text-white" />}
                             </div>
-
-                            {/* Bubble */}
-                            <div
-                                className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${msg.sender === 'bot'
-                                    ? 'bg-zinc-800 text-gray-100 rounded-bl-sm'
-                                    : 'bg-red-600 text-white rounded-br-sm'
-                                    }`}
+                            <div className={`max-w-[80%] rounded-2xl p-4 text-[11px] font-medium leading-relaxed
+                                ${msg.sender === 'bot'
+                                    ? 'bg-white/5 text-zinc-400 border border-white/5 rounded-tl-none'
+                                    : 'bg-white text-black font-bold rounded-tr-none shadow-lg'
+                                }`}
                             >
                                 {formatText(msg.text)}
-                                <p className="text-[10px] mt-1 opacity-50">
+                                <p className="text-[8px] mt-2 opacity-30 uppercase font-black tracking-widest">
                                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </p>
                             </div>
                         </div>
                     ))}
 
-                    {/* Typing indicator */}
                     {isTyping && (
-                        <div className="flex items-end gap-2">
-                            <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
-                                <Bot size={14} className="text-white" />
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                                <Bot size={14} className="text-zinc-400" />
                             </div>
-                            <div className="bg-zinc-800 px-4 py-3 rounded-2xl rounded-bl-sm">
-                                <span className="flex gap-1">
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                </span>
+                            <div className="flex gap-1.5 bg-white/5 px-4 py-3 rounded-2xl">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce" />
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce delay-150" />
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-bounce delay-300" />
                             </div>
                         </div>
                     )}
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* Quick prompts */}
-                <div className="bg-zinc-900 border-t border-zinc-800 px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-none">
+                {/* Sub-commands */}
+                <div className="px-6 py-4 flex gap-2 overflow-x-auto scrollbar-none border-t border-white/5 bg-black/20">
                     {QUICK_PROMPTS.map((prompt) => (
                         <button
                             key={prompt}
                             onClick={() => sendMessage(prompt)}
-                            className="flex-shrink-0 text-xs bg-zinc-800 hover:bg-red-600 hover:text-white text-gray-300 px-3 py-1.5 rounded-full transition-colors border border-zinc-700 whitespace-nowrap"
+                            className="flex-shrink-0 text-[9px] font-black uppercase tracking-widest bg-zinc-900/50 hover:bg-white text-zinc-500 hover:text-black px-4 py-2.5 rounded-xl border border-white/5 transition-all whitespace-nowrap"
                         >
                             {prompt}
                         </button>
                     ))}
                 </div>
 
-                {/* Input */}
-                <div className="bg-zinc-950 border-t border-zinc-800 px-3 py-3 flex gap-2 flex-shrink-0">
+                {/* Input Terminal */}
+                <div className="p-6 bg-zinc-950 border-t border-white/5 flex gap-4">
                     <input
                         ref={inputRef}
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKey}
-                        placeholder="Ask about products, location…"
-                        className="flex-1 bg-zinc-800 text-white placeholder-gray-500 text-sm px-4 py-2.5 rounded-xl border border-zinc-700 focus:border-red-600 focus:outline-none transition-colors"
+                        placeholder="INPUT QUERY..."
+                        className="flex-1 bg-zinc-900 text-white placeholder-zinc-700 text-[10px] font-black tracking-widest px-6 py-4 rounded-2xl border border-transparent focus:border-red-600 focus:outline-none transition-all uppercase"
                     />
                     <button
                         onClick={() => sendMessage()}
                         disabled={!input.trim()}
-                        className="w-10 h-10 rounded-xl bg-red-600 hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors flex-shrink-0"
-                        aria-label="Send"
+                        className="w-14 h-14 rounded-2xl bg-red-600 hover:bg-white text-white hover:text-red-600 disabled:opacity-20 flex items-center justify-center transition-all flex-shrink-0 active:scale-90"
                     >
-                        <Send size={16} />
+                        <Send size={18} />
                     </button>
                 </div>
             </div>

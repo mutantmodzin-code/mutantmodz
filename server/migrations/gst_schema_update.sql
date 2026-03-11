@@ -1,0 +1,16 @@
+-- GST Schema Update for Invoices and Invoice Items
+
+-- Update invoices table
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS gst_percentage DECIMAL(5, 2) DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS cgst_amount DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS sgst_amount DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS igst_amount DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS taxable_value DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS total_gst DECIMAL(10, 2) DEFAULT 0.00;
+
+-- Update invoice_items table
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS gst_percentage DECIMAL(5, 2) DEFAULT 0.00;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS cgst_amount DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS sgst_amount DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS igst_amount DECIMAL(10, 2) DEFAULT 0.00;
+ALTER TABLE invoice_items ADD COLUMN IF NOT EXISTS taxable_amount DECIMAL(10, 2) DEFAULT 0.00;

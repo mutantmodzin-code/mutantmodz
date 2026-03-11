@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { ArrowRight, Star, Shield, Wrench, Users, TrendingUp, ChevronDown, Heart, ShoppingCart } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Star, Shield, Wrench, ChevronDown, Heart, Zap, Box, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 
@@ -7,283 +7,264 @@ interface HomeProps {
   onNavigate: (page: string) => void;
 }
 
+const ProductImage = ({ images, alt }: { images?: string[], alt: string }) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const imageList = images && images.length > 0 ? images.filter(url => url && url.trim() !== '') : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
+
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % imageList.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [imageList.length]);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden">
+      {imageList.map((img, idx) => (
+        <img
+          key={idx}
+          src={img}
+          className={`absolute inset-0 w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out ${idx === currentIdx ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'
+            }`}
+          style={{
+            zIndex: idx === currentIdx ? 1 : 0,
+            transition: 'opacity 1s ease-in-out, transform 1s ease-out'
+          }}
+          alt={`${alt} view ${idx + 1}`}
+        />
+      ))}
+    </div>
+  );
+};
+
 export default function Home({ onNavigate }: HomeProps) {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [scrollY, setScrollY] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('All Products');
 
-  const filters = ['All Products', 'Helmets', 'Bike Accessories', 'Riding Gear', 'Modification Parts'];
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsLoaded(true);
     const fetchProducts = async () => {
       const products = await getProducts();
-      setFeaturedProducts(products.slice(0, 3));
+      setFeaturedProducts(products.slice(0, 4));
     };
     fetchProducts();
 
     const handleScroll = () => {
-      // Optimiziation to not update state unnecessarily when past hero
-      if (window.scrollY < window.innerHeight * 1.5) {
-        setScrollY(window.scrollY);
-      }
+      setScrollY(window.scrollY);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Intersection Observer for scroll animations
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('opacity-100', 'translate-y-0');
-            entry.target.classList.remove('opacity-0', 'translate-y-12');
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
 
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observer.observe(el);
-    });
-
-    return () => {
-       window.removeEventListener('scroll', handleScroll);
-       observer.disconnect();
-    }
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const reviews = [
-    {
-      name: 'Rajesh Kumar',
-      review: 'Best place for bike accessories in Coimbatore! Quality products and great service.',
-      rating: 5,
-    },
-    {
-      name: 'Arun Prasad',
-      review: 'Got my new helmet and riding gloves here. Premium quality at affordable prices!',
-      rating: 5,
-    },
-    {
-      name: 'Vikram S',
-      review: 'Mutant Modz transformed my bike with their custom modifications. Highly recommended!',
-      rating: 5,
-    },
-  ];
-
   const features = [
-    { icon: Shield, title: 'Premium Quality', description: 'Certified products from trusted brands' },
-    { icon: Users, title: 'Expert Advice', description: 'Professional guidance for all riders' },
-    { icon: Wrench, title: 'Custom Modifications', description: 'Personalize your ride with expert mods' },
-    { icon: TrendingUp, title: 'Latest Accessories', description: 'Always updated with trending products' },
+    { icon: Shield, title: 'Ballistic Protection', sub: 'Certified gear only', desc: 'Every helmet and jacket meets global safety standards for maximum survival.' },
+    { icon: Zap, title: 'Performance Mods', sub: 'Elite engineering', desc: 'Custom modifications designed to push your machines threshold of performance.' },
+    { icon: Wrench, title: 'Tactical Service', sub: 'Zero latency support', desc: 'Instant mechanical advice and professional installation for all hardware.' },
+    { icon: Box, title: 'Rapid Logistics', sub: 'Global reach', desc: 'Fast, secure shipping protocols for your essential riding modules.' },
   ];
 
   return (
-    <div className={`min-h-screen bg-zinc-950 overflow-hidden transition-opacity duration-1000 ease-in-out ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Parallax / Zoom background */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-75 ease-out"
-          style={{
-            backgroundImage: 'url(https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=1920)',
-            transform: `scale(${1.05 + scrollY * 0.0003}) translateY(${scrollY * 0.4}px)`,
-          }}
-        ></div>
-        
-        {/* Improved Contrast Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-zinc-950"></div>
-        
-        <div className={`relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto mt-16 transition-all duration-1000 delay-300 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight drop-shadow-2xl">
-            Upgrade Your Ride with
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-700 mt-2 filter drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-              Premium Accessories
-            </span>
+    <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+
+      {/* CINEMATIC HERO: THE COMMAND CENTER */}
+      <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=1920"
+            className="w-full h-full object-cover opacity-30 transform scale-110"
+            style={{
+              transform: `scale(${1.05 + scrollY * 0.0001}) translateY(${scrollY * 0.3}px)`,
+            }}
+            alt="Hero Background"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-zinc-950 z-10"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1)_0%,transparent_70%)] z-10"></div>
+
+        <div className="relative z-20 max-w-7xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.5em]">System Online. Objective: Excellence.</span>
+          </div>
+
+          <h1 className="text-6xl sm:text-[12rem] font-black text-white leading-[0.85] tracking-tighter uppercase mb-10 overflow-hidden">
+            <span className="block animate-in fade-in slide-in-from-bottom-12 duration-1000">MUTATE YOUR</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-white to-red-800 animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-200">MACHINE</span>
           </h1>
-          <p className="text-xl sm:text-2xl text-gray-300 mb-10 leading-relaxed font-light drop-shadow-lg max-w-3xl mx-auto">
-            Coimbatore's trusted destination for helmets, riding gear, and custom bike modifications
+
+          <p className="text-xl sm:text-2xl text-zinc-400 font-bold uppercase tracking-[0.4em] max-w-3xl mx-auto mb-16 opacity-80 animate-in fade-in slide-in-from-bottom-24 duration-1000 delay-400">
+            Professional Grade Hardware for the Elite Rider.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-in fade-in zoom-in duration-1000 delay-700">
             <button
               onClick={() => onNavigate('products')}
-              className="group bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-full text-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 transform hover:-translate-y-1 shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_35px_rgba(220,38,38,0.7)] w-full sm:w-auto active:scale-95"
+              className="px-12 py-7 bg-red-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_60px_rgba(220,38,38,0.4)] hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 group"
             >
-              Explore Products <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              Enter Catalog <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-2 transition-transform" />
             </button>
             <button
               onClick={() => onNavigate('contact')}
-              className="group bg-zinc-900/40 hover:bg-white text-white hover:text-black backdrop-blur-md border border-white/20 hover:border-white px-8 py-4 rounded-full text-lg font-bold transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] w-full sm:w-auto active:scale-95"
+              className="px-12 py-7 bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 shadow-2xl"
             >
-              Visit Our Store
+              Locate Base
             </button>
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer opacity-70 hover:opacity-100 transition-all duration-1000 delay-700 ${isLoaded ? 'translate-y-0 opacity-70' : 'translate-y-10 opacity-0'}`} onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-white uppercase tracking-widest font-semibold">Scroll</span>
-            <ChevronDown size={28} className="text-white" />
-          </div>
+        {/* HUD Elements */}
+        <div className="absolute left-10 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-8 opacity-20">
+          {['COIMBATORE', 'UPPILIPALAYAM', 'HQ'].map(text => (
+            <span key={text} className="text-[10px] font-black text-white vertical-text uppercase tracking-[1em]">{text}</span>
+          ))}
+        </div>
+
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40 animate-bounce cursor-pointer" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">Initiate Descent</span>
+          <ChevronDown size={24} className="text-red-600" />
         </div>
       </section>
 
-      {/* Our Products */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-950 relative">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-900/50 to-transparent"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-10 animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 ease-out">
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">
-              Our <span className="text-red-600">Products</span>
-            </h2>
-            <p className="text-lg text-zinc-400 font-light tracking-wide">Premium motorcycle accessories for passionate riders</p>
-          </div>
+      {/* THE ARRAY: CORE VALUES */}
+      <section className="py-40 px-6 sm:px-12 bg-black relative">
+        <div className="max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {features.map((f, i) => (
+            <div key={i} className="group p-12 bg-zinc-900/40 rounded-[3rem] border border-white/5 hover:border-red-600/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
+              <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center mb-10 group-hover:bg-red-600 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-inner">
+                <f.icon size={32} className="text-zinc-500 group-hover:text-white transition-colors" />
+              </div>
+              <div className="space-y-4">
+                <div className="text-red-500 font-black text-[10px] uppercase tracking-widest">{f.sub}</div>
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{f.title}</h3>
+                <p className="text-zinc-500 font-medium text-sm leading-relaxed uppercase tracking-wide group-hover:text-zinc-400 transition-colors">{f.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap justify-center gap-3 mb-16 animate-on-scroll opacity-0 translate-y-8 transition-all duration-700 delay-100 ease-out">
-            {filters.map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`px-6 py-3 rounded-full text-sm font-bold tracking-wide transition-all duration-300 min-h-[48px] touch-manipulation active:scale-95 ${activeFilter === filter ? 'bg-red-600 text-white shadow-[0_5px_15px_rgba(220,38,38,0.4)]' : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-red-500/50 hover:bg-zinc-800'}`}
-              >
-                {filter}
+      {/* FEATURED DROPS: THE COLLECTIVE */}
+      <section className="py-40 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
+        <div className="max-w-[1700px] mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-12">
+            <div className="space-y-6">
+              <div className="text-red-600 font-black uppercase tracking-[0.5em] text-[12px]">Latest Hardware Releases</div>
+              <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
+                FEATURED <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-700 to-zinc-400">ARRAY</span>
+              </h2>
+            </div>
+            <div className="flex flex-col items-end gap-6">
+              <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm max-w-sm text-right">
+                Directly imported performance modules from elite global manufacturers.
+              </p>
+              <button onClick={() => onNavigate('products')} className="group flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs border-b border-red-600/50 pb-2 hover:text-red-500 transition-colors">
+                View Entire Catalog <ArrowUpRight size={16} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
               </button>
-            ))}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredProducts.length > 0 ? featuredProducts.map((product, index) => (
-              <div
-                key={product.id || index}
-                className="group animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 ease-out bg-zinc-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-zinc-800/50 hover:border-red-600/50 transform hover:-translate-y-2 hover:shadow-[0_15px_40px_rgba(220,38,38,0.15)] cursor-pointer flex flex-col"
-                style={{ transitionDelay: `${index * 150}ms` }}
-                onClick={() => onNavigate('products')}
-              >
-                <div className="h-72 overflow-hidden relative shrink-0">
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10 pointer-events-none"></div>
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
-                    loading="lazy"
-                  />
-                  <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-zinc-900 to-transparent z-10 opacity-80 pointer-events-none"></div>
-                  
-                  {/* Floating Wishlist Icon */}
-                  <button onClick={(e) => e.stopPropagation()} className="absolute top-4 right-4 z-20 bg-black/40 backdrop-blur-sm hover:bg-red-600 border border-white/10 text-white min-w-[44px] min-h-[44px] rounded-full flex justify-center items-center transition-all duration-300 active:scale-90 hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] touch-manipulation">
-                    <Heart size={20} className="hover:fill-white transition-colors" />
-                  </button>
-                </div>
-                
-                <div className="p-6 relative z-20 flex-1 flex flex-col bg-zinc-900/95 backdrop-blur-md rounded-t-3xl -mt-6 border-t border-zinc-800/50 transition-transform duration-500 group-hover:-translate-y-2">
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-red-500 transition-colors line-clamp-1">{product.name}</h3>
-                  
-                  {/* Rating */}
-                  <div className="flex items-center gap-1 mb-3">
-                    {[1,2,3,4,5].map(star => <Star key={star} size={14} className="fill-amber-500 text-amber-500" />)}
-                    <span className="text-zinc-500 text-xs ml-1">(42)</span>
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {featuredProducts.map((p, i) => (
+              <div key={i} className="group relative h-[500px] sm:h-[600px] rounded-[4rem] overflow-hidden border border-white/5 cursor-pointer" onClick={() => onNavigate(`productDetails?productId=${p.id}`)}>
+                <ProductImage images={p.images} alt={p.name} />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent z-10"></div>
 
-                  <p className="text-zinc-400 mb-6 line-clamp-2 text-sm leading-relaxed flex-1">{product.description}</p>
-                  
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-auto">
-                    <span className="text-2xl font-black text-white group-hover:text-red-500 transition-colors drop-shadow-md">{product.price}</span>
+                <div className="absolute bottom-0 left-0 w-full p-12 space-y-6 transform group-hover:translate-y-[-10px] transition-transform duration-500">
+                  {p.stock > 0 && p.stock < 10 && (
+                    <div className="flex items-center gap-2 bg-red-600/20 border border-red-600/30 px-4 py-2 rounded-xl w-fit mb-4">
+                      <AlertTriangle size={12} className="text-red-600" />
+                      <span className="text-white text-[9px] font-black uppercase tracking-widest">⚠️ Only {p.stock} items left in stock</span>
+                    </div>
+                  )}
+                  {p.stock <= 0 && (
+                    <div className="flex items-center gap-2 bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl w-fit mb-4">
+                      <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Out of Deployment</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-end">
+                    <div className="space-y-4">
+                      <div className="text-red-600 font-black uppercase tracking-[0.4em] text-[11px]">{p.category}</div>
+                      <h4 className="text-4xl sm:text-5xl font-black text-white uppercase tracking-tighter leading-none">{p.name}</h4>
+                    </div>
+                    <div className="text-3xl font-black text-white border-l border-white/20 pl-6 mb-1">
+                      {p.price}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 pt-6 translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 active:scale-95">
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.hash = `payment?productId=${product.id}`;
-                      }}
-                      className="bg-red-600 text-white hover:bg-red-500 w-full sm:w-auto px-5 py-3 min-h-[48px] rounded-xl font-bold flex justify-center items-center gap-2 transition-all duration-300 shadow-[0_5px_15px_rgba(220,38,38,0.3)] hover:shadow-[0_8px_25px_rgba(220,38,38,0.5)] active:scale-95 touch-manipulation"
+                      disabled={p.stock <= 0}
+                      className={`px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${p.stock > 0 ? 'bg-white text-black hover:bg-red-600 hover:text-white' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                        }`}
                     >
-                      <ShoppingCart size={18} /> Add to Cart
+                      {p.stock > 0 ? 'Purchase Mod' : 'Sold Out'}
+                    </button>
+                    <button className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
+                      <Heart size={24} />
                     </button>
                   </div>
                 </div>
               </div>
-            )) : (
-              // Skeleton Loading State
-              [1,2,3].map(i => (
-                 <div key={i} className="animate-pulse bg-zinc-900/50 rounded-2xl h-96 border border-zinc-800/50">
-                    <div className="h-72 bg-zinc-800/50 rounded-t-2xl"></div>
-                    <div className="p-8">
-                       <div className="h-4 bg-zinc-800 rounded w-3/4 mb-4"></div>
-                       <div className="h-4 bg-zinc-800 rounded w-1/2 mb-6"></div>
-                    </div>
-                 </div>
-              ))
-            )}
-          </div>
-          
-          <div className="mt-16 text-center animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 delay-300 ease-out">
-             <button
-                onClick={() => onNavigate('products')}
-                className="text-white hover:text-red-500 font-semibold tracking-wider uppercase text-sm border-b leading-tight border-white/30 hover:border-red-500 transition-all duration-300 pb-1 inline-flex items-center gap-2 group"
-              >
-                View All Products <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-             </button>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Why Choose Us */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-900 relative overflow-hidden">
-        <div className="absolute -left-[20%] -top-[20%] w-[50%] h-[50%] rounded-full bg-red-900/10 blur-[120px] pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center mb-16 animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 ease-out">
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">
-              Why Choose <span className="text-red-600">Us</span>
+      {/* THE SHOP BY BIKE: TECHNICAL SPECTRUM */}
+      <section className="py-40 px-6 sm:px-12 bg-black border-y border-white/5">
+        <div className="max-w-[1700px] mx-auto text-center space-y-24">
+          <div className="space-y-6">
+            <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
+              ENGINEERED BY <br /> <span className="text-red-600">MODEL</span>
             </h2>
+            <p className="text-zinc-500 font-bold uppercase tracking-[0.5em] text-xs">Precise compatibility mapping for every machine.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="group animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 ease-out text-center p-8 bg-black/40 backdrop-blur-md rounded-2xl border border-zinc-800/50 hover:border-red-600/30 hover:bg-zinc-800/50 hover:-translate-y-2 hover:shadow-[0_10px_30px_rgba(220,38,38,0.1)] cursor-default"
-                style={{ transitionDelay: `${index * 150}ms` }}
-              >
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-zinc-900 rounded-2xl mb-6 shadow-inner group-hover:bg-red-600/10 transition-colors duration-500 group-hover:rotate-6 transform">
-                  <feature.icon size={36} className="text-red-500 group-hover:scale-110 transition-transform duration-500" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {['Royal Enfield', 'KTM Performance', 'Yamaha Racing', 'Honda HighWing', 'Kawasaki Ninja', 'Ducati Corse', 'BMW Motorrad', 'Triumph Engineering'].map((bike, idx) => (
+              <div key={idx} className="group p-16 bg-zinc-900/20 rounded-[3rem] border border-white/5 hover:bg-red-600 transition-all duration-700 cursor-pointer text-center relative overflow-hidden">
+                <div className="relative z-10 space-y-4">
+                  <div className="text-white font-black uppercase text-xl sm:text-2xl tracking-tighter group-hover:scale-110 transition-transform">{bike}</div>
+                  <div className="text-zinc-600 text-[10px] font-black uppercase tracking-widest group-hover:text-white/80">Calibration Active</div>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3 tracking-wide">{feature.title}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed">{feature.description}</p>
+                <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-20 transition-opacity">
+                  <Zap size={100} className="text-white" />
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Customer Reviews */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-zinc-950">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 ease-out">
-            <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight">
-              Customer <span className="text-red-600">Reviews</span>
-            </h2>
-            <p className="text-lg text-zinc-400 font-light tracking-wide">Trusted by riders across Coimbatore</p>
+      {/* TESTIMONIALS: THE FEEDBACK LOOP */}
+      <section className="py-40 px-6 sm:px-12 bg-zinc-950">
+        <div className="max-w-7xl mx-auto space-y-24">
+          <div className="text-center space-y-6">
+            <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase">THE <span className="text-red-600">FEEDBACK</span> LOOP</h2>
+            <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Direct transmission from our global brotherhood.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {reviews.map((review, index) => (
-              <div 
-                key={index} 
-                className="group animate-on-scroll opacity-0 translate-y-12 transition-all duration-700 ease-out bg-zinc-900/40 p-10 rounded-3xl border border-zinc-800/80 hover:border-red-600/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)] cursor-default"
-                style={{ transitionDelay: `${index * 150}ms` }}
-              >
-                <div className="flex gap-1.5 mb-6">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star key={i} size={18} className="text-amber-500 fill-amber-500 group-hover:scale-110 transition-transform duration-300" style={{ transitionDelay: `${i * 50}ms` }} />
-                  ))}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            {[
+              { name: 'RAJESH KUMAR', review: 'Tactical equipment of the highest order. The Coimbatore command center is unparalleled.', role: 'Enfield Pilot' },
+              { name: 'ARUN PRASAD', review: 'Precision mods that transformed my mechanical output. Fast logistics, zero latency.', role: 'KTM Rider' },
+              { name: 'VIKRAM S', review: 'Elite standards in every hardware module. Highly recommend the modification protocol.', role: 'Superbike Tech' }
+            ].map((r, i) => (
+              <div key={i} className="p-12 bg-zinc-900/40 rounded-[3rem] border border-white/5 space-y-12 flex flex-col justify-between hover:border-red-600/30 transition-all duration-500">
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map(s => <Star key={s} size={16} className="fill-red-600 text-red-600" />)}
                 </div>
-                <p className="text-zinc-300 mb-8 leading-relaxed font-light italic">"{review.review}"</p>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-900 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    {review.name.charAt(0)}
+                <p className="text-2xl font-black text-white italic tracking-tight leading-relaxed uppercase">"{r.review}"</p>
+                <div className="flex items-center gap-6 pt-6 border-t border-white/5">
+                  <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-xl">{r.name[0]}</div>
+                  <div className="space-y-1">
+                    <div className="text-white font-black text-sm uppercase tracking-widest">{r.name}</div>
+                    <div className="text-zinc-600 font-black text-[10px] uppercase tracking-widest">{r.role}</div>
                   </div>
-                  <p className="text-white font-bold tracking-wide">{review.name}</p>
                 </div>
               </div>
             ))}
@@ -291,29 +272,28 @@ export default function Home({ onNavigate }: HomeProps) {
         </div>
       </section>
 
-      {/* Modern CTA Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-red-900">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-700 via-red-600 to-red-900 object-cover opacity-90 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg')] mix-blend-overlay bg-cover bg-center opacity-30"></div>
-        <div className="max-w-5xl mx-auto text-center relative z-10 px-4 animate-on-scroll opacity-0 scale-95 transition-all duration-1000 ease-out">
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-xl">
-            Ready to Upgrade Your Ride?
+      {/* FINAL CALL: INITIATE SEQUENCE */}
+      <section className="py-40 px-6 sm:px-12 bg-red-600 relative overflow-hidden group">
+        <div className="absolute inset-0 bg-black opacity-30 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"></div>
+        <div className="max-w-[1200px] mx-auto text-center relative z-10 space-y-12">
+          <h2 className="text-6xl sm:text-[10rem] font-black text-white leading-none tracking-tighter uppercase">
+            READY FOR <br /> <span className="text-black">UPGRADE?</span>
           </h2>
-          <p className="text-xl text-white/90 mb-10 font-light max-w-2xl mx-auto leading-relaxed">
-            Visit our store in Coimbatore and explore our premium collection of accessories, or shop online directly.
+          <p className="text-xl sm:text-2xl text-white font-black uppercase tracking-[0.5em] max-w-2xl mx-auto leading-relaxed">
+            Enter the catalog or visit our Coimbatore HQ for elite modification protocols.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <button
-              onClick={() => onNavigate('contact')}
-              className="bg-white text-red-700 px-10 py-4 rounded-full text-lg font-bold shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.6)] transform hover:-translate-y-1 transition-all duration-300 active:scale-95"
-            >
-              Get in Touch
-            </button>
-             <button
+          <div className="flex flex-col sm:flex-row gap-8 justify-center pt-8">
+            <button
               onClick={() => onNavigate('products')}
-              className="bg-red-800/80 hover:bg-red-900 border border-red-400/30 backdrop-blur-sm text-white px-10 py-4 rounded-full text-lg font-bold shadow-lg transform hover:-translate-y-1 transition-all duration-300 active:scale-95"
+              className="px-16 py-8 bg-black text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-white hover:text-red-700 transition-all transform hover:-translate-y-2 active:scale-95"
             >
-              Browse Catalog
+              Initiate Catalog Sequence
+            </button>
+            <button
+              onClick={() => onNavigate('contact')}
+              className="px-16 py-8 bg-white text-red-700 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 active:scale-95"
+            >
+              Secure Direct Channel
             </button>
           </div>
         </div>

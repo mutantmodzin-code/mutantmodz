@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Wrench, Shirt, Cog, ShoppingCart } from 'lucide-react';
+import { Shield, Wrench, Shirt, Cog, ShoppingCart, Filter, ArrowUpRight, Search, Zap, Plus, CheckCircle, Phone } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 
@@ -7,100 +7,239 @@ interface ProductsProps {
   onNavigate: (page: string) => void;
 }
 
-export default function Products({ }: ProductsProps) {
+const ProductImage = ({ images, alt, className }: { images?: string[], alt: string, className?: string }) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const imageList = images && images.length > 0 ? images.filter(img => img && img.trim() !== '') : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
+
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % imageList.length);
+    }, 4000); // 4 seconds for inventory page
+    return () => clearInterval(interval);
+  }, [imageList.length]);
+
+  return (
+    <div className={`relative w-full h-full overflow-hidden ${className}`}>
+      {imageList.map((img, idx) => (
+        <img
+          key={idx}
+          src={img}
+          alt={`${alt} view ${idx + 1}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-out group-hover:scale-110 group-hover:rotate-1 ${idx === currentIdx ? 'opacity-100' : 'opacity-0'
+            }`}
+          style={{ zIndex: idx === currentIdx ? 1 : 0 }}
+        />
+      ))}
+    </div>
+  );
+};
+
+export default function Products({ onNavigate }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchProducts = async () => {
       const data = await getProducts();
       setProducts(data);
+      setIsLoaded(true);
     };
     fetchProducts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const categories = [
-    { id: 'all', name: 'All Products', icon: Cog },
-    { id: 'helmets', name: 'Helmets', icon: Shield },
-    { id: 'accessories', name: 'Bike Accessories', icon: Wrench },
-    { id: 'gear', name: 'Riding Gear', icon: Shirt },
-    { id: 'mods', name: 'Modification Parts', icon: Cog },
+    { id: 'all', name: 'All Manifest', icon: Cog },
+    { id: 'helmets', name: 'Ballistic Helmets', icon: Shield },
+    { id: 'accessories', name: 'Tech Accessories', icon: Wrench },
+    { id: 'gear', name: 'Tactical Gear', icon: Shirt },
+    { id: 'mods', name: 'Performance Mods', icon: Zap },
   ];
 
-  const filteredProducts = selectedCategory === 'all'
-    ? products
-    : products.filter(p => p.category === selectedCategory);
+  const filteredProducts = products.filter(p => {
+    const matchesCategory = selectedCategory === 'all' || p.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   const handleBuyNow = (productId: string) => {
-    window.location.hash = `payment?productId=${productId}`;
+    onNavigate(`payment?productId=${productId}`);
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <section className="bg-black py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl sm:text-6xl font-bold text-white mb-4">
-            Our <span className="text-red-600">Products</span>
+    <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+
+      {/* Editorial Header Section */}
+      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-black">
+          <img
+            src="https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg"
+            className="w-full h-full object-cover opacity-20 transform scale-105 animate-slow-zoom"
+            alt="Background"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/20 via-zinc-950/80 to-zinc-950"></div>
+
+        <div className="max-w-[1600px] mx-auto relative z-10 px-6 text-center">
+          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Operational Manifest 2026</span>
+          </div>
+          <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+            ELITE <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">HARDWARE</span>
           </h1>
-          <p className="text-xl text-gray-400">Premium bike accessories for passionate riders</p>
+          <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+            High-performance modules engineered for the extreme.
+          </p>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40 animate-bounce">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">Initiate Sequence</span>
+          <div className="w-px h-12 bg-gradient-to-b from-red-600 to-transparent"></div>
         </div>
       </section>
 
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-zinc-900 sticky top-20 z-40 border-b-2 border-zinc-800">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-4">
+      {/* Control Center: Filter Bar */}
+      <section className="sticky top-[73px] z-40  border-y border-white/5 bg-zinc-950/70 backdrop-blur-3xl">
+        <div className="max-w-[1700px] mx-auto px-6 py-6 flex flex-col lg:flex-row items-center justify-between gap-10">
+
+          <div className="flex items-center gap-5 overflow-x-auto no-scrollbar w-full lg:w-auto pb-4 lg:pb-0">
+            <div className="flex items-center gap-3 text-zinc-500 mr-6 shrink-0 border-r border-white/5 pr-6 py-2">
+              <Filter size={16} className="text-red-600" />
+              <span className="text-[11px] font-black uppercase tracking-widest text-zinc-300">Classification</span>
+            </div>
             {categories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-md font-semibold transition-all ${selectedCategory === cat.id
-                  ? 'bg-red-600 text-white'
-                  : 'bg-black text-gray-400 hover:bg-zinc-800 hover:text-white border-2 border-zinc-800'
+                className={`flex items-center gap-3 px-8 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all relative group overflow-hidden ${selectedCategory === cat.id
+                  ? 'text-white'
+                  : 'text-zinc-500 hover:text-white bg-white/5'
                   }`}
               >
-                <cat.icon size={20} />
-                {cat.name}
+                {selectedCategory === cat.id && (
+                  <div className="absolute inset-0 bg-red-600 transition-all duration-500 animate-in fade-in zoom-in shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
+                )}
+                <cat.icon size={16} className="relative z-10" />
+                <span className="relative z-10">{cat.name}</span>
               </button>
             ))}
+          </div>
+
+          <div className="relative w-full lg:w-[450px] group">
+            <div className="absolute inset-0 bg-red-600/5 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+            <input
+              type="text"
+              placeholder="SEARCH THE ARSENAL..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-zinc-900/40 border border-white/5 rounded-2xl py-5 pl-14 pr-8 text-[11px] font-black text-white tracking-[0.3em] uppercase focus:outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-700 relative z-10"
+            />
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-red-600 transition-colors z-20" size={18} />
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
-        <div className="max-w-7xl mx-auto">
+      {/* Grid Assembly */}
+      <section className="py-24 px-6 sm:px-12">
+        <div className="max-w-[1700px] mx-auto">
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-gray-400 text-xl">No products found in this category</p>
+            <div className="text-center py-48 glass-card rounded-[3rem] border border-white/5">
+              <div className="w-24 h-24 bg-zinc-900/50 rounded-full flex items-center justify-center mx-auto mb-8 relative">
+                <div className="absolute inset-0 bg-red-600/10 rounded-full animate-ping"></div>
+                <Search size={40} className="text-zinc-600" />
+              </div>
+              <p className="text-zinc-500 font-black text-sm uppercase tracking-[0.3em] mb-8">Zero hardware matches found in current sector</p>
+              <button
+                onClick={() => { setSelectedCategory('all'); setSearchQuery(''); }}
+                className="px-10 py-4 bg-white text-black font-black text-[11px] uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition-all transform active:scale-95"
+              >
+                Re-initialize Hunt
+              </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
               {filteredProducts.map((product, index) => (
                 <div
                   key={product.id || index}
-                  onClick={() => window.location.hash = `productDetails?productId=${product.id}`}
-                  className="bg-zinc-900 rounded-lg overflow-hidden border-2 border-zinc-800 hover:border-red-600 transition-all transform hover:scale-105 cursor-pointer group"
+                  className="group relative animate-in fade-in slide-in-from-bottom-8 duration-700"
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="h-64 overflow-hidden bg-white flex items-center justify-center p-4">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-lg font-bold text-white mb-2">{product.name}</h3>
-                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-red-600">{product.price}</span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleBuyNow(product.id);
-                        }}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition-colors flex items-center gap-2"
-                      >
-                        <ShoppingCart size={16} /> Buy Now
-                      </button>
+                  <div className="bg-zinc-900/40 backdrop-blur-md rounded-[3rem] overflow-hidden border border-white/5 group-hover:border-red-600/30 transition-all duration-700 group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex flex-col h-full">
+
+                    {/* Visual Interface */}
+                    <div
+                      className="h-80 overflow-hidden relative cursor-pointer group-hover:h-72 transition-all duration-500"
+                      onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
+                    >
+                      <ProductImage images={product.images} alt={product.name} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent group-hover:from-red-950/40 transition-colors"></div>
+
+                      {/* Price Element */}
+                      <div className="absolute bottom-8 left-8 z-20">
+                        <div className="bg-white text-zinc-950 px-6 py-3 rounded-2xl text-[20px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110">
+                          {product.price}
+                        </div>
+                      </div>
+
+                      {/* Status Badges */}
+                      <div className="absolute top-8 left-8 flex flex-col gap-2 z-20">
+                        <div className="bg-red-600/20 backdrop-blur-xl border border-red-600/30 text-red-500 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
+                          In Stock
+                        </div>
+                      </div>
+
+                      {/* Action Icon */}
+                      <div className="absolute top-8 right-8 z-20 w-12 h-12 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white opacity-0 transform translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
+                        <Plus size={20} />
+                      </div>
+                    </div>
+
+                    {/* Data Panel */}
+                    <div className="p-10 flex flex-1 flex-col justify-between">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-red-500 font-black text-[10px] uppercase tracking-widest border-b border-red-500/20 pb-1">{product.category}</span>
+                        </div>
+                        <h3 className="text-[22px] font-black text-white group-hover:text-red-500 transition-colors tracking-tight leading-tight uppercase">{product.name}</h3>
+                        <p className="text-zinc-500 text-[13px] font-medium leading-relaxed line-clamp-2">{product.description}</p>
+
+                        <div className="flex flex-wrap gap-4 pt-4">
+                          <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                            <CheckCircle size={12} className="text-red-600" />
+                            Certified
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                            <Zap size={12} className="text-red-600" />
+                            Express
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-10 pt-8 border-t border-white/5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleBuyNow(product.id);
+                          }}
+                          className="w-full relative h-[60px] group/btn overflow-hidden rounded-2xl bg-zinc-800 transition-all duration-500 active:scale-95"
+                        >
+                          <div className="absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] group-hover/btn:-translate-y-full transition-all duration-500">
+                            <ShoppingCart size={18} className="text-red-600" />
+                            Initiate Purchase
+                          </div>
+                          <div className="absolute inset-0 bg-white flex items-center justify-center gap-3 text-black font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
+                            Assemble Order <ArrowUpRight size={16} />
+                          </div>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -110,28 +249,41 @@ export default function Products({ }: ProductsProps) {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-red-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">
-            Looking for Something Specific?
+      {/* Workshop Call-to-Action */}
+      <section className="py-40 px-6 sm:px-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-red-600">
+          <img
+            src="https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg"
+            className="w-full h-full object-cover opacity-20 mix-blend-overlay scale-110 group-hover:scale-125 transition-transform duration-1000"
+            alt="Workshop"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-transparent to-red-600 opacity-50"></div>
+
+        <div className="max-w-[1200px] mx-auto text-center relative z-10 space-y-12">
+          <div className="inline-block px-6 py-2 bg-black text-white rounded-full text-[10px] font-black uppercase tracking-[0.5em] mb-4">Direct Channel</div>
+          <h2 className="text-6xl sm:text-8xl font-black text-white tracking-tighter leading-none uppercase">
+            UPGRADE YOUR <br />
+            <span className="text-black inline-block transform -rotate-1 skew-x-1 underline decoration-white decoration-4 underline-offset-8">HARDWARE</span>
           </h2>
-          <p className="text-xl text-white mb-8 opacity-90">
-            Visit our store or call us to discuss your requirements
+          <p className="text-xl text-white font-bold tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">
+            Professional consultation available at Coimbatore command center.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+          <div className="flex flex-col md:flex-row gap-6 justify-center pt-8">
             <a
-              href="tel:+919876543210"
-              className="bg-white hover:bg-gray-200 text-red-600 px-8 py-4 rounded-md text-lg font-semibold transition-all inline-block"
+              href="tel:+919342637975"
+              className="bg-white text-black px-12 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4"
             >
-              Call Now: +91 98765 43210
+              <Phone size={20} /> +91 93426 37975
             </a>
             <a
-              href="https://wa.me/919876543210"
+              href="https://wa.me/919342637975"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-black hover:bg-zinc-900 text-white px-8 py-4 rounded-md text-lg font-semibold transition-all inline-block"
+              className="bg-black text-white px-12 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4"
             >
-              WhatsApp Us
+              <Zap size={20} className="text-red-600" /> Secure Protocol
             </a>
           </div>
         </div>

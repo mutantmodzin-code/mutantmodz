@@ -1,156 +1,82 @@
 import { Product } from '../types';
-import { supabase } from './supabase';
+
+const API_URL = 'http://127.0.0.1:3001/api';
 
 export const getProducts = async (): Promise<Product[]> => {
     try {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const response = await fetch(`${API_URL}/products`);
+        if (!response.ok) throw new Error('Failed to fetch products');
+        const data = await response.json();
 
-        if (error) throw error;
+        // Map backend product (PostgreSQL) to main app's premium Product type
+        return data.map((p: any) => {
+            let images: string[] = [];
+            try {
+                if (p.image_url && p.image_url.startsWith('[')) {
+                    images = JSON.parse(p.image_url).filter((url: string) => url !== '');
+                } else if (p.image_url) {
+                    images = [p.image_url];
+                }
+            } catch (e) {
+                images = p.image_url ? [p.image_url] : [];
+            }
 
-        if (data && data.length > 0) {
-            return data as Product[];
-        }
-
-        // Fallback to initial products if DB is empty
-        return initialProducts;
+            return {
+                id: p.id.toString(),
+                category: p.category_name?.toLowerCase() || 'accessories',
+                name: p.name,
+                description: p.description || `${p.brand} professional grade hardware`,
+                price: p.price?.toString().includes('₹') ? p.price : `₹${parseFloat(p.price).toLocaleString('en-IN')}`,
+                stock: parseInt(p.stock) || 0,
+                image: images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']
+            };
+        });
     } catch (error) {
-        console.error('Error fetching products from Supabase:', error);
-        return initialProducts;
+        console.error('Database connection failed. Ensure backend is running:', error);
+        return [];
     }
 };
 
-export const saveProduct = async (product: Product) => {
+export const saveProduct = async (_product: Product) => {
+    // Managed via Administrative Interface in /frontend
+    console.warn('Direct save from main interface is deprecated. Use Management Portal.');
+};
+
+export const deleteProduct = async (_id: string) => {
+    // Managed via Administrative Interface in /frontend
+    console.warn('Direct delete from main interface is deprecated. Use Management Portal.');
+};
+
+export const createInvoice = async (invoiceData: any) => {
     try {
-        const { id, ...productData } = product;
-
-        let result;
-        if (id && isNaN(Number(id))) { // Real UUID or just a string ID
-            result = await supabase
-                .from('products')
-                .upsert({ id, ...productData });
-        } else {
-            result = await supabase
-                .from('products')
-                .insert([productData]);
+        const response = await fetch(`${API_URL}/invoices`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(invoiceData)
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create invoice');
         }
-
-        if (result.error) throw result.error;
+        return await response.json();
     } catch (error) {
-        console.error('Error saving product to Supabase:', error);
+        console.error('Invoice creation failed:', error);
+        throw error;
     }
 };
 
-export const deleteProduct = async (id: string) => {
+export const createCustomer = async (customerData: any) => {
     try {
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+        const response = await fetch(`${API_URL}/customers`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(customerData)
+        });
+        if (!response.ok) throw new Error('Failed to create customer');
+        return await response.json();
     } catch (error) {
-        console.error('Error deleting product from Supabase:', error);
+        console.error('Customer creation failed:', error);
+        throw error;
     }
 };
-
-const initialProducts: Product[] = [
-    {
-        id: '1',
-        category: 'helmets',
-        name: 'MT Revenge 2 Full-Face Helmet',
-        description: 'Aerodynamic design with superior ventilation',
-        price: '₹4,999',
-        image: 'https://images.pexels.com/photos/1201996/pexels-photo-1201996.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '2',
-        category: 'helmets',
-        name: 'SMK Twister Captain Helmet',
-        description: 'DOT certified with anti-fog visor',
-        price: '₹3,499',
-        image: 'https://images.pexels.com/photos/163210/motorcycles-race-helmets-pilots-163210.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '3',
-        category: 'helmets',
-        name: 'Axor Apex Hunter Helmet',
-        description: 'Lightweight with dual visor system',
-        price: '₹5,499',
-        image: 'https://images.pexels.com/photos/4488662/pexels-photo-4488662.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '4',
-        category: 'accessories',
-        name: 'LED Headlight Kit',
-        description: 'Ultra-bright 6000K white light',
-        price: '₹1,999',
-        image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '5',
-        category: 'accessories',
-        name: 'Custom Exhaust System',
-        description: 'Enhanced sound and performance',
-        price: '₹3,999',
-        image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '6',
-        category: 'accessories',
-        name: 'Mobile Holder Mount',
-        description: '360° rotation with secure grip',
-        price: '₹499',
-        image: 'https://images.pexels.com/photos/1127133/pexels-photo-1127133.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '7',
-        category: 'gear',
-        name: 'Riding Gloves Pro',
-        description: 'Knuckle protection with touchscreen compatibility',
-        price: '₹899',
-        image: 'https://images.pexels.com/photos/6873876/pexels-photo-6873876.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '8',
-        category: 'gear',
-        name: 'Riding Jacket',
-        description: 'Waterproof with CE approved armor',
-        price: '₹4,499',
-        image: 'https://images.pexels.com/photos/6873871/pexels-photo-6873871.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '9',
-        category: 'gear',
-        name: 'Knee & Elbow Guards',
-        description: 'Adjustable straps with impact protection',
-        price: '₹1,299',
-        image: 'https://images.pexels.com/photos/7243409/pexels-photo-7243409.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '10',
-        category: 'mods',
-        name: 'Performance Air Filter',
-        description: 'Increased airflow and engine efficiency',
-        price: '₹1,799',
-        image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '11',
-        category: 'mods',
-        name: 'LED Strip Lights',
-        description: 'RGB color changing with remote',
-        price: '₹899',
-        image: 'https://images.pexels.com/photos/3311574/pexels-photo-3311574.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-    {
-        id: '12',
-        category: 'mods',
-        name: 'Carbon Fiber Tank Pad',
-        description: 'Premium look with scratch protection',
-        price: '₹699',
-        image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-    },
-];

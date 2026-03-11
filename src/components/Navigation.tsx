@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { 
-  Menu, X, Search, Mic, User, ShoppingCart, ChevronDown, 
-  Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar, Flame,
-  ChevronRight, ArrowRight, Star
+import {
+  Menu, X, Search, Mic, User, ShoppingCart, ChevronDown,
+  Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
+  ArrowRight, Flame, Star
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -10,7 +10,7 @@ interface NavigationProps {
   onNavigate: (page: string) => void;
 }
 
-export default function Navigation({ currentPage, onNavigate }: NavigationProps) {
+export default function Navigation({ currentPage: _currentPage, onNavigate }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     document.addEventListener('click', handleClickOutside);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       document.removeEventListener('click', handleClickOutside);
@@ -41,9 +41,9 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
 
   // Complex Mega Menu Structure Data
   const categoriesData = [
-    { 
-      id: 'bike', 
-      label: 'Shop by Bike', 
+    {
+      id: 'bike',
+      label: 'Shop by Bike',
       icon: Bike,
       columns: [
         {
@@ -59,9 +59,9 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         { title: 'Himalayan 450 Mods', image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'New' }
       ]
     },
-    { 
-      id: 'super', 
-      label: 'Super Bikes', 
+    {
+      id: 'super',
+      label: 'Super Bikes',
       icon: Zap,
       columns: [
         {
@@ -74,12 +74,12 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'Track Day Essentials', image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Hot' }
+        { title: 'Track Day Essentials', image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Hot' }
       ]
     },
-    { 
-      id: 'accessories', 
-      label: 'Motorcycle Accessories', 
+    {
+      id: 'accessories',
+      label: 'Motorcycle Accessories',
       icon: Wrench,
       columns: [
         {
@@ -92,12 +92,12 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'Premium Mounts', image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Top Rated' }
+        { title: 'Premium Mounts', image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Top Rated' }
       ]
     },
-    { 
-      id: 'gear', 
-      label: 'Riding Gear', 
+    {
+      id: 'gear',
+      label: 'Riding Gear',
       icon: Shirt,
       columns: [
         {
@@ -110,12 +110,12 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'All-Weather Jackets', image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Bestseller' }
+        { title: 'All-Weather Jackets', image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Bestseller' }
       ]
     },
-    { 
-      id: 'luggage', 
-      label: 'Luggage & Touring', 
+    {
+      id: 'luggage',
+      label: 'Luggage & Touring',
       icon: Briefcase,
       columns: [
         {
@@ -128,12 +128,12 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'Expedition Saddle Bags', image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'New' }
+        { title: 'Expedition Saddle Bags', image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'New' }
       ]
     },
-    { 
-      id: 'helmets', 
-      label: 'Helmets & Protection', 
+    {
+      id: 'helmets',
+      label: 'Helmets & Protection',
       icon: Shield,
       columns: [
         {
@@ -146,12 +146,12 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'Carbon Fiber Series', image: 'https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Premium' }
+        { title: 'Carbon Fiber Series', image: 'https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Premium' }
       ]
     },
-    { 
-      id: 'combos', 
-      label: 'Combos', 
+    {
+      id: 'combos',
+      label: 'Combos',
       icon: Package,
       columns: [
         {
@@ -164,12 +164,12 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'Starter Kit: Save 20%', image: 'https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Sale' }
+        { title: 'Starter Kit: Save 20%', image: 'https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Sale' }
       ]
     },
-    { 
-      id: 'events', 
-      label: 'Events', 
+    {
+      id: 'events',
+      label: 'Events',
       icon: Calendar,
       columns: [
         {
@@ -182,7 +182,7 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         }
       ],
       featured: [
-         { title: 'Track Day 2026', image: 'https://images.pexels.com/photos/2416812/pexels-photo-2416812.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Register' }
+        { title: 'Track Day 2026', image: 'https://images.pexels.com/photos/2416812/pexels-photo-2416812.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Register' }
       ]
     },
   ];
@@ -198,18 +198,17 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
 
   return (
     <>
-      <nav 
-        className={`fixed top-0 w-full z-50 transition-all duration-500 cubic-bezier(0.25, 1, 0.5, 1) border-b border-zinc-800/80 ${
-          isScrolled 
-            ? 'bg-zinc-950/85 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)]' 
-            : 'bg-gradient-to-b from-zinc-950/95 to-zinc-950/80 backdrop-blur-md'
-        }`}
+      <nav
+        className={`fixed top-0 w-full z-50 transition-all duration-500 cubic-bezier(0.25, 1, 0.5, 1) border-b border-zinc-800/80 ${isScrolled
+          ? 'bg-zinc-950/85 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)]'
+          : 'bg-gradient-to-b from-zinc-950/95 to-zinc-950/80 backdrop-blur-md'
+          }`}
       >
         {/* TOP ROW: Logo & Search & Icons */}
-        <div className={`transition-all duration-500 ease-out border-b border-zinc-800/40 ${isScrolled ? 'py-1' : 'py-4'}`}>
-          <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={`transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-zinc-800/40 ${isScrolled ? 'py-1' : 'py-5'}`}>
+          <div className="max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-12">
             <div className="flex justify-between items-center gap-6">
-              
+
               {/* Logo */}
               <div
                 className="flex items-center cursor-pointer group shrink-0"
@@ -224,11 +223,11 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               {/* Large Smart Search Bar (Desktop) */}
               <div className="hidden lg:flex flex-1 max-w-4xl mx-auto relative group z-10">
                 <div className={`flex w-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-700/60 rounded-full transition-all duration-400 shadow-inner group-focus-within:bg-zinc-900/80 group-focus-within:border-red-500/50 group-focus-within:shadow-[0_0_20px_rgba(220,38,38,0.15)] ${isScrolled ? 'h-10' : 'h-12'}`}>
-                  
+
                   {/* Category Selector inside search */}
                   <div className="relative flex items-center h-full border-r border-zinc-700/60 transition-colors group-focus-within:border-zinc-600">
-                    <button 
-                      className="flex items-center gap-1.5 px-4 md:px-5 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                    <button
+                      className="flex items-center gap-2 px-5 md:px-6 text-[13px] font-bold text-zinc-300 hover:text-white transition-all duration-300 uppercase tracking-tight"
                       onClick={() => setIsSearchCatOpen(!isSearchCatOpen)}
                     >
                       {searchCategory} <ChevronDown size={14} className={`transition-transform duration-300 ${isSearchCatOpen ? 'rotate-180' : ''}`} />
@@ -237,8 +236,8 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
                     {isSearchCatOpen && (
                       <div className="absolute top-[120%] left-0 w-40 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                         {searchCategories.map(cat => (
-                          <button 
-                            key={cat} 
+                          <button
+                            key={cat}
                             className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-red-600/20 hover:pl-5 transition-all duration-300"
                             onClick={() => { setSearchCategory(cat); setIsSearchCatOpen(false); }}
                           >
@@ -251,10 +250,10 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
 
                   {/* Input Field */}
                   <div className="relative flex-1 flex items-center h-full">
-                    <input 
-                      type="text" 
-                      placeholder="Search helmets, riding gear, luggage, accessories..." 
-                      className="w-full h-full bg-transparent text-white text-[15px] pl-4 pr-12 focus:outline-none placeholder-zinc-500 font-light transition-all duration-300"
+                    <input
+                      type="text"
+                      placeholder="Search helmets, riding gear, performance mods..."
+                      className="w-full h-full bg-transparent text-white text-[15px] pl-5 pr-14 focus:outline-none placeholder-zinc-500 font-medium transition-all duration-300"
                     />
                     {/* Micro-interaction icons inside input */}
                     <div className="absolute right-3 flex items-center gap-2 text-zinc-400">
@@ -273,7 +272,7 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               <div className="hidden lg:flex items-center space-x-5 shrink-0">
                 <button className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer">
                   <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1">
-                     <User size={20} className="group-hover:text-red-400 transition-colors" />
+                    <User size={20} className="group-hover:text-red-400 transition-colors" />
                   </div>
                   <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">Account</span>
                 </button>
@@ -295,19 +294,19 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
-            
+
             {/* Mobile Smart Search (Shows below logo on mobile) */}
             <div className={`lg:hidden w-full mt-3 transition-all duration-500 ${isScrolled ? 'hidden' : 'block'}`}>
-               <div className="flex w-full bg-zinc-900/60 border border-zinc-800 rounded-full h-11 shadow-inner focus-within:border-red-500/50 transition-colors duration-300">
-                  <input 
-                    type="text" 
-                    placeholder="Search products..." 
-                    className="w-full h-full bg-transparent text-white text-sm pl-4 pr-10 focus:outline-none placeholder-zinc-500"
-                  />
-                  <button className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500 transition-colors">
-                    <Search size={18} />
-                  </button>
-               </div>
+              <div className="flex w-full bg-zinc-900/60 border border-zinc-800 rounded-full h-11 shadow-inner focus-within:border-red-500/50 transition-colors duration-300">
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full h-full bg-transparent text-white text-sm pl-4 pr-10 focus:outline-none placeholder-zinc-500"
+                />
+                <button className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500 transition-colors">
+                  <Search size={18} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -316,76 +315,81 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         <div className="hidden lg:block relative bg-zinc-950/40 backdrop-blur-md mega-menu-container">
           <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'h-0 opacity-0 overflow-hidden' : 'h-[52px] opacity-100'}`}>
-              
+
               <div className="flex items-center space-x-2 flex-1 justify-center xl:justify-start">
                 {categoriesData.map((cat) => (
-                  <div 
+                  <div
                     key={cat.id}
                     className="group"
                   >
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}
-                      className={`flex items-center gap-1.5 px-3 py-4 text-[12px] xl:text-[13px] font-bold tracking-wide uppercase transition-colors duration-300 relative ${activeDropdown === cat.id ? 'text-white' : 'text-zinc-300 hover:text-white'}`}
+                      className={`flex items-center gap-2 px-5 py-5 text-[13px] xl:text-[14px] font-black tracking-widest uppercase transition-all duration-500 relative group/navlink hover:-translate-y-0.5 ${activeDropdown === cat.id ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
                     >
-                      <cat.icon size={16} className={`transition-all duration-300 group-hover:scale-110 group-hover:text-red-500 ${activeDropdown === cat.id ? 'text-red-500' : 'text-zinc-500'}`} />
+                      <cat.icon size={18} className={`transition-all duration-500 group-hover/navlink:scale-125 group-hover/navlink:text-red-500 group-hover/navlink:drop-shadow-[0_0_8px_rgba(220,38,38,0.5)] ${activeDropdown === cat.id ? 'text-red-500' : 'text-zinc-500'}`} />
                       {cat.label}
+                      {/* Glow Highlight Background */}
+                      <span className="absolute inset-x-0 inset-y-2 bg-red-600/0 group-hover/navlink:bg-red-600/5 rounded-xl transition-all duration-500 -z-10"></span>
                       {/* Smooth Underline Animation */}
-                      <span className={`absolute left-1/2 -translate-x-1/2 bottom-[2px] h-[2px] bg-red-600 transition-all duration-400 ease-out shadow-[0_0_10px_rgba(220,38,38,0.8)] rounded-full ${activeDropdown === cat.id ? 'w-[80%]' : 'w-0 group-hover:w-[80%]'}`}></span>
+                      <span className={`absolute left-1/2 -translate-x-1/2 bottom-[4px] h-[3px] bg-red-600 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) shadow-[0_0_15px_rgba(220,38,38,1)] rounded-full ${activeDropdown === cat.id ? 'w-[70%]' : 'w-0 group-hover:w-[70%]'}`}></span>
                     </button>
 
                     {/* Dynamic Mega Menu Dropdown */}
-                    <div className={`absolute left-0 top-full w-full bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-y border-zinc-800/80 shadow-[0_40px_80px_rgba(0,0,0,0.95)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform origin-top overflow-hidden ${
-                      activeDropdown === cat.id ? 'opacity-100 scale-y-100 translate-y-0 visible h-auto pb-4 max-h-[500px]' : 'opacity-0 scale-y-95 -translate-y-4 invisible h-0 pointer-events-none'
-                    }`}>
+                    <div className={`absolute left-0 top-full w-full bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-y border-zinc-800/80 shadow-[0_40px_80px_rgba(0,0,0,0.95)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform origin-top overflow-hidden ${activeDropdown === cat.id ? 'opacity-100 scale-y-100 translate-y-0 visible h-auto pb-4 max-h-[500px]' : 'opacity-0 scale-y-95 -translate-y-4 invisible h-0 pointer-events-none'
+                      }`}>
                       <div className="max-w-[1500px] mx-auto px-8 py-10 flex gap-12">
-                         {/* Columns Container */}
-                         <div className="flex flex-1 gap-12 border-r border-zinc-800/50 pr-12">
-                           {cat.columns.map((col, idx) => (
-                             <div key={idx} className="flex-1">
-                               <h3 className="text-white font-bold text-[15px] mb-5 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-800/80 pb-3 group-hover/title:text-red-500">
-                                  {idx === 0 ? <cat.icon size={18} className="text-red-500 animate-[pulse_2s_infinite]" /> : <Star size={16} className="text-zinc-500" />}
-                                  {col.title}
-                               </h3>
-                               <ul className="space-y-3.5">
-                                 {col.links.map(link => (
-                                   <li key={link}>
-                                     <button 
+                        {/* Columns Container */}
+                        <div className="flex flex-1 gap-12 border-r border-zinc-800/50 pr-12">
+                          {cat.columns.map((col, idx) => (
+                            <div key={idx} className="flex-1">
+                              <h3 className="text-white font-bold text-[15px] mb-5 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-800/80 pb-3 group-hover/title:text-red-500">
+                                {idx === 0 ? <cat.icon size={18} className="text-red-500 animate-[pulse_2s_infinite]" /> : <Star size={16} className="text-zinc-500" />}
+                                {col.title}
+                              </h3>
+                              <ul className="space-y-4">
+                                {col.links.map((link, lIdx) => (
+                                  <li key={link} className={`transition-all duration-500 transform ${activeDropdown === cat.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} style={{ transitionDelay: `${(idx * 50) + (lIdx * 30)}ms` }}>
+                                    <button
                                       onClick={() => handleNavClick('products')}
-                                      className="text-zinc-400 hover:text-red-400 text-[14px] font-medium transition-all duration-300 hover:translate-x-2 flex items-center gap-2 group/link"
-                                     >
-                                       <ChevronRight size={14} className="opacity-0 -ml-4 transition-all duration-300 group-hover/link:opacity-100 group-hover/link:ml-0 text-red-500" /> 
-                                       {link}
-                                     </button>
-                                   </li>
-                                 ))}
-                               </ul>
-                               {/* 'View All' Link at bottom of first column */}
-                               {idx === 0 && (
-                                  <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
-                                    View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
-                                  </button>
-                               )}
-                             </div>
-                           ))}
-                         </div>
-                         
-                         {/* Featured Image Cards (Right Sidebar of Mega Menu) */}
-                         <div className="w-[30%] grid gap-5">
-                            <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest pl-2">Featured</h3>
-                            {cat.featured.map((card, idx) => (
-                              <div key={idx} className="group/card relative cursor-pointer rounded-2xl overflow-hidden hover:shadow-[0_15px_40px_rgba(220,38,38,0.2)] transition-all duration-500 h-48 border border-zinc-800/50 hover:border-red-500/50" onClick={() => handleNavClick('products')}>
-                                 <div className="absolute inset-0 bg-black/50 group-hover/card:bg-black/20 transition-colors duration-500 z-10"></div>
-                                 <img src={card.image} alt={card.title} className="w-full h-full object-cover transform group-hover/card:scale-110 transition-transform duration-700 ease-in-out" />
-                                 <div className="absolute top-4 right-4 z-20 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-sm shadow-lg">{card.badge}</div>
-                                 <div className="absolute bottom-0 left-0 w-full p-5 z-20 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent transform group-hover/card:translate-y-0 transition-transform duration-500">
-                                    <span className="text-white font-bold text-lg block group-hover/card:text-red-400 transition-colors">{card.title}</span>
-                                    <span className="text-red-500 text-xs font-bold uppercase tracking-widest mt-1 flex items-center gap-1 opacity-0 translate-y-2 group-hover/card:opacity-100 group-hover/card:translate-y-0 transition-all duration-500 delay-100">
-                                      Shop Now <ArrowRight size={12} />
-                                    </span>
-                                 </div>
+                                      className="text-zinc-400 hover:text-white text-[15px] font-bold transition-all duration-300 hover:translate-x-3 flex items-center gap-3 group/link"
+                                    >
+                                      <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/link:opacity-100 transition-all duration-300 shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
+                                      {link}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                              {/* 'View All' Link at bottom of first column */}
+                              {idx === 0 && (
+                                <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
+                                  View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Featured Image Cards (Right Sidebar of Mega Menu) */}
+                        <div className="w-[30%] grid gap-5">
+                          <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest pl-2">Featured</h3>
+                          {cat.featured.map((card, fIdx) => (
+                            <div key={fIdx}
+                              className={`group/card relative cursor-pointer rounded-2xl overflow-hidden hover:shadow-[0_15px_40px_rgba(220,38,38,0.2)] transition-all duration-700 h-48 border border-zinc-800/50 hover:border-red-600/50 transform ${activeDropdown === cat.id ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+                              style={{ transitionDelay: `${400 + (fIdx * 100)}ms` }}
+                              onClick={() => handleNavClick('products')}
+                            >
+                              <div className="absolute inset-0 bg-black/50 group-hover/card:bg-black/20 transition-colors duration-500 z-10"></div>
+                              <img src={card.image} alt={card.title} className="w-full h-full object-cover transform group-hover/card:scale-110 transition-transform duration-700 ease-in-out" />
+                              <div className="absolute top-4 right-4 z-20 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-sm shadow-lg">{card.badge}</div>
+                              <div className="absolute bottom-0 left-0 w-full p-5 z-20 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent transform group-hover/card:translate-y-0 transition-transform duration-500">
+                                <span className="text-white font-bold text-lg block group-hover/card:text-red-400 transition-colors">{card.title}</span>
+                                <span className="text-red-500 text-xs font-bold uppercase tracking-widest mt-1 flex items-center gap-1 opacity-0 translate-y-2 group-hover/card:opacity-100 group-hover/card:translate-y-0 transition-all duration-500 delay-100">
+                                  Shop Now <ArrowRight size={12} />
+                                </span>
                               </div>
-                            ))}
-                         </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -393,7 +397,7 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               </div>
 
               {/* Animated CTA Garage Sale */}
-              <button 
+              <button
                 onClick={() => handleNavClick('products')}
                 className="group relative inline-flex items-center justify-center shrink-0 ml-4 font-bold hidden xl:flex"
               >
@@ -410,9 +414,8 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
         </div>
 
         {/* Mobile Navigation Menu */}
-        <div className={`lg:hidden fixed inset-0 top-[100px] z-40 bg-zinc-950/98 backdrop-blur-2xl transition-all duration-500 overflow-y-auto ease-in-out ${
-          isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
-        }`}>
+        <div className={`lg:hidden fixed inset-0 top-[100px] z-40 bg-zinc-950/98 backdrop-blur-2xl transition-all duration-500 overflow-y-auto ease-in-out ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
+          }`}>
           <div className="p-4 space-y-2 pb-24 border-t border-zinc-800/50">
             {/* Mobile Account / Cart */}
             <div className="flex gap-4 mb-6 pt-2">
@@ -436,13 +439,13 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
                   >
                     <div className="flex items-center gap-4">
                       <div className="p-2.5 bg-zinc-800/80 rounded-lg group-hover:bg-red-600/20 transition-colors duration-300 shadow-inner group-hover:scale-110 transform">
-                         <cat.icon size={20} className="text-zinc-400 group-hover:text-red-500 transition-colors duration-300" />
+                        <cat.icon size={20} className="text-zinc-400 group-hover:text-red-500 transition-colors duration-300" />
                       </div>
                       <span className="text-white font-bold tracking-wide uppercase text-[13px]">{cat.label}</span>
                     </div>
                     <ChevronDown size={18} className={`text-zinc-600 transition-transform duration-300 ${mobileExpandedCat === cat.id ? 'rotate-180 text-red-500' : 'group-hover:text-red-500'}`} />
                   </button>
-                  
+
                   {/* Mobile Accordion Sub-menu */}
                   <div className={`overflow-hidden transition-all duration-300 ${mobileExpandedCat === cat.id ? 'max-h-[500px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
                     <div className="px-4 ml-12 border-l border-zinc-800/80 pl-4 space-y-4">
@@ -452,7 +455,7 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
                           <ul className="space-y-1">
                             {col.links.slice(0, 4).map(link => (
                               <li key={link}>
-                                <button 
+                                <button
                                   onClick={() => handleNavClick('products')}
                                   className="text-zinc-300 hover:text-white text-sm py-2 min-h-[40px] w-full text-left transition-colors flex items-center gap-2 touch-manipulation"
                                 >
@@ -463,11 +466,11 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
                           </ul>
                         </div>
                       ))}
-                      <button 
-                         onClick={() => handleNavClick('products')}
-                         className="text-red-500 text-sm font-bold min-h-[40px] pt-1 w-full text-left touch-manipulation"
+                      <button
+                        onClick={() => handleNavClick('products')}
+                        className="text-red-500 text-sm font-bold min-h-[40px] pt-1 w-full text-left touch-manipulation"
                       >
-                         View All {cat.label} &rarr;
+                        View All {cat.label} &rarr;
                       </button>
                     </div>
                   </div>
@@ -475,7 +478,7 @@ export default function Navigation({ currentPage, onNavigate }: NavigationProps)
               ))}
             </div>
 
-            <button 
+            <button
               onClick={() => handleNavClick('products')}
               className="w-full mt-8 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 p-4 min-h-[48px] rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all duration-300 active:scale-95 transform touch-manipulation"
             >

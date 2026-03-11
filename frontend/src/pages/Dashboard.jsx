@@ -59,7 +59,7 @@ const Dashboard = () => {
                     </div>
                     <div style={{ height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={stats.revenueTrend}>
+                            <AreaChart data={stats.revenueTrend || []}>
                                 <defs>
                                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
@@ -82,10 +82,10 @@ const Dashboard = () => {
                     <div className="card">
                         <h3 style={{ fontWeight: 700, marginBottom: '1.5rem' }}>Recent Online Orders</h3>
                         <div style={{ display: 'grid', gap: '0.75rem' }}>
-                            {stats.recentOnline.length > 0 ? stats.recentOnline.map(order => (
+                            {(stats.recentOnline || []).length > 0 ? stats.recentOnline.map(order => (
                                 <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', fontSize: '0.875rem' }}>
                                     <span>#{order.id} - {order.customer_name || 'Guest'}</span>
-                                    <span style={{ fontWeight: 600 }}>₹{parseFloat(order.total_amount).toFixed(2)}</span>
+                                    <span style={{ fontWeight: 600 }}>₹{parseFloat(order.total_amount || 0).toFixed(2)}</span>
                                 </div>
                             )) : <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No recent online orders</p>}
                         </div>
@@ -93,10 +93,10 @@ const Dashboard = () => {
                     <div className="card">
                         <h3 style={{ fontWeight: 700, marginBottom: '1.5rem' }}>Recent Offline Bills</h3>
                         <div style={{ display: 'grid', gap: '0.75rem' }}>
-                            {stats.recentOffline.length > 0 ? stats.recentOffline.map(bill => (
+                            {(stats.recentOffline || []).length > 0 ? stats.recentOffline.map(bill => (
                                 <div key={bill.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem', backgroundColor: '#f8fafc', borderRadius: '0.5rem', fontSize: '0.875rem' }}>
                                     <span>#{bill.id} - {bill.customer_name || 'Walking Customer'}</span>
-                                    <span style={{ fontWeight: 600 }}>₹{parseFloat(bill.total_amount).toFixed(2)}</span>
+                                    <span style={{ fontWeight: 600 }}>₹{parseFloat(bill.total_amount || 0).toFixed(2)}</span>
                                 </div>
                             )) : <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>No recent offline bills</p>}
                         </div>

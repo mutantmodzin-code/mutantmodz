@@ -100,7 +100,7 @@ const ProfitDashboard = () => {
             <div className="card" style={{ gridColumn: 'span 1' }}>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem' }}>Top Profitable Products</h2>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    {profitData.byProduct.map((p, i) => (
+                    {(profitData.byProduct || []).map((p, i) => (
                         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{p.name}</p>
@@ -127,7 +127,7 @@ const ProfitDashboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {currentData.map((item, idx) => (
+                        {(currentData || []).map((item, idx) => (
                             <tr key={idx}>
                                 <td>{item[dataKey]}</td>
                                 <td style={{ textAlign: 'right' }}>₹{parseFloat(item.total_selling).toFixed(2)}</td>

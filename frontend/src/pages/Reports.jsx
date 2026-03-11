@@ -65,7 +65,7 @@ const Reports = () => {
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 15,
                 head: [['Product Name', 'Quantity Sold', 'Revenue Generated']],
-                body: data.details.map(item => [item.name, item.quantity, `₹${parseFloat(item.revenue).toFixed(2)}`]),
+                body: (data.details || []).map(item => [item.name, item.quantity, `₹${parseFloat(item.revenue || 0).toFixed(2)}`]),
             });
 
             doc.save(`Revenue_Report_${data.dateRange.start}_${data.dateRange.end}.pdf`);

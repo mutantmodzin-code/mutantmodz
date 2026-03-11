@@ -37,6 +37,7 @@ const ProductImage = ({ images, alt, className }: { images?: string[], alt: stri
 
 export default function Products({ onNavigate }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +52,22 @@ export default function Products({ onNavigate }: ProductsProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      const brandMatch = hash.match(/[?&]brand=([^&]+)/);
+      if (brandMatch) {
+        setSelectedBrand(brandMatch[1].toLowerCase());
+      } else {
+        setSelectedBrand(null);
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   const categories = [
     { id: 'all', name: 'All Manifest', icon: Cog },
     { id: 'helmets', name: 'Ballistic Helmets', icon: Shield },
@@ -60,10 +77,14 @@ export default function Products({ onNavigate }: ProductsProps) {
   ];
 
   const filteredProducts = products.filter(p => {
-    const matchesCategory = selectedCategory === 'all' || p.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    const matchesBrand = !selectedBrand ||
+      p.name.toLowerCase().includes(selectedBrand) ||
+      p.description.toLowerCase().includes(selectedBrand) ||
+      (p as any).brand?.toLowerCase() === selectedBrand;
+    return matchesCategory && matchesSearch && matchesBrand;
   });
 
   const handleBuyNow = (productId: string) => {
@@ -96,6 +117,17 @@ export default function Products({ onNavigate }: ProductsProps) {
           <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
             High-performance modules engineered for the extreme.
           </p>
+          {selectedBrand && (
+            <div className="mt-8 inline-flex items-center gap-4 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-2xl animate-in fade-in zoom-in duration-500">
+              <span className="text-red-500 font-black uppercase text-[10px] tracking-[0.3em]">Sector: {selectedBrand}</span>
+              <button
+                onClick={() => window.location.hash = 'products'}
+                className="text-zinc-500 hover:text-white transition-colors text-xs"
+              >
+                ✕
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Scroll Indicator */}

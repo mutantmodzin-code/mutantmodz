@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Star, Shield, Wrench, ChevronDown, Heart, Zap, Box, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
+import { HeroSlideshow } from '../components/HeroSlideshow';
+import { BrandCarousel } from '../components/BrandCarousel';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -70,63 +72,19 @@ export default function Home({ onNavigate }: HomeProps) {
 
   return (
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+      <HeroSlideshow onNavigate={onNavigate} />
+      <BrandCarousel onNavigate={onNavigate} />
 
-      {/* CINEMATIC HERO: THE COMMAND CENTER */}
-      <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=1920"
-            className="w-full h-full object-cover opacity-30 transform scale-110"
-            style={{
-              transform: `scale(${1.05 + scrollY * 0.0001}) translateY(${scrollY * 0.3}px)`,
-            }}
-            alt="Hero Background"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-zinc-950 z-10"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1)_0%,transparent_70%)] z-10"></div>
-
-        <div className="relative z-20 max-w-7xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.5em]">System Online. Objective: Excellence.</span>
-          </div>
-
-          <h1 className="text-6xl sm:text-[12rem] font-black text-white leading-[0.85] tracking-tighter uppercase mb-10 overflow-hidden">
-            <span className="block animate-in fade-in slide-in-from-bottom-12 duration-1000">MUTATE YOUR</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-white to-red-800 animate-in fade-in slide-in-from-bottom-20 duration-1000 delay-200">MACHINE</span>
-          </h1>
-
-          <p className="text-xl sm:text-2xl text-zinc-400 font-bold uppercase tracking-[0.4em] max-w-3xl mx-auto mb-16 opacity-80 animate-in fade-in slide-in-from-bottom-24 duration-1000 delay-400">
-            Professional Grade Hardware for the Elite Rider.
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/50 to-transparent" />
+        <div className="max-w-7xl mx-auto text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            About <span className="text-red-600">Mutant Modz</span>
+          </h2>
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Your one-stop shop for premium bike accessories, helmets, and riding gear in Coimbatore.
+            We bring passion and expertise to any rider who walks through our doors.
           </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-in fade-in zoom-in duration-1000 delay-700">
-            <button
-              onClick={() => onNavigate('products')}
-              className="px-12 py-7 bg-red-600 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-[0_20px_60px_rgba(220,38,38,0.4)] hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 group"
-            >
-              Enter Catalog <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-2 transition-transform" />
-            </button>
-            <button
-              onClick={() => onNavigate('contact')}
-              className="px-12 py-7 bg-white/5 backdrop-blur-xl border border-white/10 text-white rounded-[2rem] font-black uppercase tracking-widest text-xs hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 shadow-2xl"
-            >
-              Locate Base
-            </button>
-          </div>
-        </div>
-
-        {/* HUD Elements */}
-        <div className="absolute left-10 top-1/2 -translate-y-1/2 hidden xl:flex flex-col gap-8 opacity-20">
-          {['COIMBATORE', 'UPPILIPALAYAM', 'HQ'].map(text => (
-            <span key={text} className="text-[10px] font-black text-white vertical-text uppercase tracking-[1em]">{text}</span>
-          ))}
-        </div>
-
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40 animate-bounce cursor-pointer" onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}>
-          <span className="text-[10px] font-black uppercase tracking-widest text-white">Initiate Descent</span>
-          <ChevronDown size={24} className="text-red-600" />
         </div>
       </section>
 
@@ -146,7 +104,7 @@ export default function Home({ onNavigate }: HomeProps) {
             </div>
           ))}
         </div>
-      </section>
+      </section >
 
       {/* FEATURED DROPS: THE COLLECTIVE */}
       <section className="py-40 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
@@ -212,10 +170,10 @@ export default function Home({ onNavigate }: HomeProps) {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* THE SHOP BY BIKE: TECHNICAL SPECTRUM */}
-      <section className="py-40 px-6 sm:px-12 bg-black border-y border-white/5">
+      < section className="py-40 px-6 sm:px-12 bg-black border-y border-white/5" >
         <div className="max-w-[1700px] mx-auto text-center space-y-24">
           <div className="space-y-6">
             <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
@@ -238,10 +196,10 @@ export default function Home({ onNavigate }: HomeProps) {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* TESTIMONIALS: THE FEEDBACK LOOP */}
-      <section className="py-40 px-6 sm:px-12 bg-zinc-950">
+      < section className="py-40 px-6 sm:px-12 bg-zinc-950" >
         <div className="max-w-7xl mx-auto space-y-24">
           <div className="text-center space-y-6">
             <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase">THE <span className="text-red-600">FEEDBACK</span> LOOP</h2>
@@ -270,10 +228,10 @@ export default function Home({ onNavigate }: HomeProps) {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* FINAL CALL: INITIATE SEQUENCE */}
-      <section className="py-40 px-6 sm:px-12 bg-red-600 relative overflow-hidden group">
+      < section className="py-40 px-6 sm:px-12 bg-red-600 relative overflow-hidden group" >
         <div className="absolute inset-0 bg-black opacity-30 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"></div>
         <div className="max-w-[1200px] mx-auto text-center relative z-10 space-y-12">
           <h2 className="text-6xl sm:text-[10rem] font-black text-white leading-none tracking-tighter uppercase">
@@ -297,7 +255,7 @@ export default function Home({ onNavigate }: HomeProps) {
             </button>
           </div>
         </div>
-      </section>
-    </div>
+      </section >
+    </div >
   );
 }

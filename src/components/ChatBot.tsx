@@ -13,7 +13,7 @@ const KB: { patterns: RegExp[]; response: string }[] = [
     {
         patterns: [/hello|hi|hey|good\s*(morning|afternoon|evening)|namaste|howdy/i],
         response:
-            "👋 Welcome to the **Mutant Modz** Command Center. I'm your AI logistics officer. State your objective: products, location, or technical support. 🏍️",
+            "👋 Welcome to **Mutant Modz** Customer Support. I'm your support agent. State your objective: products, location, or technical support. 🏍️",
     },
     {
         patterns: [/product|sell|stock|availabl|what.*have|what.*offer|catalog/i],
@@ -23,7 +23,7 @@ const KB: { patterns: RegExp[]; response: string }[] = [
     {
         patterns: [/helmet/i],
         response:
-            "🪖 **Ballistic Protection**:\n\n• **MT Revenge 2** – ₹4,999 (Elite Tier)\n• **SMK Twister** – ₹3,499 (Industrial Standard)\n• **Axor Apex** – ₹5,499 (Dual Visor Array)\n\nAll units are DOT/ISI validated.",
+            "🪖 **Ballistic Protection**:\n\n• **MT Revenge 2** – ₹4,999 (Elite Tier)\n• **SMK Twister** – ₹3,499 (Industrial Standard)\n• **Axor Apex** – ₹5,499 (Dual Visor Array)\n\nAll items are DOT/ISI validated.",
     },
     {
         patterns: [/gear|glove|jacket|guard|suit|riding wear/i],
@@ -150,7 +150,7 @@ export default function ChatBot() {
                 {isOpen ? <X size={24} /> : <Zap size={24} className="group-hover:animate-pulse" />}
                 {!isOpen && (
                     <span className="absolute right-full mr-6 bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 pointer-events-none">
-                        Command Center
+                        Customer Support
                     </span>
                 )}
             </button>

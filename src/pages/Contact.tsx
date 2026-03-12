@@ -74,14 +74,14 @@ export default function Contact() {
         <div className="max-w-5xl mx-auto relative z-10 px-6 text-center pt-20">
           <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-4 py-2 rounded-full mb-8">
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Ready for Transmission</span>
+            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Ready to Contact</span>
           </div>
           <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6">
             COMMS <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">CENTER</span>
           </h1>
           <p className="text-lg text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[12px] opacity-80">
-            Initiate contact with the Mutant Modz logistics team.
+            Get in touch with the Mutant Modz support team.
           </p>
         </div>
       </section>
@@ -216,7 +216,7 @@ export default function Contact() {
                     </div>
                     <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${submitted ? 'translate-y-0' : 'translate-y-20'}`}>
                       <Zap size={20} />
-                      Transmission Success
+                      Message Sent
                     </div>
                   </button>
                 </form>

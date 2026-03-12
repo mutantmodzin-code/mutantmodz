@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { ArrowRight, Star, Shield, Wrench, ChevronDown, Heart, Zap, Box, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Star, Shield, Wrench, Heart, Zap, Box, ArrowUpRight, AlertTriangle } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import { HeroSlideshow } from '../components/HeroSlideshow';
-import { BrandCarousel } from '../components/BrandCarousel';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -42,10 +41,7 @@ const ProductImage = ({ images, alt }: { images?: string[], alt: string }) => {
 
 export default function Home({ onNavigate }: HomeProps) {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [scrollY, setScrollY] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-
-  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -54,13 +50,6 @@ export default function Home({ onNavigate }: HomeProps) {
       setFeaturedProducts(products.slice(0, 4));
     };
     fetchProducts();
-
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const features = [
@@ -73,38 +62,6 @@ export default function Home({ onNavigate }: HomeProps) {
   return (
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
       <HeroSlideshow onNavigate={onNavigate} />
-      <BrandCarousel onNavigate={onNavigate} />
-
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/50 to-transparent" />
-        <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-            About <span className="text-red-600">Mutant Modz</span>
-          </h2>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            Your one-stop shop for premium bike accessories, helmets, and riding gear in Coimbatore.
-            We bring passion and expertise to any rider who walks through our doors.
-          </p>
-        </div>
-      </section>
-
-      {/* THE ARRAY: CORE VALUES */}
-      <section className="py-40 px-6 sm:px-12 bg-black relative">
-        <div className="max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {features.map((f, i) => (
-            <div key={i} className="group p-12 bg-zinc-900/40 rounded-[3rem] border border-white/5 hover:border-red-600/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
-              <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center mb-10 group-hover:bg-red-600 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-inner">
-                <f.icon size={32} className="text-zinc-500 group-hover:text-white transition-colors" />
-              </div>
-              <div className="space-y-4">
-                <div className="text-red-500 font-black text-[10px] uppercase tracking-widest">{f.sub}</div>
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{f.title}</h3>
-                <p className="text-zinc-500 font-medium text-sm leading-relaxed uppercase tracking-wide group-hover:text-zinc-400 transition-colors">{f.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section >
 
       {/* FEATURED DROPS: THE COLLECTIVE */}
       <section className="py-40 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
@@ -141,7 +98,7 @@ export default function Home({ onNavigate }: HomeProps) {
                   )}
                   {p.stock <= 0 && (
                     <div className="flex items-center gap-2 bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl w-fit mb-4">
-                      <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Out of Deployment</span>
+                      <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Out of Stock</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">
@@ -159,7 +116,7 @@ export default function Home({ onNavigate }: HomeProps) {
                       className={`px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${p.stock > 0 ? 'bg-white text-black hover:bg-red-600 hover:text-white' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
                         }`}
                     >
-                      {p.stock > 0 ? 'Purchase Mod' : 'Sold Out'}
+                      {p.stock > 0 ? 'Buy Now' : 'Sold Out'}
                     </button>
                     <button className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
                       <Heart size={24} />
@@ -171,6 +128,19 @@ export default function Home({ onNavigate }: HomeProps) {
           </div>
         </div>
       </section >
+
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-red-600/50 to-transparent" />
+        <div className="max-w-7xl mx-auto text-center mb-16">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+            About <span className="text-red-600">Mutant Modz</span>
+          </h2>
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Your one-stop shop for premium bike accessories, helmets, and riding gear in Coimbatore.
+            We bring passion and expertise to any rider who walks through our doors.
+          </p>
+        </div>
+      </section>
 
       {/* THE SHOP BY BIKE: TECHNICAL SPECTRUM */}
       < section className="py-40 px-6 sm:px-12 bg-black border-y border-white/5" >
@@ -198,17 +168,35 @@ export default function Home({ onNavigate }: HomeProps) {
         </div>
       </section >
 
+      {/* THE ARRAY: CORE VALUES */}
+      <section className="py-40 px-6 sm:px-12 bg-black relative">
+        <div className="max-w-[1700px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {features.map((f, i) => (
+            <div key={i} className="group p-12 bg-zinc-900/40 rounded-[3rem] border border-white/5 hover:border-red-600/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]">
+              <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center mb-10 group-hover:bg-red-600 group-hover:rotate-12 group-hover:scale-110 transition-all duration-500 shadow-inner">
+                <f.icon size={32} className="text-zinc-500 group-hover:text-white transition-colors" />
+              </div>
+              <div className="space-y-4">
+                <div className="text-red-500 font-black text-[10px] uppercase tracking-widest">{f.sub}</div>
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">{f.title}</h3>
+                <p className="text-zinc-500 font-medium text-sm leading-relaxed uppercase tracking-wide group-hover:text-zinc-400 transition-colors">{f.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section >
+
       {/* TESTIMONIALS: THE FEEDBACK LOOP */}
       < section className="py-40 px-6 sm:px-12 bg-zinc-950" >
         <div className="max-w-7xl mx-auto space-y-24">
           <div className="text-center space-y-6">
             <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase">THE <span className="text-red-600">FEEDBACK</span> LOOP</h2>
-            <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Direct transmission from our global brotherhood.</p>
+            <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Direct reviews from our riding community.</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {[
-              { name: 'RAJESH KUMAR', review: 'Tactical equipment of the highest order. The Coimbatore command center is unparalleled.', role: 'Enfield Pilot' },
+              { name: 'RAJESH KUMAR', review: 'Tactical equipment of the highest order. The Coimbatore customer support is unparalleled.', role: 'Enfield Pilot' },
               { name: 'ARUN PRASAD', review: 'Precision mods that transformed my mechanical output. Fast logistics, zero latency.', role: 'KTM Rider' },
               { name: 'VIKRAM S', review: 'Elite standards in every hardware module. Highly recommend the modification protocol.', role: 'Superbike Tech' }
             ].map((r, i) => (
@@ -230,7 +218,7 @@ export default function Home({ onNavigate }: HomeProps) {
         </div>
       </section >
 
-      {/* FINAL CALL: INITIATE SEQUENCE */}
+      {/* FINAL CALL: BUY NOW */}
       < section className="py-40 px-6 sm:px-12 bg-red-600 relative overflow-hidden group" >
         <div className="absolute inset-0 bg-black opacity-30 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"></div>
         <div className="max-w-[1200px] mx-auto text-center relative z-10 space-y-12">
@@ -245,7 +233,7 @@ export default function Home({ onNavigate }: HomeProps) {
               onClick={() => onNavigate('products')}
               className="px-16 py-8 bg-black text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-white hover:text-red-700 transition-all transform hover:-translate-y-2 active:scale-95"
             >
-              Initiate Catalog Sequence
+              View Catalog
             </button>
             <button
               onClick={() => onNavigate('contact')}

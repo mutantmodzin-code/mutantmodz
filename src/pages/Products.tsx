@@ -132,7 +132,7 @@ export default function Products({ onNavigate }: ProductsProps) {
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40 animate-bounce">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white">Initiate Sequence</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">View Item</span>
           <div className="w-px h-12 bg-gradient-to-b from-red-600 to-transparent"></div>
         </div>
       </section>
@@ -265,7 +265,7 @@ export default function Products({ onNavigate }: ProductsProps) {
                         >
                           <div className="absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] group-hover/btn:-translate-y-full transition-all duration-500">
                             <ShoppingCart size={18} className="text-red-600" />
-                            Initiate Purchase
+                            Buy Now
                           </div>
                           <div className="absolute inset-0 bg-white flex items-center justify-center gap-3 text-black font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
                             Assemble Order <ArrowUpRight size={16} />
@@ -299,7 +299,7 @@ export default function Products({ onNavigate }: ProductsProps) {
             <span className="text-black inline-block transform -rotate-1 skew-x-1 underline decoration-white decoration-4 underline-offset-8">HARDWARE</span>
           </h2>
           <p className="text-xl text-white font-bold tracking-[0.3em] uppercase max-w-2xl mx-auto leading-relaxed">
-            Professional consultation available at Coimbatore command center.
+            Professional consultation available at Coimbatore customer support.
           </p>
 
           <div className="flex flex-col md:flex-row gap-6 justify-center pt-8">

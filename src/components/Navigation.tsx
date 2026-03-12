@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, Mic, User, ShoppingCart, ChevronDown,
   Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
@@ -17,6 +17,18 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
   const [searchCategory, setSearchCategory] = useState('All');
   const [isSearchCatOpen, setIsSearchCatOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = (id: string) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setActiveDropdown(id);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 200);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -321,6 +333,8 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
                   <div
                     key={cat.id}
                     className="group"
+                    onMouseEnter={() => handleMouseEnter(cat.id)}
+                    onMouseLeave={handleMouseLeave}
                   >
                     <button
                       onClick={() => setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}

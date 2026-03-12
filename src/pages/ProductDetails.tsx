@@ -238,7 +238,7 @@ export default function ProductDetails() {
                                     <Truck size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Rapid Deployment</p>
+                                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Fast Shipping</p>
                                     <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">India Wide Delivery</p>
                                 </div>
                             </div>
@@ -356,7 +356,7 @@ export default function ProductDetails() {
                                     </div>
                                     <textarea
                                         className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-white text-xs font-bold focus:outline-none focus:border-red-600 min-h-[150px] uppercase placeholder:text-zinc-800"
-                                        placeholder="Enter transmission data..."
+                                        placeholder="Enter message..."
                                     ></textarea>
                                     <button className="w-full bg-red-600 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white hover:bg-white hover:text-red-600 transition-all">Submit Entry</button>
                                 </div>

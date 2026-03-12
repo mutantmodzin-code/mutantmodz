@@ -110,7 +110,7 @@ export default function Payment() {
             const freshProducts = await getProducts();
             const freshProd = freshProducts.find(p => p.id === product.id);
             if (!freshProd || (freshProd as any).stock <= 0) {
-                // alert('Mission Aborted: Target hardware is currently out of stock.');
+                // alert('Order Aborted: Target item is currently out of stock.');
                 // setIsLoading(false);
                 // return;
             }
@@ -164,7 +164,7 @@ export default function Payment() {
                     <div className="w-24 h-24 bg-zinc-900 rounded-[2rem] flex items-center justify-center mx-auto border border-zinc-800">
                         <Package size={40} className="text-zinc-600" />
                     </div>
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Transmission Void</h2>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Payment Failed</h2>
                     <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">No product sequence detected in core.</p>
                 </div>
             </div>
@@ -181,7 +181,7 @@ export default function Payment() {
                     <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Order Decoded</h2>
                     <p className="text-zinc-500 mb-12 font-medium leading-relaxed">Your hardware request for <span className="text-white">{product.name}</span> has been successfully logged.</p>
                     <a href="/" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
-                        Back to Command Center
+                        Back to Homepage
                     </a>
                 </div>
             </div>
@@ -231,7 +231,7 @@ export default function Payment() {
                                 <SectionHeader title="Authentication" icon={Lock} />
                                 <div className="space-y-8">
                                     <div>
-                                        <Label required>Transmission Email</Label>
+                                        <Label required>Email Address</Label>
                                         <Input
                                             type="email"
                                             required
@@ -244,7 +244,7 @@ export default function Payment() {
                             </div>
 
                             <div className="animate-on-scroll">
-                                <SectionHeader title="Deployment Zone" icon={Smartphone} />
+                                <SectionHeader title="Shipping Details" icon={Smartphone} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-3">
                                         <Label required>Designation</Label>
@@ -336,7 +336,7 @@ export default function Payment() {
                                         { id: 'razorpay', label: 'RAZORPAY GATEWAY', icon: ShieldCheck },
                                         { id: 'cod', label: 'CASH ON DELIVERY', icon: Truck },
                                         { id: 'card', label: 'DIRECT CARD', icon: CreditCard },
-                                        { id: 'upi', label: 'UPI INTERFACE', icon: Smartphone },
+                                        { id: 'upi', label: 'UPI PAYMENT', icon: Smartphone },
                                         { id: 'netbanking', label: 'BANK TRANSFER', icon: Building2 },
                                     ].map((method) => (
                                         <button
@@ -396,7 +396,7 @@ export default function Payment() {
                                 {isLoading ? (
                                     <div className="w-6 h-6 border-4 border-black/20 border-t-black rounded-full animate-spin"></div>
                                 ) : (
-                                    <>Initiate Protocol <ShieldCheck size={18} /></>
+                                    <>Pay Now <ShieldCheck size={18} /></>
                                 )}
                             </button>
                         </div>

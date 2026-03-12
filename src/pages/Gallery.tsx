@@ -143,7 +143,7 @@ export default function Gallery() {
               Follow the <span className="text-red-600">Evolution</span>
             </h2>
             <p className="text-zinc-500 font-bold tracking-widest text-xs uppercase max-w-lg mx-auto leading-relaxed">
-              Daily transmissions of custom builds, new components, and community highlights.
+              Daily updates of custom builds, new components, and community highlights.
             </p>
           </div>
           <a

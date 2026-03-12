@@ -11,7 +11,8 @@ import {
     Truck,
     RotateCcw,
     ChevronRight,
-    Star
+    Star,
+    AlertTriangle
 } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
@@ -150,8 +151,22 @@ export default function ProductDetails() {
                     {/* Right: Spec Controls */}
                     <div className="lg:col-span-12 xl:col-span-5 space-y-12 animate-on-scroll">
                         <div className="space-y-6">
-                            <div className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest">
-                                <ShieldCheck size={12} /> Elite Hardware
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest">
+                                    <ShieldCheck size={12} /> Elite Hardware
+                                </div>
+                                {product.stock > 0 && product.stock < 10 && (
+                                    <div className="inline-flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl shadow-lg shadow-red-600/50">
+                                        <AlertTriangle size={14} className="text-white" />
+                                        <span className="text-white text-[11px] font-black uppercase tracking-widest">Only {product.stock} items left in stock</span>
+                                    </div>
+                                )}
+                                {product.stock <= 0 && (
+                                    <div className="inline-flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl shadow-lg shadow-red-600/50">
+                                        <AlertTriangle size={14} className="text-white" />
+                                        <span className="text-white text-[11px] font-black uppercase tracking-widest">OUT OF STOCK</span>
+                                    </div>
+                                )}
                             </div>
                             <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter leading-none uppercase">{product.name}</h1>
 
@@ -217,15 +232,16 @@ export default function ProductDetails() {
                                     </div>
                                     <button
                                         onClick={handleBuyNow}
-                                        className="flex-1 bg-red-600 hover:bg-white hover:text-red-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3"
+                                        disabled={product.stock <= 0}
+                                        className={`flex-1 ${product.stock > 0 ? 'bg-red-600 hover:bg-white hover:text-red-600 text-white text-[10px]' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed text-[10px]'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3`}
                                     >
-                                        Execute Checkout <ArrowRight size={16} />
+                                        {product.stock > 0 ? 'Execute Checkout' : 'Sold Out'} <ArrowRight size={16} />
                                     </button>
                                 </div>
-                                <button className="w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3">
+                                <button disabled={product.stock <= 0} className={`w-full ${product.stock > 0 ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}>
                                     <ShoppingCart size={16} /> Stage to basket
                                 </button>
-                                <button className="w-full bg-[#1ebe5d]/10 border border-[#1ebe5d]/20 text-[#1ebe5d] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 hover:bg-[#1ebe5d] hover:text-white">
+                                <button disabled={product.stock <= 0} className={`w-full ${product.stock > 0 ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}>
                                     <Phone size={16} /> WhatsApp Direct Purchase
                                 </button>
                             </div>

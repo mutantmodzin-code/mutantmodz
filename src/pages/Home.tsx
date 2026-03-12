@@ -91,14 +91,15 @@ export default function Home({ onNavigate }: HomeProps) {
 
                 <div className="absolute bottom-0 left-0 w-full p-12 space-y-6 transform group-hover:translate-y-[-10px] transition-transform duration-500">
                   {p.stock > 0 && p.stock < 10 && (
-                    <div className="flex items-center gap-2 bg-red-600/20 border border-red-600/30 px-4 py-2 rounded-xl w-fit mb-4">
-                      <AlertTriangle size={12} className="text-red-600" />
-                      <span className="text-white text-[9px] font-black uppercase tracking-widest">⚠️ Only {p.stock} items left in stock</span>
+                    <div className="flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl w-fit mb-4 shadow-lg shadow-red-600/50">
+                      <AlertTriangle size={14} className="text-white" />
+                      <span className="text-white text-[11px] font-black uppercase tracking-widest">Only {p.stock} items left in stock</span>
                     </div>
                   )}
                   {p.stock <= 0 && (
-                    <div className="flex items-center gap-2 bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl w-fit mb-4">
-                      <span className="text-zinc-500 text-[9px] font-black uppercase tracking-widest">Out of Stock</span>
+                    <div className="flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl w-fit mb-4 shadow-lg shadow-red-600/50">
+                      <AlertTriangle size={14} className="text-white" />
+                      <span className="text-white text-[11px] font-black uppercase tracking-widest">OUT OF STOCK</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">

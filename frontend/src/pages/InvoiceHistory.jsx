@@ -7,6 +7,7 @@ const InvoiceHistory = () => {
     const [invoices, setInvoices] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [filter, setFilter] = useState({ type: 'all', value: '' });
+    const [orderTypeFilter, setOrderTypeFilter] = useState('all');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
 
     useEffect(() => {
@@ -36,10 +37,12 @@ const InvoiceHistory = () => {
         setTimeout(() => window.print(), 500);
     };
 
-    const filteredInvoices = invoices.filter(inv =>
-        (inv.customer_name || 'Walk-in').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        inv.id.toString().includes(searchTerm)
-    );
+    const filteredInvoices = invoices.filter(inv => {
+        const matchesSearch = (inv.customer_name || 'Walk-in').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            inv.id.toString().includes(searchTerm);
+        const matchesType = orderTypeFilter === 'all' || (inv.order_type || 'Offline Order') === orderTypeFilter;
+        return matchesSearch && matchesType;
+    });
 
     return (
         <div>
@@ -50,6 +53,11 @@ const InvoiceHistory = () => {
                         <Search style={{ position: 'absolute', top: '10px', left: '10px', color: '#94a3b8' }} size={20} />
                         <input className="input" style={{ paddingLeft: '3rem' }} placeholder="Search inv # or customer..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
+                    <select className="input" style={{ width: '150px' }} value={orderTypeFilter} onChange={(e) => setOrderTypeFilter(e.target.value)}>
+                        <option value="all">All Orders</option>
+                        <option value="Online Order">Online Orders</option>
+                        <option value="Offline Order">Offline Orders</option>
+                    </select>
                     <select className="input" style={{ width: '150px' }} value={filter.type} onChange={(e) => handleFilterChange(e.target.value, '')}>
                         <option value="all">All Time</option>
                         <option value="date">Specific Date</option>
@@ -77,6 +85,7 @@ const InvoiceHistory = () => {
                             <th>Customer</th>
                             <th>Date</th>
                             <th>Total Amount</th>
+                            <th>Order Type</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -88,7 +97,19 @@ const InvoiceHistory = () => {
                                 <td>{inv.customer_name || 'Walk-in'}</td>
                                 <td>{format(new Date(inv.created_at), 'PPP')}</td>
                                 <td>₹{inv.total_amount}</td>
-                                <td><span style={{ color: '#22c55e', backgroundColor: '#f0fdf4', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>{inv.status}</span></td>
+                                <td>
+                                    <span style={{
+                                        color: (inv.order_type || 'Offline Order') === 'Online Order' ? '#0284c7' : '#475569',
+                                        backgroundColor: (inv.order_type || 'Offline Order') === 'Online Order' ? '#e0f2fe' : '#f1f5f9',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '0.25rem',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500
+                                    }}>
+                                        {inv.order_type || 'Offline Order'}
+                                    </span>
+                                </td>
+                                <td><span style={{ color: '#22c55e', backgroundColor: '#f0fdf4', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>{inv.status || 'paid'}</span></td>
                                 <td>
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <button className="btn" style={{ padding: '0.25rem' }} onClick={() => fetchDetails(inv.id)}><Eye size={16} color="#2563eb" /></button>
@@ -112,6 +133,7 @@ const InvoiceHistory = () => {
                             <div style={{ textAlign: 'right' }}>
                                 <h3>INVOICE #{selectedInvoice.invoice.id}</h3>
                                 <p>Date: {format(new Date(selectedInvoice.invoice.created_at), 'PPP')}</p>
+                                <p style={{ fontWeight: 500, color: '#64748b' }}>{selectedInvoice.invoice.order_type || 'Offline Order'}</p>
                             </div>
                         </div>
                         <div style={{ marginBottom: '2rem' }}>

@@ -13,6 +13,7 @@ const Billing = () => {
     const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     const [skuSearch, setSkuSearch] = useState('');
+    const [orderType, setOrderType] = useState('Offline Order');
 
     useEffect(() => {
         fetchProducts();
@@ -116,7 +117,7 @@ const Billing = () => {
                 discount: 0,
                 total_amount: total,
                 payment_method: 'Cash',
-                order_type: 'Offline Order',
+                order_type: orderType,
                 gst_percentage: gst_rate,
                 cgst_amount,
                 sgst_amount,
@@ -238,6 +239,13 @@ const Billing = () => {
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem' }}>
                             <span style={{ fontWeight: 700 }}>Grand Total:</span>
                             <span style={{ fontWeight: 700, color: '#2563eb' }}>₹{total.toFixed(2)}</span>
+                        </div>
+                        <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 600 }}>Order Type</label>
+                            <select className="input" value={orderType} onChange={(e) => setOrderType(e.target.value)}>
+                                <option value="Offline Order">Offline Order</option>
+                                <option value="Online Order">Online Order</option>
+                            </select>
                         </div>
                     </div>
                     <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem', padding: '1rem' }} onClick={handleCreateBill}>

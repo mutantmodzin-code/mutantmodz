@@ -222,10 +222,17 @@ export default function Products({ onNavigate }: ProductsProps) {
 
                       {/* Status Badges */}
                       <div className="absolute top-8 left-8 flex flex-col gap-2 z-20">
-                        <div className="bg-red-600/20 backdrop-blur-xl border border-red-600/30 text-red-500 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></div>
-                          In Stock
-                        </div>
+                        {product.stock > 0 ? (
+                          <div className="bg-red-600 border border-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-red-600/50">
+                            <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                            {product.stock < 10 ? `Only ${product.stock} Left` : 'In Stock'}
+                          </div>
+                        ) : (
+                          <div className="bg-zinc-800 border border-zinc-600 text-red-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-zinc-900/50">
+                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                            Sold Out
+                          </div>
+                        )}
                       </div>
 
                       {/* Action Icon */}
@@ -259,17 +266,20 @@ export default function Products({ onNavigate }: ProductsProps) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleBuyNow(product.id);
+                            if (product.stock > 0) handleBuyNow(product.id);
                           }}
-                          className="w-full relative h-[60px] group/btn overflow-hidden rounded-2xl bg-zinc-800 transition-all duration-500 active:scale-95"
+                          disabled={product.stock <= 0}
+                          className={`w-full relative h-[60px] group/btn overflow-hidden rounded-2xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-zinc-800' : 'bg-zinc-900 cursor-not-allowed opacity-50'}`}
                         >
-                          <div className="absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] group-hover/btn:-translate-y-full transition-all duration-500">
+                          <div className={`absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'group-hover/btn:-translate-y-full' : ''}`}>
                             <ShoppingCart size={18} className="text-red-600" />
-                            Buy Now
+                            {product.stock > 0 ? 'Initiate Purchase' : 'Sold Out'}
                           </div>
-                          <div className="absolute inset-0 bg-white flex items-center justify-center gap-3 text-black font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
-                            Assemble Order <ArrowUpRight size={16} />
-                          </div>
+                          {product.stock > 0 && (
+                            <div className="absolute inset-0 bg-white flex items-center justify-center gap-3 text-black font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
+                              Assemble Order <ArrowUpRight size={16} />
+                            </div>
+                          )}
                         </button>
                       </div>
                     </div>

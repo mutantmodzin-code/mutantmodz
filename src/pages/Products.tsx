@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Shield, Wrench, Shirt, Cog, ShoppingCart, Filter, ArrowUpRight, Search, Zap, Plus, CheckCircle, Phone } from 'lucide-react';
+import { Shield, Wrench, Shirt, Cog, ShoppingCart, Filter, ArrowUpRight, Search, Zap, CheckCircle, Phone, ShoppingBag } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
+import { useCart } from '../context/CartContext';
 
 interface ProductsProps {
   onNavigate: (page: string) => void;
@@ -9,31 +10,57 @@ interface ProductsProps {
 
 const ProductImage = ({ images, alt, className }: { images?: string[], alt: string, className?: string }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const imageList = images && images.length > 0 ? images.filter(img => img && img.trim() !== '') : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
+  const imageList = images && images.length > 0
+    ? images.filter(img => img && img.trim() !== '')
+    : [];
+
+  // Always have at least the placeholder
+  const finalList = imageList.length > 0
+    ? imageList
+    : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
 
   useEffect(() => {
-    if (imageList.length <= 1) return;
+    if (finalList.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % imageList.length);
-    }, 4000); // 4 seconds for inventory page
+      setCurrentIdx(prev => (prev + 1) % finalList.length);
+    }, 2000);
     return () => clearInterval(interval);
-  }, [imageList.length]);
+  }, [finalList.length]);
 
   return (
-    <div className={`relative w-full h-full overflow-hidden ${className}`}>
-      {imageList.map((img, idx) => (
+    <div className={`relative w-full h-full overflow-hidden ${className ?? ''}`}>
+      {finalList.map((img, idx) => (
         <img
           key={idx}
           src={img}
-          alt={`${alt} view ${idx + 1}`}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-out group-hover:scale-110 group-hover:rotate-1 ${idx === currentIdx ? 'opacity-100' : 'opacity-0'
-            }`}
-          style={{ zIndex: idx === currentIdx ? 1 : 0 }}
+          alt={`${alt} ${idx + 1}`}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-in-out"
+          style={{
+            transform: `translateX(${(idx - currentIdx) * 100}%)`,
+            transition: 'transform 700ms cubic-bezier(0.4,0,0.2,1), scale 700ms ease',
+            zIndex: idx === currentIdx ? 1 : 0,
+          }}
         />
       ))}
+
+      {/* Dot indicators */}
+      {finalList.length > 1 && (
+        <div className="absolute bottom-3 left-0 w-full flex justify-center gap-1.5 z-20 pointer-events-none">
+          {finalList.map((_, idx) => (
+            <div
+              key={idx}
+              className={`transition-all duration-500 rounded-full ${idx === currentIdx
+                  ? 'bg-white w-5 h-1.5 shadow-[0_0_6px_rgba(255,255,255,0.9)]'
+                  : 'bg-white/40 w-1.5 h-1.5'
+                }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default function Products({ onNavigate }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -41,6 +68,7 @@ export default function Products({ onNavigate }: ProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -65,6 +93,15 @@ export default function Products({ onNavigate }: ProductsProps) {
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
+
+    // Initial check for URL search params
+    const checkUrlParams = () => {
+      const searchParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+      const search = searchParams.get('search');
+      if (search) setSearchQuery(decodeURIComponent(search));
+    };
+    checkUrlParams();
+
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
@@ -87,9 +124,7 @@ export default function Products({ onNavigate }: ProductsProps) {
     return matchesCategory && matchesSearch && matchesBrand;
   });
 
-  const handleBuyNow = (productId: string) => {
-    onNavigate(`payment?productId=${productId}`);
-  };
+
 
   return (
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
@@ -235,10 +270,16 @@ export default function Products({ onNavigate }: ProductsProps) {
                         )}
                       </div>
 
-                      {/* Action Icon */}
-                      <div className="absolute top-8 right-8 z-20 w-12 h-12 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white opacity-0 transform translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
-                        <Plus size={20} />
-                      </div>
+                      {/* Action Icon: Add to Cart Quick Action */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (product.stock > 0) addToCart(product);
+                        }}
+                        className="absolute top-8 right-8 z-20 w-12 h-12 bg-red-600 border border-red-500 rounded-2xl flex items-center justify-center text-white opacity-0 transform translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 hover:scale-110 active:scale-95 shadow-lg shadow-red-600/40"
+                      >
+                        <ShoppingBag size={20} />
+                      </button>
                     </div>
 
                     {/* Data Panel */}
@@ -266,17 +307,17 @@ export default function Products({ onNavigate }: ProductsProps) {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (product.stock > 0) handleBuyNow(product.id);
+                            if (product.stock > 0) addToCart(product);
                           }}
                           disabled={product.stock <= 0}
                           className={`w-full relative h-[60px] group/btn overflow-hidden rounded-2xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-zinc-800' : 'bg-zinc-900 cursor-not-allowed opacity-50'}`}
                         >
                           <div className={`absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'group-hover/btn:-translate-y-full' : ''}`}>
                             <ShoppingCart size={18} className="text-red-600" />
-                            {product.stock > 0 ? 'Initiate Purchase' : 'Sold Out'}
+                            {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
                           </div>
                           {product.stock > 0 && (
-                            <div className="absolute inset-0 bg-white flex items-center justify-center gap-3 text-black font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
+                            <div className="absolute inset-0 bg-red-600 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
                               Assemble Order <ArrowUpRight size={16} />
                             </div>
                           )}

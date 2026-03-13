@@ -9,7 +9,8 @@ import {
     BarChart3,
     Settings,
     Bike,
-    TrendingUp
+    TrendingUp,
+    ShoppingCart
 } from 'lucide-react';
 
 const SidebarLink = ({ to, icon: Icon, children }) => (
@@ -57,6 +58,7 @@ const Sidebar = () => {
                 <div style={{ margin: '1.5rem 0 0.5rem 0', padding: '0 0.5rem', fontSize: '0.625rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sales & Billing</div>
                 <SidebarLink to="/billing" icon={Receipt}>New Invoice</SidebarLink>
                 <SidebarLink to="/invoices" icon={History}>Invoice Registry</SidebarLink>
+                <SidebarLink to="/online-orders" icon={ShoppingCart}>Online Orders</SidebarLink>
 
                 <div style={{ margin: '1.5rem 0 0.5rem 0', padding: '0 0.5rem', fontSize: '0.625rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Analytics</div>
                 <SidebarLink to="/reports" icon={BarChart3}>Revenue Reports</SidebarLink>

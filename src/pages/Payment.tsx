@@ -58,6 +58,11 @@ export default function Payment() {
 
     const processOrder = async () => {
         try {
+            // Read size/color/quantity from product details selection
+            const selectedSize = localStorage.getItem('checkout_size') || '';
+            const selectedColor = localStorage.getItem('checkout_color') || '';
+            const selectedQty = parseInt(localStorage.getItem('checkout_quantity') || '1') || 1;
+
             // 1. Create/Update Customer
             const customerRes = await createCustomer({
                 name: `${customer.firstName} ${customer.lastName}`,
@@ -67,7 +72,7 @@ export default function Payment() {
             });
 
             // 2. Prepare Invoice Data
-            const subtotal = priceNum;
+            const subtotal = priceNum * selectedQty;
             const tax = subtotal * 0.18;
             const totalAmt = subtotal + tax + shippingNum;
 
@@ -82,16 +87,23 @@ export default function Payment() {
                 gst_percentage: 18,
                 items: [{
                     product_id: parseInt(product.id),
-                    quantity: 1,
-                    unit_price: subtotal,
+                    quantity: selectedQty,
+                    unit_price: priceNum,
                     line_total: subtotal,
                     gst_percentage: 18,
-                    taxable_amount: subtotal
+                    taxable_amount: subtotal,
+                    selected_size: selectedSize,
+                    selected_color: selectedColor
                 }]
             };
 
             // 3. Create Invoice (Backend handles stock deduction)
             await createInvoice(invoiceData);
+
+            // Cleanup localStorage
+            localStorage.removeItem('checkout_size');
+            localStorage.removeItem('checkout_color');
+            localStorage.removeItem('checkout_quantity');
 
             setPaymentDone(true);
         } catch (error: any) {

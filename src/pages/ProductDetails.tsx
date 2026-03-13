@@ -80,6 +80,9 @@ export default function ProductDetails() {
         : [product.image];
 
     const handleBuyNow = () => {
+        localStorage.setItem('checkout_size', selectedSize);
+        localStorage.setItem('checkout_color', selectedTexture);
+        localStorage.setItem('checkout_quantity', quantity.toString());
         window.location.hash = `payment?productId=${product.id}`;
     };
 

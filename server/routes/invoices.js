@@ -60,12 +60,14 @@ router.post('/', async (req, res) => {
                 await client.query(
                     `INSERT INTO invoice_items (
                         invoice_id, product_id, quantity, unit_price, line_total, purchase_price,
-                        gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_amount
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+                        gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_amount,
+                        selected_size, selected_color
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
                     [
                         invoiceId, item.product_id, item.quantity, item.unit_price, item.line_total, purchase_price,
                         item.gst_percentage || 0, item.cgst_amount || 0, item.sgst_amount || 0,
-                        item.igst_amount || 0, item.taxable_amount || item.line_total
+                        item.igst_amount || 0, item.taxable_amount || item.line_total,
+                        item.selected_size || null, item.selected_color || null
                     ]
                 );
 
@@ -127,6 +129,71 @@ router.get('/', authenticateToken, async (req, res) => {
     try {
         const result = await db.query(query, values);
         res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get Online Orders with Items
+router.get('/online/all', authenticateToken, async (req, res) => {
+    try {
+        const { date } = req.query;
+        let query = `
+            SELECT i.*, 
+                   c.name as customer_name, c.email as customer_email, 
+                   c.phone as customer_phone, c.address as customer_address
+            FROM invoices i     
+            LEFT JOIN customers c ON i.customer_id = c.id 
+            WHERE i.order_type = 'Online Order'
+        `;
+        let values = [];
+        
+        if (date) {
+            query += ` AND i.created_at::date = $1`;
+            values.push(date);
+        }
+        
+        query += ` ORDER BY i.created_at DESC`;
+
+        const result = await db.query(query, values);
+        
+        let onlineOrders = result.rows;
+        if (onlineOrders.length > 0) {
+            const invoiceIds = onlineOrders.map(order => order.id);
+            const itemsQuery = `
+                SELECT ii.*, p.name as product_name, p.image_url 
+                FROM invoice_items ii 
+                LEFT JOIN products p ON ii.product_id = p.id 
+                WHERE ii.invoice_id = ANY($1)
+            `;
+            const itemsResult = await db.query(itemsQuery, [invoiceIds]);
+            
+            const itemsByInvoice = {};
+            itemsResult.rows.forEach(item => {
+                if (!itemsByInvoice[item.invoice_id]) {
+                    itemsByInvoice[item.invoice_id] = [];
+                }
+                itemsByInvoice[item.invoice_id].push(item);
+            });
+            
+            onlineOrders.forEach(order => {
+                order.items = itemsByInvoice[order.id] || [];
+            });
+        }
+
+        res.json(onlineOrders);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Invoice Status
+router.patch('/:id/status', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    try {
+        await db.query('UPDATE invoices SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ message: 'Status updated successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -10,9 +10,12 @@ import Contact from './pages/Contact';
 import ProductDetails from './pages/ProductDetails';
 
 import Payment from './pages/Payment';
+import { CartProvider } from './context/CartContext';
+import CartDrawer from './components/CartDrawer';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -53,12 +56,24 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <Navigation currentPage={currentPage} onNavigate={navigate} />
-      <main className="pt-20">{renderPage()}</main>
-      <Footer />
-      <ChatBot />
-    </div>
+    <CartProvider>
+      <div className="min-h-screen bg-zinc-950">
+        <Navigation
+          currentPage={currentPage}
+          onNavigate={navigate}
+          onOpenCart={() => setIsCartOpen(true)}
+        />
+        <main className="pt-20">{renderPage()}</main>
+        <Footer />
+        <ChatBot />
+
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          onNavigate={navigate}
+        />
+      </div>
+    </CartProvider>
   );
 }
 

@@ -4,7 +4,7 @@ const api = axios.create({
     baseURL: 'http://127.0.0.1:3001/api',
 });
 
-// Add a request interceptor to include the token
+// Request interceptor: attach token
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -13,7 +13,18 @@ api.interceptors.request.use(
         }
         return config;
     },
+    (error) => Promise.reject(error)
+);
+
+// Response interceptor: handle expired/invalid token
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
         return Promise.reject(error);
     }
 );

@@ -90,14 +90,14 @@ const Products = () => {
         });
     };
 
-    const handleFileChange = async (e, index) => {
-        const file = e.target.files[0];
-        if (file) {
-            const base64 = await uploadImage(file);
-            const newUrls = [...formData.image_urls];
-            newUrls[index] = base64;
-            setFormData({ ...formData, image_urls: newUrls });
+    const handleFileChange = async (e) => {
+        const files = Array.from(e.target.files).slice(0, 4);
+        if (files.length === 0) return;
+        const newUrls = ['', '', '', ''];
+        for (let i = 0; i < files.length; i++) {
+            newUrls[i] = await uploadImage(files[i]);
         }
+        setFormData({ ...formData, image_urls: newUrls });
     };
 
     const openEdit = (p) => {
@@ -249,24 +249,36 @@ const Products = () => {
 
                             <div style={{ gridColumn: 'span 2' }}>
                                 <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.75rem', display: 'block' }}>Product Images (Up to 4)</label>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                    {[0, 1, 2, 3].map((idx) => (
-                                        <div key={idx} style={{ padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '0.5rem' }}>
-                                            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-                                                <div style={{ width: '40px', height: '40px', backgroundColor: '#f1f5f9', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
-                                                    {formData.image_urls[idx] && <img src={formData.image_urls[idx]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-                                                </div>
-                                                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>Image {idx + 1}</span>
-                                            </div>
-                                            <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, idx)} style={{ fontSize: '0.7rem', display: 'block', width: '100%', marginBottom: '0.25rem' }} />
-                                            <input className="input" placeholder="Or URL..." value={formData.image_urls[idx]} onChange={(e) => {
-                                                const newUrls = [...formData.image_urls];
-                                                newUrls[idx] = e.target.value;
-                                                setFormData({ ...formData, image_urls: newUrls });
-                                            }} style={{ fontSize: '0.75rem', padding: '0.25rem 0.5rem' }} />
-                                        </div>
-                                    ))}
+                                <div
+                                    style={{ border: '2px dashed #e2e8f0', borderRadius: '0.5rem', padding: '1rem', backgroundColor: '#f8fafc', cursor: 'pointer', textAlign: 'center', transition: 'border-color 0.2s', userSelect: 'none' }}
+                                    onClick={() => document.getElementById('multi-image-input').click()}
+                                >
+                                    <div style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '0.25rem' }}>🖼️ Click to select up to 4 images</div>
+                                    <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Hold Ctrl / ⌘ to pick multiple files</div>
+                                    <input
+                                        id="multi-image-input"
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleFileChange}
+                                        style={{ display: 'none' }}
+                                    />
                                 </div>
+                                {formData.image_urls.some(u => u) && (
+                                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                                        {formData.image_urls.map((url, idx) => url ? (
+                                            <div key={idx} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '0.5rem', overflow: 'hidden', border: '2px solid #e2e8f0', flexShrink: 0 }}>
+                                                <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Image ${idx + 1}`} />
+                                                <button
+                                                    type="button"
+                                                    style={{ position: 'absolute', top: '2px', right: '2px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', cursor: 'pointer', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+                                                    onClick={(e) => { e.stopPropagation(); const newUrls = [...formData.image_urls]; newUrls[idx] = ''; setFormData({ ...formData, image_urls: newUrls }); }}
+                                                >✕</button>
+                                                <span style={{ position: 'absolute', bottom: '2px', left: '2px', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '9px', padding: '1px 3px', borderRadius: '3px' }}>{idx + 1}</span>
+                                            </div>
+                                        ) : null)}
+                                    </div>
+                                )}
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>

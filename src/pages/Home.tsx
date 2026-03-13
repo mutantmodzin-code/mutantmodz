@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Star, Shield, Wrench, Heart, Zap, Box, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import { Star, Shield, Wrench, Heart, Zap, Box, ArrowUpRight, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import { HeroSlideshow } from '../components/HeroSlideshow';
+import { useCart } from '../context/CartContext';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -10,31 +11,127 @@ interface HomeProps {
 
 const ProductImage = ({ images, alt }: { images?: string[], alt: string }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
-  const imageList = images && images.length > 0 ? images.filter(url => url && url.trim() !== '') : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
+  const imageList = images && images.length > 0
+    ? images.filter(url => url && url.trim() !== '')
+    : [];
+
+  const finalList = imageList.length > 0
+    ? imageList
+    : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
 
   useEffect(() => {
-    if (imageList.length <= 1) return;
+    if (finalList.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % imageList.length);
-    }, 3000);
+      setCurrentIdx(prev => (prev + 1) % finalList.length);
+    }, 2000);
     return () => clearInterval(interval);
-  }, [imageList.length]);
+  }, [finalList.length]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {imageList.map((img, idx) => (
+      {finalList.map((img, idx) => (
         <img
           key={idx}
           src={img}
-          className={`absolute inset-0 w-full h-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000 ease-out ${idx === currentIdx ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full'
-            }`}
+          alt={`${alt} ${idx + 1}`}
+          className="absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out"
           style={{
-            zIndex: idx === currentIdx ? 1 : 0,
-            transition: 'opacity 1s ease-in-out, transform 1s ease-out'
+            transform: `translateX(${(idx - currentIdx) * 100}%)`,
+            transition: 'transform 700ms cubic-bezier(0.4,0,0.2,1), filter 700ms ease, opacity 700ms ease',
           }}
-          alt={`${alt} view ${idx + 1}`}
         />
       ))}
+
+      {/* Dot indicators */}
+      {finalList.length > 1 && (
+        <div className="absolute bottom-3 left-0 w-full flex justify-center gap-1.5 z-20 pointer-events-none">
+          {finalList.map((_, idx) => (
+            <div
+              key={idx}
+              className={`transition-all duration-500 rounded-full ${idx === currentIdx
+                ? 'bg-white w-4 h-1.5 shadow-[0_0_6px_rgba(255,255,255,0.8)]'
+                : 'bg-white/40 w-1.5 h-1.5'
+                }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+const bikeBrands = [
+  { name: 'Royal Enfield', image: 'https://i.postimg.cc/PfYfZnpM/Screenshot-13-3-2026-113212-www-bing-com.jpg' },
+  { name: 'KTM Performance', image: 'https://i.postimg.cc/ZRJHcSYJ/Screenshot-13-3-2026-114152-www-bing-com.jpg' },
+  { name: 'Yamaha Racing', image: 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=800&q=80' },
+  { name: 'Honda HighWing', image: 'https://i.postimg.cc/RZPQfVgF/Screenshot-2026-03-13-135421.png' },
+  { name: 'Kawasaki Ninja', image: 'https://images.unsplash.com/photo-1620038891632-6bf590b10e53?auto=format&fit=crop&w=800&q=80' },
+  { name: 'Ducati Corse', image: 'https://images.unsplash.com/photo-1568772585428-1cdbc1276d33?auto=format&fit=crop&w=800&q=80' },
+  { name: 'BMW Motorrad', image: 'https://images.unsplash.com/photo-1599819811279-d5ad9ceced8d?auto=format&fit=crop&w=800&q=80' },
+  { name: 'Triumph Engineering', image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80' }
+];
+
+const BrandCard = ({ brand }: { brand: typeof bikeBrands[0] }) => {
+  const [transformStyle, setTransformStyle] = useState('');
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (window.innerWidth < 1024) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+    
+    setTransformStyle(`perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`);
+  };
+
+  const handleMouseEnter = () => {
+    if (window.innerWidth >= 1024) {
+      setIsHovered(true);
+    }
+  };
+  
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    if (window.innerWidth >= 1024) {
+      setTransformStyle('perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)');
+    } else {
+      setTransformStyle('');
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-5 sm:gap-6 cursor-pointer group">
+      <div
+        className="w-full aspect-[4/3] bg-zinc-900/30 rounded-[2.5rem] border border-white/5 relative overflow-hidden transition-all duration-300 ease-out active:scale-95 sm:group-hover:shadow-[0_20px_40px_rgba(220,38,38,0.15)] sm:group-hover:border-red-600/30"
+        onMouseMove={handleMouseMove}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          transform: transformStyle,
+          transformStyle: 'preserve-3d',
+          transition: isHovered ? 'none' : 'transform 500ms ease-out',
+        }}
+      >
+        <div 
+          className="absolute inset-0 z-0 transition-all duration-700 ease-out group-hover:scale-110"
+        >
+          <img 
+            src={brand.image} 
+            alt={brand.name} 
+            className="w-full h-full object-cover opacity-60 transition-all duration-500 group-hover:opacity-100" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent"></div>
+        </div>
+      </div>
+
+      <div className="text-zinc-300 font-black uppercase text-lg sm:text-lg tracking-[0.2em] group-hover:text-white transition-colors duration-300 text-center">
+        {brand.name}
+      </div>
     </div>
   );
 };
@@ -42,6 +139,7 @@ const ProductImage = ({ images, alt }: { images?: string[], alt: string }) => {
 export default function Home({ onNavigate }: HomeProps) {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     setIsLoaded(true);
@@ -64,9 +162,9 @@ export default function Home({ onNavigate }: HomeProps) {
       <HeroSlideshow onNavigate={onNavigate} />
 
       {/* FEATURED DROPS: THE COLLECTIVE */}
-      <section className="py-40 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
+      <section className="py-20 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
         <div className="max-w-[1700px] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-12">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
             <div className="space-y-6">
               <div className="text-red-600 font-black uppercase tracking-[0.5em] text-[12px]">Latest Hardware Releases</div>
               <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
@@ -83,44 +181,45 @@ export default function Home({ onNavigate }: HomeProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredProducts.map((p, i) => (
-              <div key={i} className="group relative h-[500px] sm:h-[600px] rounded-[4rem] overflow-hidden border border-white/5 cursor-pointer" onClick={() => onNavigate(`productDetails?productId=${p.id}`)}>
+              <div key={i} className="group relative h-[320px] rounded-[2rem] overflow-hidden border border-white/5 cursor-pointer" onClick={() => onNavigate(`productDetails?productId=${p.id}`)}>
                 <ProductImage images={p.images} alt={p.name} />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent z-10"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent z-10"></div>
 
-                <div className="absolute bottom-0 left-0 w-full p-12 space-y-6 transform group-hover:translate-y-[-10px] transition-transform duration-500">
+                <div className="absolute bottom-0 left-0 w-full p-6 space-y-2 transform group-hover:translate-y-[-6px] transition-transform duration-500 z-20">
                   {p.stock > 0 && p.stock < 10 && (
-                    <div className="flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl w-fit mb-4 shadow-lg shadow-red-600/50">
-                      <AlertTriangle size={14} className="text-white" />
-                      <span className="text-white text-[11px] font-black uppercase tracking-widest">Only {p.stock} items left in stock</span>
+                    <div className="flex items-center gap-1.5 bg-red-600 border border-red-400 px-2.5 py-1 rounded-lg w-fit shadow-lg shadow-red-600/50">
+                      <AlertTriangle size={10} className="text-white" />
+                      <span className="text-white text-[9px] font-black uppercase tracking-widest">Only {p.stock} left</span>
                     </div>
                   )}
                   {p.stock <= 0 && (
-                    <div className="flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl w-fit mb-4 shadow-lg shadow-red-600/50">
-                      <AlertTriangle size={14} className="text-white" />
-                      <span className="text-white text-[11px] font-black uppercase tracking-widest">OUT OF STOCK</span>
+                    <div className="flex items-center gap-1.5 bg-red-600 border border-red-400 px-2.5 py-1 rounded-lg w-fit shadow-lg shadow-red-600/50">
+                      <AlertTriangle size={10} className="text-white" />
+                      <span className="text-white text-[9px] font-black uppercase tracking-widest">Out of Stock</span>
                     </div>
                   )}
                   <div className="flex justify-between items-end">
-                    <div className="space-y-4">
-                      <div className="text-red-600 font-black uppercase tracking-[0.4em] text-[11px]">{p.category}</div>
-                      <h4 className="text-4xl sm:text-5xl font-black text-white uppercase tracking-tighter leading-none">{p.name}</h4>
+                    <div className="space-y-1">
+                      <div className="text-red-500 font-black uppercase tracking-widest text-[9px]">{p.category}</div>
+                      <h4 className="text-lg font-black text-white uppercase tracking-tight leading-tight">{p.name}</h4>
                     </div>
-                    <div className="text-3xl font-black text-white border-l border-white/20 pl-6 mb-1">
+                    <div className="text-base font-black text-white border-l border-white/20 pl-3">
                       {p.price}
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 pt-6 translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 active:scale-95">
+                  <div className="flex items-center gap-2 pt-2 translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                     <button
+                      onClick={(e) => { e.stopPropagation(); if (p.stock > 0) addToCart(p); }}
                       disabled={p.stock <= 0}
-                      className={`px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${p.stock > 0 ? 'bg-white text-black hover:bg-red-600 hover:text-white' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-                        }`}
+                      className={`flex items-center gap-1.5 px-5 py-2.5 rounded-xl font-black uppercase tracking-widest text-[9px] transition-all ${p.stock > 0 ? 'bg-white text-black hover:bg-red-600 hover:text-white' : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'}`}
                     >
-                      {p.stock > 0 ? 'Buy Now' : 'Sold Out'}
+                      <ShoppingCart size={12} />
+                      {p.stock > 0 ? 'Add to Cart' : 'Sold Out'}
                     </button>
-                    <button className="w-16 h-16 bg-white/10 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
-                      <Heart size={24} />
+                    <button className="w-9 h-9 bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white hover:text-black transition-all">
+                      <Heart size={14} />
                     </button>
                   </div>
                 </div>
@@ -154,16 +253,8 @@ export default function Home({ onNavigate }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {['Royal Enfield', 'KTM Performance', 'Yamaha Racing', 'Honda HighWing', 'Kawasaki Ninja', 'Ducati Corse', 'BMW Motorrad', 'Triumph Engineering'].map((bike, idx) => (
-              <div key={idx} className="group p-16 bg-zinc-900/20 rounded-[3rem] border border-white/5 hover:bg-red-600 transition-all duration-700 cursor-pointer text-center relative overflow-hidden">
-                <div className="relative z-10 space-y-4">
-                  <div className="text-white font-black uppercase text-xl sm:text-2xl tracking-tighter group-hover:scale-110 transition-transform">{bike}</div>
-                  <div className="text-zinc-600 text-[10px] font-black uppercase tracking-widest group-hover:text-white/80">Calibration Active</div>
-                </div>
-                <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-20 transition-opacity">
-                  <Zap size={100} className="text-white" />
-                </div>
-              </div>
+            {bikeBrands.map((brand, idx) => (
+              <BrandCard key={idx} brand={brand} />
             ))}
           </div>
         </div>

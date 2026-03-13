@@ -13,6 +13,7 @@ import Auth from './pages/Auth';
 import ProfitDashboard from './pages/ProfitDashboard';
 import Vendors from './pages/Vendors';
 import GstReports from './pages/GstReports';
+import OnlineOrders from './pages/OnlineOrders';
 
 const Layout = ({ children }) => {
   const { user, loading } = useAuth();
@@ -44,6 +45,7 @@ const App = () => {
           <Route path="/billing" element={<Layout><Billing /></Layout>} />
           <Route path="/invoices" element={<Layout><InvoiceHistory /></Layout>} />
           <Route path="/customers" element={<Layout><Customers /></Layout>} />
+          <Route path="/online-orders" element={<Layout><OnlineOrders /></Layout>} />
           <Route path="/reports" element={<Layout><Reports /></Layout>} />
           <Route path="/profit" element={<Layout><ProfitDashboard /></Layout>} />
           <Route path="/vendors" element={<Layout><Vendors /></Layout>} />

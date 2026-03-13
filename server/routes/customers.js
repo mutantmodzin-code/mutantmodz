@@ -3,10 +3,24 @@ const router = express.Router();
 const db = require('../db');
 const { authenticateToken } = require('./auth');
 
-// Get all customers
+// Get all customers with online/offline classification
 router.get('/', authenticateToken, async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM customers ORDER BY created_at DESC');
+        const result = await db.query(`
+            SELECT
+                c.*,
+                COUNT(i.id) AS total_orders,
+                COALESCE(SUM(i.total_amount), 0) AS total_spent,
+                MAX(i.created_at) AS last_order_at,
+                CASE
+                    WHEN COUNT(CASE WHEN i.order_type = 'Online Order' THEN 1 END) > 0 THEN 'online'
+                    ELSE 'offline'
+                END AS customer_type
+            FROM customers c
+            LEFT JOIN invoices i ON i.customer_id = c.id
+            GROUP BY c.id
+            ORDER BY c.created_at DESC
+        `);
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });

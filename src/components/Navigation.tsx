@@ -4,20 +4,24 @@ import {
   Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
   ArrowRight, Flame, Star
 } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 interface NavigationProps {
   currentPage: string;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: string) => void;
+  onOpenCart?: () => void;
 }
 
-export default function Navigation({ currentPage: _currentPage, onNavigate }: NavigationProps) {
+export default function Navigation({ currentPage: _currentPage, onNavigate, onOpenCart }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchCategory, setSearchCategory] = useState('All');
   const [isSearchCatOpen, setIsSearchCatOpen] = useState(false);
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { totalCount } = useCart();
 
   const handleMouseEnter = (id: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -208,6 +212,14 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      onNavigate('products', `?search=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery('');
+    }
+  };
+
   return (
     <>
       <nav
@@ -261,22 +273,24 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
                   </div>
 
                   {/* Input Field */}
-                  <div className="relative flex-1 flex items-center h-full">
+                  <form onSubmit={handleSearch} className="relative flex-1 flex items-center h-full">
                     <input
                       type="text"
                       placeholder="Search helmets, riding gear, performance mods..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full h-full bg-transparent text-white text-[15px] pl-5 pr-14 focus:outline-none placeholder-zinc-500 font-medium transition-all duration-300"
                     />
                     {/* Micro-interaction icons inside input */}
                     <div className="absolute right-3 flex items-center gap-2 text-zinc-400">
-                      <button className="p-1.5 hover:text-red-500 hover:bg-zinc-800 rounded-full transition-colors duration-300 cursor-pointer group/mic">
+                      <button type="button" className="p-1.5 hover:text-red-500 hover:bg-zinc-800 rounded-full transition-colors duration-300 cursor-pointer group/mic">
                         <Mic size={18} className="group-hover/mic:scale-110 group-hover/mic:animate-pulse transition-transform" />
                       </button>
-                      <button className="p-1.5 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all duration-300 cursor-pointer shadow-[0_0_10px_rgba(220,38,38,0.2)] hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95">
+                      <button type="submit" className="p-1.5 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all duration-300 cursor-pointer shadow-[0_0_10px_rgba(220,38,38,0.2)] hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95">
                         <Search size={18} />
                       </button>
                     </div>
-                  </div>
+                  </form>
                 </div>
               </div>
 
@@ -289,10 +303,17 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
                   <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">Account</span>
                 </button>
                 <div className="w-px h-8 bg-zinc-800"></div>
-                <button className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative">
+                <button
+                  onClick={onOpenCart}
+                  className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative"
+                >
                   <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1 group-hover:animate-[wiggle_1s_ease-in-out_infinite]">
                     <ShoppingCart size={20} className="group-hover:text-red-400 transition-colors" />
-                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.8)] animate-bounce">2</span>
+                    {totalCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.8)] animate-bounce">
+                        {totalCount}
+                      </span>
+                    )}
                   </div>
                   <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">Cart</span>
                 </button>
@@ -309,16 +330,18 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
 
             {/* Mobile Smart Search (Shows below logo on mobile) */}
             <div className={`lg:hidden w-full mt-3 transition-all duration-500 ${isScrolled ? 'hidden' : 'block'}`}>
-              <div className="flex w-full bg-zinc-900/60 border border-zinc-800 rounded-full h-11 shadow-inner focus-within:border-red-500/50 transition-colors duration-300">
+              <form onSubmit={handleSearch} className="relative flex w-full bg-zinc-900/60 border border-zinc-800 rounded-full h-11 shadow-inner focus-within:border-red-500/50 transition-colors duration-300">
                 <input
                   type="text"
                   placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full h-full bg-transparent text-white text-sm pl-4 pr-10 focus:outline-none placeholder-zinc-500"
                 />
-                <button className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500 transition-colors">
+                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500 transition-colors">
                   <Search size={18} />
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -437,9 +460,16 @@ export default function Navigation({ currentPage: _currentPage, onNavigate }: Na
                 <User size={24} className="text-red-400" />
                 <span className="text-white text-sm font-semibold">Account</span>
               </button>
-              <button className="flex-1 bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 min-h-[48px] flex flex-col items-center gap-2 hover:bg-zinc-800 hover:border-red-500/30 transition-colors relative active:scale-95 touch-manipulation">
+              <button
+                onClick={onOpenCart}
+                className="flex-1 bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 min-h-[48px] flex flex-col items-center gap-2 hover:bg-zinc-800 hover:border-red-500/30 transition-colors relative active:scale-95 touch-manipulation"
+              >
                 <ShoppingCart size={24} className="text-red-400" />
-                <span className="absolute top-3 right-8 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">2</span>
+                {totalCount > 0 && (
+                  <span className="absolute top-3 right-8 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
+                    {totalCount}
+                  </span>
+                )}
                 <span className="text-white text-sm font-semibold">Cart</span>
               </button>
             </div>

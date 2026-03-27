@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+// No imports needed for this component's current functionality
 
 const brands = [
   'Rynox', 'Alpinestars', 'LS2', 'K&N', 'Sena', 

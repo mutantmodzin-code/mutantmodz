@@ -1,66 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Shield, Wrench, Shirt, Cog, ShoppingCart, Filter, ArrowUpRight, Search, Zap, CheckCircle, Phone, ShoppingBag } from 'lucide-react';
+import { Search, Filter, Shield, Wrench, Shirt, Cog, Zap, Phone } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
-import { useCart } from '../context/CartContext';
+import ProductCard from '../components/ProductCard';
 
 interface ProductsProps {
   onNavigate: (page: string) => void;
 }
-
-const ProductImage = ({ images, alt, className }: { images?: string[], alt: string, className?: string }) => {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const imageList = images && images.length > 0
-    ? images.filter(img => img && img.trim() !== '')
-    : [];
-
-  // Always have at least the placeholder
-  const finalList = imageList.length > 0
-    ? imageList
-    : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'];
-
-  useEffect(() => {
-    if (finalList.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIdx(prev => (prev + 1) % finalList.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [finalList.length]);
-
-  return (
-    <div className={`relative w-full h-full overflow-hidden ${className ?? ''}`}>
-      {finalList.map((img, idx) => (
-        <img
-          key={idx}
-          src={img}
-          alt={`${alt} ${idx + 1}`}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-in-out"
-          style={{
-            transform: `translateX(${(idx - currentIdx) * 100}%)`,
-            transition: 'transform 700ms cubic-bezier(0.4,0,0.2,1), scale 700ms ease',
-            zIndex: idx === currentIdx ? 1 : 0,
-          }}
-        />
-      ))}
-
-      {/* Dot indicators */}
-      {finalList.length > 1 && (
-        <div className="absolute bottom-3 left-0 w-full flex justify-center gap-1.5 z-20 pointer-events-none">
-          {finalList.map((_, idx) => (
-            <div
-              key={idx}
-              className={`transition-all duration-500 rounded-full ${idx === currentIdx
-                  ? 'bg-white w-5 h-1.5 shadow-[0_0_6px_rgba(255,255,255,0.9)]'
-                  : 'bg-white/40 w-1.5 h-1.5'
-                }`}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
 
 export default function Products({ onNavigate }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -68,7 +14,6 @@ export default function Products({ onNavigate }: ProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -233,99 +178,11 @@ export default function Products({ onNavigate }: ProductsProps) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
               {filteredProducts.map((product, index) => (
-                <div
+                <ProductCard 
                   key={product.id || index}
-                  className="group relative animate-in fade-in slide-in-from-bottom-8 duration-700"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <div className="bg-zinc-900/40 backdrop-blur-md rounded-[3rem] overflow-hidden border border-white/5 group-hover:border-red-600/30 transition-all duration-700 group-hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex flex-col h-full">
-
-                    {/* Visual Interface */}
-                    <div
-                      className="h-80 overflow-hidden relative cursor-pointer group-hover:h-72 transition-all duration-500"
-                      onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
-                    >
-                      <ProductImage images={product.images} alt={product.name} />
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent group-hover:from-red-950/40 transition-colors"></div>
-
-                      {/* Price Element */}
-                      <div className="absolute bottom-8 left-8 z-20">
-                        <div className="bg-white text-zinc-950 px-6 py-3 rounded-2xl text-[20px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110">
-                          {product.price}
-                        </div>
-                      </div>
-
-                      {/* Status Badges */}
-                      <div className="absolute top-8 left-8 flex flex-col gap-2 z-20">
-                        {product.stock > 0 ? (
-                          <div className="bg-red-600 border border-red-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-red-600/50">
-                            <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-                            {product.stock < 10 ? `Only ${product.stock} Left` : 'In Stock'}
-                          </div>
-                        ) : (
-                          <div className="bg-zinc-800 border border-zinc-600 text-red-500 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-zinc-900/50">
-                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                            Sold Out
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Action Icon: Add to Cart Quick Action */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (product.stock > 0) addToCart(product);
-                        }}
-                        className="absolute top-8 right-8 z-20 w-12 h-12 bg-red-600 border border-red-500 rounded-2xl flex items-center justify-center text-white opacity-0 transform translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 hover:scale-110 active:scale-95 shadow-lg shadow-red-600/40"
-                      >
-                        <ShoppingBag size={20} />
-                      </button>
-                    </div>
-
-                    {/* Data Panel */}
-                    <div className="p-10 flex flex-1 flex-col justify-between">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-red-500 font-black text-[10px] uppercase tracking-widest border-b border-red-500/20 pb-1">{product.category}</span>
-                        </div>
-                        <h3 className="text-[22px] font-black text-white group-hover:text-red-500 transition-colors tracking-tight leading-tight uppercase">{product.name}</h3>
-                        <p className="text-zinc-500 text-[13px] font-medium leading-relaxed line-clamp-2">{product.description}</p>
-
-                        <div className="flex flex-wrap gap-4 pt-4">
-                          <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                            <CheckCircle size={12} className="text-red-600" />
-                            Certified
-                          </div>
-                          <div className="flex items-center gap-1.5 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
-                            <Zap size={12} className="text-red-600" />
-                            Express
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-10 pt-8 border-t border-white/5">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (product.stock > 0) addToCart(product);
-                          }}
-                          disabled={product.stock <= 0}
-                          className={`w-full relative h-[60px] group/btn overflow-hidden rounded-2xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-zinc-800' : 'bg-zinc-900 cursor-not-allowed opacity-50'}`}
-                        >
-                          <div className={`absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'group-hover/btn:-translate-y-full' : ''}`}>
-                            <ShoppingCart size={18} className="text-red-600" />
-                            {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
-                          </div>
-                          {product.stock > 0 && (
-                            <div className="absolute inset-0 bg-red-600 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
-                              Assemble Order <ArrowUpRight size={16} />
-                            </div>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  product={product}
+                  onNavigate={onNavigate}
+                />
               ))}
             </div>
           )}

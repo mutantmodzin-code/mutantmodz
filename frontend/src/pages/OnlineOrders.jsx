@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { Package, MapPin, Mail, Phone, ShoppingBag, CheckCircle, Clock, Calendar } from 'lucide-react';
+import { Package, MapPin, Mail, Phone, ShoppingBag, CheckCircle, Clock, Calendar, CreditCard, Banknote } from 'lucide-react';
 
 const OnlineOrders = () => {
     const [orders, setOrders] = useState([]);
@@ -88,15 +88,30 @@ const OnlineOrders = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                    {/* Payment Method Badge */}
+                                    <div style={{ 
+                                        padding: '0.25rem 0.75rem', 
+                                        borderRadius: '9999px', 
+                                        fontSize: '0.7rem', 
+                                        fontWeight: 700, 
+                                        textTransform: 'uppercase',
+                                        backgroundColor: order.payment_method === 'COD' ? '#fff7ed' : '#eff6ff',
+                                        color: order.payment_method === 'COD' ? '#ea580c' : '#2563eb',
+                                        border: order.payment_method === 'COD' ? '1px solid #fed7aa' : '1px solid #bfdbfe',
+                                        display: 'flex', alignItems: 'center', gap: '0.35rem'
+                                    }}>
+                                        {order.payment_method === 'COD' || order.payment_method === 'cod' ? <Banknote size={13} /> : <CreditCard size={13} />}
+                                        {['razorpay', 'upi', 'card', 'netbanking'].includes(order.payment_method?.toLowerCase()) ? order.payment_method.toUpperCase() : (order.payment_method || 'Online')}
+                                    </div>
                                     <div style={{ 
                                         padding: '0.25rem 0.75rem', 
                                         borderRadius: '9999px', 
                                         fontSize: '0.75rem', 
                                         fontWeight: 700, 
                                         textTransform: 'uppercase',
-                                        backgroundColor: order.status === 'Completed' ? '#dcfce7' : '#fef3c7',
-                                        color: order.status === 'Completed' ? '#16a34a' : '#d97706'
+                                        backgroundColor: order.status === 'Completed' || order.status === 'paid' ? '#dcfce7' : (order.status === 'unpaid' ? '#fee2e2' : '#fef3c7'),
+                                        color: order.status === 'Completed' || order.status === 'paid' ? '#16a34a' : (order.status === 'unpaid' ? '#dc2626' : '#d97706')
                                     }}>
                                         {order.status || 'Pending'}
                                     </div>

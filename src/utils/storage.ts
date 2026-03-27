@@ -27,9 +27,12 @@ export const getProducts = async (): Promise<Product[]> => {
                 name: p.name,
                 description: p.description || `${p.brand} professional grade hardware`,
                 price: p.price?.toString().includes('₹') ? p.price : `₹${parseFloat(p.price).toLocaleString('en-IN')}`,
+                price_num: parseFloat(p.price) || 0,
                 stock: parseInt(p.stock) || 0,
                 image: images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-                images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']
+                images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+                brand: p.brand || '',
+                date_added: p.created_at || null
             };
         });
     } catch (error) {

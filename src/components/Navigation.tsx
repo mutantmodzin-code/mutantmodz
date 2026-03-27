@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, Mic, User, ShoppingCart, ChevronDown,
   Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
-  ArrowRight, Flame, Star
+  ArrowRight, Flame, Star, ChevronRight, LogOut
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useUserAuth } from '../context/UserAuthContext';
+import AnnouncementBar from './AnnouncementBar';
 
 interface NavigationProps {
   currentPage: string;
@@ -21,7 +23,10 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
   const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeBrand, setActiveBrand] = useState<string | null>('Royal Enfield');
   const { totalCount } = useCart();
+  const { isLoggedIn, user, setShowLoginPopup, logout } = useUserAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleMouseEnter = (id: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -61,14 +66,39 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
       id: 'bike',
       label: 'Shop by Bike',
       icon: Bike,
-      columns: [
-        {
-          title: 'Popular Bikes',
-          links: ['Royal Enfield', 'KTM', 'Yamaha', 'Bajaj', 'TVS', 'Honda', 'Suzuki']
+      isMega: true,
+      brands: [
+        { 
+          name: 'Royal Enfield', 
+          models: ['Classic 350', 'Meteor 350', 'Himalayan 450', 'Hunter 350', 'Interceptor 650', 'Continental GT 650', 'Super Meteor 650'] 
         },
-        {
-          title: 'Compatible Products',
-          links: ['Crash Guards', 'Phone Mounts', 'Mirrors', 'LED Lights', 'Seat Covers', 'Luggage Racks']
+        { 
+          name: 'KTM', 
+          models: ['Duke 125', 'Duke 200', 'Duke 390', 'Adventure 390', 'RC 390'] 
+        },
+        { 
+          name: 'Yamaha', 
+          models: ['R15 V3', 'R15 V4', 'MT-15', 'FZ-S', 'Aerox 155'] 
+        },
+        { 
+          name: 'Honda', 
+          models: ['CB300R', 'CB350', 'CB500X', 'Hornet 160R', 'CBR 650R'] 
+        },
+        { 
+          name: 'Bajaj', 
+          models: ['Pulsar 150', 'Pulsar 220', 'Pulsar NS200', 'Dominar 400'] 
+        },
+        { 
+          name: 'TVS', 
+          models: ['Apache RTR 160', 'Apache RTR 200', 'Apache RTX 300', 'Ronin'] 
+        },
+        { 
+          name: 'Suzuki', 
+          models: ['Gixxer', 'Gixxer SF', 'V-Strom 250'] 
+        },
+        { 
+          name: 'Hero', 
+          models: ['Xpulse 200', 'Xpulse 210'] 
         }
       ],
       featured: [
@@ -205,8 +235,8 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
 
   const searchCategories = ['All', 'Helmets', 'Gear', 'Accessories', 'Exhausts', 'Luggage'];
 
-  const handleNavClick = (pageId: string) => {
-    onNavigate(pageId);
+  const handleNavClick = (pageId: string, params: string = '') => {
+    onNavigate(pageId, params);
     setIsMenuOpen(false);
     setActiveDropdown(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -296,11 +326,38 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
 
               {/* Right Icons: User & Cart */}
               <div className="hidden lg:flex items-center space-x-5 shrink-0">
-                <button className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer">
+                <button 
+                  onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                  className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative"
+                >
                   <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1">
-                    <User size={20} className="group-hover:text-red-400 transition-colors" />
+                    {isLoggedIn ? (
+                      <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-[9px] font-black text-white">
+                        {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                      </div>
+                    ) : (
+                      <User size={20} className="group-hover:text-red-400 transition-colors" />
+                    )}
                   </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">Account</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
+                    {isLoggedIn ? user?.displayName?.split(' ')[0] || 'Account' : 'Login'}
+                  </span>
+                  
+                  {/* User Dropdown Menu */}
+                  {isLoggedIn && showUserMenu && (
+                    <div className="absolute top-full mt-3 right-0 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl py-2 z-50">
+                      <div className="px-4 py-3 border-b border-zinc-800">
+                        <p className="text-white text-xs font-bold truncate">{user?.displayName}</p>
+                        <p className="text-zinc-500 text-[10px] truncate">{user?.email}</p>
+                      </div>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); logout(); setShowUserMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-red-500 hover:bg-red-600/10 transition-all text-xs font-bold"
+                      >
+                        <LogOut size={14} /> Logout
+                      </button>
+                    </div>
+                  )}
                 </button>
                 <div className="w-px h-8 bg-zinc-800"></div>
                 <button
@@ -375,35 +432,71 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                     <div className={`absolute left-0 top-full w-full bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-y border-zinc-800/80 shadow-[0_40px_80px_rgba(0,0,0,0.95)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform origin-top overflow-hidden ${activeDropdown === cat.id ? 'opacity-100 scale-y-100 translate-y-0 visible h-auto pb-4 max-h-[500px]' : 'opacity-0 scale-y-95 -translate-y-4 invisible h-0 pointer-events-none'
                       }`}>
                       <div className="max-w-[1500px] mx-auto px-8 py-10 flex gap-12">
-                        {/* Columns Container */}
+                        {/* Columns Container or Brand/Model Split */}
                         <div className="flex flex-1 gap-12 border-r border-zinc-800/50 pr-12">
-                          {cat.columns.map((col, idx) => (
-                            <div key={idx} className="flex-1">
-                              <h3 className="text-white font-bold text-[15px] mb-5 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-800/80 pb-3 group-hover/title:text-red-500">
-                                {idx === 0 ? <cat.icon size={18} className="text-red-500 animate-[pulse_2s_infinite]" /> : <Star size={16} className="text-zinc-500" />}
-                                {col.title}
-                              </h3>
-                              <ul className="space-y-4">
-                                {col.links.map((link, lIdx) => (
-                                  <li key={link} className={`transition-all duration-500 transform ${activeDropdown === cat.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} style={{ transitionDelay: `${(idx * 50) + (lIdx * 30)}ms` }}>
+                          {cat.id === 'bike' && cat.brands ? (
+                            <div className="flex w-full gap-8">
+                              {/* Brands List (Left) */}
+                              <div className="w-1/3 border-r border-zinc-800/50 pr-8">
+                                <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-6">Select Brand</h3>
+                                <div className="space-y-1">
+                                  {cat.brands.map((brand) => (
                                     <button
-                                      onClick={() => handleNavClick('products')}
-                                      className="text-zinc-400 hover:text-white text-[15px] font-bold transition-all duration-300 hover:translate-x-3 flex items-center gap-3 group/link"
+                                      key={brand.name}
+                                      onMouseEnter={() => setActiveBrand(brand.name)}
+                                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-black uppercase text-[12px] tracking-widest ${activeBrand === brand.name ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
                                     >
-                                      <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/link:opacity-100 transition-all duration-300 shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
-                                      {link}
+                                      {brand.name} <ChevronRight size={14} className={activeBrand === brand.name ? 'translate-x-1 opacity-100' : 'opacity-0'} />
                                     </button>
-                                  </li>
-                                ))}
-                              </ul>
-                              {/* 'View All' Link at bottom of first column */}
-                              {idx === 0 && (
-                                <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
-                                  View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
-                                </button>
-                              )}
+                                  ))}
+                                </div>
+                              </div>
+                              {/* Models List (Right) */}
+                              <div className="flex-1">
+                                <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-6">Compatible Models</h3>
+                                <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                                  {cat.brands.find(b => b.name === activeBrand)?.models.map((model) => (
+                                    <button
+                                      key={model}
+                                      onClick={() => handleNavClick('products', `?bike=${encodeURIComponent(model)}`)}
+                                      className="text-left text-zinc-300 hover:text-red-500 text-[13px] font-bold transition-colors flex items-center gap-2 group/model"
+                                    >
+                                      <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/model:opacity-100 transition-all shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
+                                      {model}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
                             </div>
-                          ))}
+                          ) : (
+                            cat.columns?.map((col, idx) => (
+                              <div key={idx} className="flex-1">
+                                <h3 className="text-white font-bold text-[15px] mb-5 uppercase tracking-wider flex items-center gap-2 border-b border-zinc-800/80 pb-3 group-hover/title:text-red-500">
+                                  {idx === 0 ? <cat.icon size={18} className="text-red-500 animate-[pulse_2s_infinite]" /> : <Star size={16} className="text-zinc-500" />}
+                                  {col.title}
+                                </h3>
+                                <ul className="space-y-4">
+                                  {col.links.map((link, lIdx) => (
+                                    <li key={link} className={`transition-all duration-500 transform ${activeDropdown === cat.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} style={{ transitionDelay: `${(idx * 50) + (lIdx * 30)}ms` }}>
+                                      <button
+                                        onClick={() => handleNavClick('products')}
+                                        className="text-zinc-400 hover:text-white text-[15px] font-bold transition-all duration-300 hover:translate-x-3 flex items-center gap-3 group/link"
+                                      >
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/link:opacity-100 transition-all duration-300 shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
+                                        {link}
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                                {/* 'View All' Link at bottom of first column */}
+                                {idx === 0 && (
+                                  <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
+                                    View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
+                                  </button>
+                                )}
+                              </div>
+                            ))
+                          )}
                         </div>
 
                         {/* Featured Image Cards (Right Sidebar of Mega Menu) */}
@@ -449,6 +542,7 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
             </div>
           </div>
         </div>
+        {!isScrolled && <AnnouncementBar />}
 
         {/* Mobile Navigation Menu */}
         <div className={`lg:hidden fixed inset-0 top-[100px] z-40 bg-zinc-950/98 backdrop-blur-2xl transition-all duration-500 overflow-y-auto ease-in-out ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
@@ -456,9 +550,20 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
           <div className="p-4 space-y-2 pb-24 border-t border-zinc-800/50">
             {/* Mobile Account / Cart */}
             <div className="flex gap-4 mb-6 pt-2">
-              <button className="flex-1 bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 min-h-[48px] flex flex-col items-center gap-2 hover:bg-zinc-800 hover:border-red-500/30 transition-colors active:scale-95 touch-manipulation">
-                <User size={24} className="text-red-400" />
-                <span className="text-white text-sm font-semibold">Account</span>
+              <button 
+                onClick={() => isLoggedIn ? logout() : setShowLoginPopup(true)}
+                className="flex-1 bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 min-h-[48px] flex flex-col items-center gap-2 hover:bg-zinc-800 hover:border-red-500/30 transition-colors active:scale-95 touch-manipulation"
+              >
+                {isLoggedIn ? (
+                  <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
+                    {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                ) : (
+                  <User size={24} className="text-red-400" />
+                )}
+                <span className="text-white text-sm font-semibold">
+                  {isLoggedIn ? user?.displayName?.split(' ')[0] || 'Account' : 'Login'}
+                </span>
               </button>
               <button
                 onClick={onOpenCart}
@@ -491,25 +596,46 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                   </button>
 
                   {/* Mobile Accordion Sub-menu */}
-                  <div className={`overflow-hidden transition-all duration-300 ${mobileExpandedCat === cat.id ? 'max-h-[500px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
+                  <div className={`overflow-hidden transition-all duration-300 ${mobileExpandedCat === cat.id ? 'max-h-[800px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
                     <div className="px-4 ml-12 border-l border-zinc-800/80 pl-4 space-y-4">
-                      {cat.columns.map((col, colIdx) => (
-                        <div key={colIdx}>
-                          <h4 className="text-zinc-400 text-[11px] font-bold uppercase tracking-widest mb-2">{col.title}</h4>
-                          <ul className="space-y-1">
-                            {col.links.slice(0, 4).map(link => (
-                              <li key={link}>
-                                <button
-                                  onClick={() => handleNavClick('products')}
-                                  className="text-zinc-300 hover:text-white text-sm py-2 min-h-[40px] w-full text-left transition-colors flex items-center gap-2 touch-manipulation"
-                                >
-                                  {link}
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
+                      {cat.id === 'bike' && cat.brands ? (
+                        <div className="space-y-6">
+                          {cat.brands.map(brand => (
+                            <div key={brand.name}>
+                              <h4 className="text-red-500 text-[11px] font-bold uppercase tracking-widest mb-2">{brand.name}</h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                {brand.models.map(model => (
+                                  <button
+                                    key={model}
+                                    onClick={() => handleNavClick('products', `?bike=${encodeURIComponent(model)}`)}
+                                    className="text-zinc-400 hover:text-white text-[11px] py-1 text-left transition-colors"
+                                  >
+                                    {model}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      ) : (
+                        cat.columns?.map((col, colIdx) => (
+                          <div key={colIdx}>
+                            <h4 className="text-zinc-400 text-[11px] font-bold uppercase tracking-widest mb-2">{col.title}</h4>
+                            <ul className="space-y-1">
+                              {col.links.slice(0, 4).map(link => (
+                                <li key={link}>
+                                  <button
+                                    onClick={() => handleNavClick('products')}
+                                    className="text-zinc-300 hover:text-white text-sm py-2 min-h-[40px] w-full text-left transition-colors flex items-center gap-2 touch-manipulation"
+                                  >
+                                    {link}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))
+                      )}
                       <button
                         onClick={() => handleNavClick('products')}
                         className="text-red-500 text-sm font-bold min-h-[40px] pt-1 w-full text-left touch-manipulation"
@@ -533,7 +659,7 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
         </div>
       </nav>
       {/* Spacer to prevent content from going under the fixed nav */}
-      <div className={`transition-all duration-400 ${isScrolled ? 'h-[100px] md:h-[68px]' : 'h-[140px] md:h-[116px]'}`}></div>
+      <div className={`transition-all duration-400 ${isScrolled ? 'h-[100px] md:h-[68px]' : 'h-[180px] md:h-[156px]'}`}></div>
     </>
   );
 }

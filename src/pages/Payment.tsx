@@ -13,11 +13,33 @@ import {
 } from 'lucide-react';
 import { getProducts, createInvoice, createCustomer } from '../utils/storage';
 
+const SectionHeader = ({ title, icon: Icon }: { title: string, icon?: any }) => (
+    <div className="flex items-center gap-3 mb-8 pb-4 border-b border-zinc-800/50">
+        {Icon && <Icon size={16} className="text-red-600" />}
+        <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">{title}</h3>
+    </div>
+);
+
+const Label = ({ children, required = false }: { children: React.ReactNode, required?: boolean }) => (
+    <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3 ml-1">
+        {children} {required && <span className="text-red-600">*</span>}
+    </label>
+);
+
+const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input
+        {...props}
+        className={`w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-4 px-6 text-white text-xs font-bold focus:border-red-600 outline-none transition-colors placeholder:text-zinc-800 uppercase ${props.className || ''}`}
+    />
+);
+
 export default function Payment() {
     const [product, setProduct] = useState<any>(null);
     const [paymentDone, setPaymentDone] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('razorpay');
+    // Guard flag: ensures processOrder() can only execute ONCE per checkout session
+    const orderProcessed = { current: false };
 
     // Customer Detail State
     const [customer, setCustomer] = useState({
@@ -48,6 +70,11 @@ export default function Payment() {
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {
+            // If already loaded, resolve immediately — don't inject a duplicate script tag
+            if (document.querySelector('script[src*="razorpay"]')) {
+                resolve(true);
+                return;
+            }
             const script = document.createElement('script');
             script.src = 'https://checkout.razorpay.com/v1/checkout.js';
             script.onload = () => resolve(true);
@@ -56,7 +83,11 @@ export default function Payment() {
         });
     };
 
-    const processOrder = async () => {
+    const processOrder = async (priceNum: number, shippingNum: number) => {
+        // Idempotency guard: if order was already processed, do nothing
+        if (orderProcessed.current) return;
+        orderProcessed.current = true;
+
         try {
             // Read size/color/quantity from product details selection
             const selectedSize = localStorage.getItem('checkout_size') || '';
@@ -83,7 +114,7 @@ export default function Payment() {
                 tax: tax,
                 discount: 0,
                 total_amount: totalAmt,
-                payment_method: paymentMethod === 'cod' ? 'COD' : 'Online',
+                payment_method: paymentMethod.toUpperCase(),
                 gst_percentage: 18,
                 items: [{
                     product_id: parseInt(product.id),
@@ -107,6 +138,8 @@ export default function Payment() {
 
             setPaymentDone(true);
         } catch (error: any) {
+            // Reset the guard on failure so user can retry
+            orderProcessed.current = false;
             alert(error.message || 'Failed to process order sequence.');
         } finally {
             setIsLoading(false);
@@ -115,21 +148,16 @@ export default function Payment() {
 
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
+        // Block double-submit: if already processing, do nothing
+        if (isLoading) return;
         setIsLoading(true);
 
-        // Preliminary Stock Check (Backend will also check during transaction)
-        try {
-            const freshProducts = await getProducts();
-            const freshProd = freshProducts.find(p => p.id === product.id);
-            if (!freshProd || (freshProd as any).stock <= 0) {
-                // alert('Order Aborted: Target item is currently out of stock.');
-                // setIsLoading(false);
-                // return;
-            }
-        } catch (err) { }
+        const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, '')) || 0;
+        const shippingNum = 100;
+        const total = priceNum + shippingNum;
 
         if (paymentMethod === 'cod') {
-            await processOrder();
+            await processOrder(priceNum, shippingNum);
             return;
         }
 
@@ -149,7 +177,8 @@ export default function Payment() {
             description: `Payment for ${product.name}`,
             image: 'https://cdn.razorpay.com/logos/FFxP8XfW1m9M0t_medium.png',
             handler: async function (_response: any) {
-                await processOrder();
+                // Razorpay handler may fire more than once; the guard in processOrder stops duplication
+                await processOrder(priceNum, shippingNum);
             },
             prefill: {
                 name: `${customer.firstName} ${customer.lastName}`,
@@ -205,25 +234,6 @@ export default function Payment() {
     const total = priceNum + shippingNum;
     const currencyFormat = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
 
-    const SectionHeader = ({ title, icon: Icon }: { title: string, icon?: any }) => (
-        <div className="flex items-center gap-3 mb-8 pb-4 border-b border-zinc-800/50">
-            {Icon && <Icon size={16} className="text-red-600" />}
-            <h3 className="text-[10px] font-black text-white uppercase tracking-[0.3em]">{title}</h3>
-        </div>
-    );
-
-    const Label = ({ children, required = false }: { children: React.ReactNode, required?: boolean }) => (
-        <label className="block text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-3 ml-1">
-            {children} {required && <span className="text-red-600">*</span>}
-        </label>
-    );
-
-    const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-        <input
-            {...props}
-            className={`w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-4 px-6 text-white text-xs font-bold focus:border-red-600 outline-none transition-colors placeholder:text-zinc-800 uppercase ${props.className || ''}`}
-        />
-    );
 
     return (
         <div className="min-h-screen bg-zinc-950 pt-32 pb-24 px-4 sm:px-12">

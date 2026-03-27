@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { authenticateToken } = require('./auth');
+const { broadcastNotification } = require('./notifications');
 
 // Create Invoice
 router.post('/', async (req, res) => {
@@ -40,12 +41,13 @@ router.post('/', async (req, res) => {
             const invoiceResult = await client.query(
                 `INSERT INTO invoices (
                     customer_id, subtotal, tax, discount, total_amount, payment_method, order_type,
-                    gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_value, total_gst
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id`,
+                    gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_value, total_gst, status
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
                 [
                     customer_id, subtotal, tax, discount, total_amount, payment_method, order_type || 'Offline Order',
                     gst_percentage || 0, cgst_amount || 0, sgst_amount || 0, igst_amount || 0,
-                    taxable_value || subtotal, total_gst || tax
+                    taxable_value || subtotal, total_gst || tax,
+                    (payment_method && payment_method.toUpperCase() === 'COD') ? 'unpaid' : 'paid'
                 ]
             );
             const invoiceId = invoiceResult.rows[0].id;
@@ -85,6 +87,27 @@ router.post('/', async (req, res) => {
             }
 
             await client.query('COMMIT');
+
+            // Broadcast notification to admin panel if it's an online order
+            if (order_type === 'Online Order') {
+                // Fetch customer name for the notification
+                let customerName = 'Customer';
+                try {
+                    const custRes = await db.query('SELECT name FROM customers WHERE id = $1', [customer_id]);
+                    customerName = custRes.rows[0]?.name || 'Customer';
+                } catch (e) { /* ignore */ }
+
+                broadcastNotification({
+                    type: 'new_order',
+                    orderId: invoiceId,
+                    customerName,
+                    totalAmount: total_amount,
+                    paymentMethod: payment_method || 'Online',
+                    itemCount: items.length,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
             res.status(201).json({ id: invoiceId, message: 'Invoice created successfully' });
         } catch (e) {
             await client.query('ROLLBACK');

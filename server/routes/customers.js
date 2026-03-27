@@ -28,7 +28,7 @@ router.get('/', authenticateToken, async (req, res) => {
 });
 
 // Search customer by phone
-router.get('/search', authenticateToken, async (req, res) => {
+router.get('/search', async (req, res) => {
     const { phone } = req.query;
     try {
         const result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);

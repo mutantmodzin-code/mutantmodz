@@ -86,6 +86,7 @@ const InvoiceHistory = () => {
                             <th>Date</th>
                             <th>Total Amount</th>
                             <th>Order Type</th>
+                            <th>Payment Method</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -109,7 +110,31 @@ const InvoiceHistory = () => {
                                         {inv.order_type || 'Offline Order'}
                                     </span>
                                 </td>
-                                <td><span style={{ color: '#22c55e', backgroundColor: '#f0fdf4', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>{inv.status || 'paid'}</span></td>
+                                <td>
+                                    <span style={{
+                                        color: '#475569',
+                                        backgroundColor: '#f1f5f9',
+                                        padding: '0.25rem 0.5rem',
+                                        borderRadius: '0.25rem',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 500
+                                    }}>
+                                        {inv.payment_method || 'CASH'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style={{ 
+                                        color: inv.status === 'paid' || inv.status === 'Completed' ? '#16a34a' : (inv.status === 'unpaid' ? '#dc2626' : '#d97706'), 
+                                        backgroundColor: inv.status === 'paid' || inv.status === 'Completed' ? '#f0fdf4' : (inv.status === 'unpaid' ? '#fee2e2' : '#fff7ed'), 
+                                        padding: '0.25rem 0.5rem', 
+                                        borderRadius: '0.25rem',
+                                        fontSize: '0.875rem',
+                                        fontWeight: 600,
+                                        textTransform: 'uppercase'
+                                    }}>
+                                        {inv.status || 'paid'}
+                                    </span>
+                                </td>
                                 <td>
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <button className="btn" style={{ padding: '0.25rem' }} onClick={() => fetchDetails(inv.id)}><Eye size={16} color="#2563eb" /></button>

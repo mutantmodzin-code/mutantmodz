@@ -8,14 +8,21 @@ import Products from './pages/Products';
 import Gallery from './pages/Gallery';
 import Contact from './pages/Contact';
 import ProductDetails from './pages/ProductDetails';
+import Blog from './pages/Blog';
+import Combos from './pages/Combos';
+import GarageSale from './pages/GarageSale';
+import Category from './pages/Category';
 
 import Payment from './pages/Payment';
 import { CartProvider } from './context/CartContext';
+import { UserAuthProvider, useUserAuth } from './context/UserAuthContext';
 import CartDrawer from './components/CartDrawer';
+import LoginPopup from './components/LoginPopup';
 
-function App() {
+function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { showLoginPopup, setShowLoginPopup } = useUserAuth();
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -29,9 +36,9 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const navigate = (page: string) => {
+  const navigate = (page: string, params?: string) => {
     setCurrentPage(page);
-    window.location.hash = page;
+    window.location.hash = params ? `${page}${params}` : page;
   };
 
   const renderPage = () => {
@@ -48,6 +55,14 @@ function App() {
         return <Contact />;
       case 'productDetails':
         return <ProductDetails />;
+      case 'blog':
+        return <Blog />;
+      case 'combos':
+        return <Combos />;
+      case 'garage-sale':
+        return <GarageSale onNavigate={navigate} />;
+      case 'category':
+        return <Category onNavigate={navigate} />;
       case 'payment':
         return <Payment />;
       default:
@@ -56,24 +71,37 @@ function App() {
   };
 
   return (
-    <CartProvider>
-      <div className="min-h-screen bg-zinc-950">
-        <Navigation
-          currentPage={currentPage}
-          onNavigate={navigate}
-          onOpenCart={() => setIsCartOpen(true)}
-        />
-        <main className="pt-20">{renderPage()}</main>
-        <Footer />
-        <ChatBot />
+    <div className="min-h-screen bg-zinc-950">
+      <Navigation
+        currentPage={currentPage}
+        onNavigate={navigate}
+        onOpenCart={() => setIsCartOpen(true)}
+      />
+      <main className="pt-20">{renderPage()}</main>
+      <Footer />
+      <ChatBot />
 
-        <CartDrawer
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          onNavigate={navigate}
-        />
-      </div>
-    </CartProvider>
+      <CartDrawer
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        onNavigate={navigate}
+      />
+
+      <LoginPopup
+        isOpen={showLoginPopup}
+        onClose={() => setShowLoginPopup(false)}
+      />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <UserAuthProvider>
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
+    </UserAuthProvider>
   );
 }
 

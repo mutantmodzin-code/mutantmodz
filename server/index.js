@@ -33,6 +33,7 @@ const reportRoutes = require('./routes/reports');
 
 const vendorRoutes = require('./routes/vendors');
 const gstRoutes = require('./routes/gst');
+const notificationRoutes = require('./routes/notifications');
 
 // Apply Routes
 app.use('/api/auth', authRoutes);
@@ -42,6 +43,7 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/gst', gstRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

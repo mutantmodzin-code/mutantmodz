@@ -7,6 +7,12 @@ export interface Product {
     stock: number;
     image: string;
     images?: string[];
+    date_added?: string;
+    price_num: number;
+    brand?: string;
+    isBestSeller?: boolean;
+    isNew?: boolean;
+    freeShipping?: boolean;
 }
 
 export type Category = {

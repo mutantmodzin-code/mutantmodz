@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
+import { useUserAuth } from '../context/UserAuthContext';
 
 export default function ProductDetails() {
     const [product, setProduct] = useState<Product | null>(null);
@@ -26,6 +27,7 @@ export default function ProductDetails() {
     const [activeTab, setActiveTab] = useState('description');
     const [mainImage, setMainImage] = useState('');
     const [isLoaded, setIsLoaded] = useState(false);
+    const { isLoggedIn, setShowLoginPopup, setPendingAction } = useUserAuth();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -80,6 +82,16 @@ export default function ProductDetails() {
         : [product.image];
 
     const handleBuyNow = () => {
+        if (!isLoggedIn) {
+            setPendingAction(() => () => {
+                localStorage.setItem('checkout_size', selectedSize);
+                localStorage.setItem('checkout_color', selectedTexture);
+                localStorage.setItem('checkout_quantity', quantity.toString());
+                window.location.hash = `payment?productId=${product.id}`;
+            });
+            setShowLoginPopup(true);
+            return;
+        }
         localStorage.setItem('checkout_size', selectedSize);
         localStorage.setItem('checkout_color', selectedTexture);
         localStorage.setItem('checkout_quantity', quantity.toString());

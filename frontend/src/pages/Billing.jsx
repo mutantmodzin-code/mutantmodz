@@ -14,6 +14,7 @@ const Billing = () => {
 
     const [skuSearch, setSkuSearch] = useState('');
     const [orderType, setOrderType] = useState('Offline Order');
+    const [paymentMethod, setPaymentMethod] = useState('Cash');
 
     useEffect(() => {
         fetchProducts();
@@ -116,7 +117,7 @@ const Billing = () => {
                 tax: total_gst,
                 discount: 0,
                 total_amount: total,
-                payment_method: 'Cash',
+                payment_method: paymentMethod,
                 order_type: orderType,
                 gst_percentage: gst_rate,
                 cgst_amount,
@@ -240,12 +241,23 @@ const Billing = () => {
                             <span style={{ fontWeight: 700 }}>Grand Total:</span>
                             <span style={{ fontWeight: 700, color: '#2563eb' }}>₹{total.toFixed(2)}</span>
                         </div>
-                        <div style={{ display: 'grid', gap: '0.5rem', marginTop: '1rem' }}>
-                            <label style={{ fontSize: '0.875rem', fontWeight: 600 }}>Order Type</label>
-                            <select className="input" value={orderType} onChange={(e) => setOrderType(e.target.value)}>
-                                <option value="Offline Order">Offline Order</option>
-                                <option value="Online Order">Online Order</option>
-                            </select>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Order Type</label>
+                                <select className="input" value={orderType} onChange={(e) => setOrderType(e.target.value)}>
+                                    <option value="Offline Order">Offline Order</option>
+                                    <option value="Online Order">Online Order</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Payment Method</label>
+                                <select className="input" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                                    <option value="Cash">Cash</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="Card">Card</option>
+                                    <option value="COD">COD</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                     <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem', padding: '1rem' }} onClick={handleCreateBill}>

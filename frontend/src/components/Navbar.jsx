@@ -9,10 +9,42 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
 
-    // Connect to SSE notification stream
+    // Live Notifications: Polling + SSE (Fallback for Vercel)
     useEffect(() => {
         let eventSource;
-        const connect = () => {
+        let pollInterval;
+        let lastOrderId = localStorage.getItem('lastProcessedOrder');
+
+        // Function to handle new orders
+        const handleNewOrder = (data) => {
+            if (data.id && (lastOrderId === null || parseInt(data.id) > parseInt(lastOrderId))) {
+                lastOrderId = data.id;
+                localStorage.setItem('lastProcessedOrder', data.id);
+                
+                // Format data for the store
+                const notification = {
+                    type: 'new_order',
+                    orderId: data.id || data.orderId,
+                    customerName: data.customer_name || data.customerName,
+                    totalAmount: data.total_amount || data.totalAmount,
+                    paymentMethod: data.payment_method || data.paymentMethod,
+                    timestamp: data.created_at || data.timestamp || new Date().toISOString()
+                };
+
+                setNotifications(prev => [notification, ...prev].slice(0, 20));
+                setUnreadCount(prev => prev + 1);
+
+                // Play notification sound
+                try {
+                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbsGczIjdjr+PkyoJXKClluOv/zINRISlnvO//0YdOIyxpvvP/04pPIi5qv/X/1IpOIi9rv/b/1YtOIjBswPf/1oxNITFtw/n/2I1MITJuw/v/2Y1MITNvxPz/2o5MITNvxf3/249LITRwxv7/3JBLITV');
+                    audio.volume = 0.3;
+                    audio.play().catch(() => {});
+                } catch (e) {}
+            }
+        };
+
+        // 1. SSE Connection (Works locally, inconsistent on Vercel)
+        const connectSSE = () => {
             const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api';
             eventSource = new EventSource(`${baseUrl}/notifications/stream`);
 
@@ -20,30 +52,37 @@ const Navbar = () => {
                 try {
                     const data = JSON.parse(event.data);
                     if (data.type === 'new_order') {
-                        setNotifications(prev => [data, ...prev].slice(0, 20)); // Keep last 20
-                        setUnreadCount(prev => prev + 1);
-
-                        // Play notification sound
-                        try {
-                            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbsGczIjdjr+PkyoJXKClluOv/zINRISlnvO//0YdOIyxpvvP/04pPIi5qv/X/1IpOIi9rv/b/1YtOIjBswPf/1oxNITFtw/n/2I1MITJuw/v/2Y1MITNvxPz/2o5MITNvxf3/249LITRwxv7/3JBLITV');
-                            audio.volume = 0.3;
-                            audio.play().catch(() => {});
-                        } catch (e) {}
+                        handleNewOrder(data);
                     }
                 } catch (e) {}
             };
 
             eventSource.onerror = () => {
                 eventSource.close();
-                // Reconnect after 5 seconds
-                setTimeout(connect, 5000);
+                setTimeout(connectSSE, 10000);
             };
         };
 
-        connect();
+        // 2. Polling (Reliable on Vercel)
+        const checkLatestOrder = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api'}/notifications/latest`);
+                const data = await response.json();
+                if (data && data.id) {
+                    handleNewOrder(data);
+                }
+            } catch (e) {
+                console.error('Polling failed:', e);
+            }
+        };
+
+        connectSSE();
+        checkLatestOrder(); // Check immediately
+        pollInterval = setInterval(checkLatestOrder, 15000); // Check every 15 seconds
 
         return () => {
             if (eventSource) eventSource.close();
+            if (pollInterval) clearInterval(pollInterval);
         };
     }, []);
 

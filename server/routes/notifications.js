@@ -29,8 +29,27 @@ router.get('/stream', (req, res) => {
     });
 });
 
-// Function to broadcast to all connected admin clients
+// Get latest online order for polling fallback
+router.get('/latest', async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT i.id, i.total_amount, i.payment_method, i.created_at, c.name as customer_name
+            FROM invoices i
+            LEFT JOIN customers c ON i.customer_id = c.id
+            WHERE i.order_type = 'Online Order'
+            ORDER BY i.id DESC
+            LIMIT 1
+        `);
+        res.json(result.rows[0] || null);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Broadcast notification to all connected admin clients
 const broadcastNotification = (notification) => {
+    // Note: SSE (broadcastNotification) does not work consistently across Vercel serverless instances.
+    // This is maintained for local development, but polling is used for production.
     const data = `data: ${JSON.stringify(notification)}\n\n`;
     clients.forEach(client => {
         try {

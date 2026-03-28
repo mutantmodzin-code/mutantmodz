@@ -13,7 +13,8 @@ const Navbar = () => {
     useEffect(() => {
         let eventSource;
         const connect = () => {
-            eventSource = new EventSource('http://127.0.0.1:3001/api/notifications/stream');
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api';
+            eventSource = new EventSource(`${baseUrl}/notifications/stream`);
 
             eventSource.onmessage = (event) => {
                 try {

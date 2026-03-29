@@ -2,12 +2,80 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Bell, Search, User, LogOut, ShoppingBag, X } from 'lucide-react';
 
+// ── Loud notification ding via Web Audio API ──────────────────────────────────
+const playNotificationSound = () => {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        // Main ding
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.4);
+        gain.gain.setValueAtTime(1.0, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.8);
+        // Second note for a two-tone chime
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.15);
+        osc2.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.55);
+        gain2.gain.setValueAtTime(0.8, ctx.currentTime + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+        osc2.start(ctx.currentTime + 0.15);
+        osc2.stop(ctx.currentTime + 0.9);
+    } catch (e) {}
+};
+
+// ── Native browser notification (works on mobile) ─────────────────────────────
+const showBrowserNotification = (notif) => {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    try {
+        const n = new Notification('🛒 New Order #' + notif.orderId, {
+            body: `${notif.customerName} • ₹${parseFloat(notif.totalAmount).toLocaleString('en-IN')} • ${notif.paymentMethod}`,
+            icon: '/vite.svg',
+            badge: '/vite.svg',
+            tag: 'order-' + notif.orderId,
+            renotify: true,
+            requireInteraction: true,
+            vibrate: [200, 100, 200, 100, 400]
+        });
+        n.onclick = () => {
+            window.focus();
+            n.close();
+        };
+    } catch (e) {}
+};
+// ─────────────────────────────────────────────────────────────────────────────
+
 const Navbar = () => {
     const { user, logout } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [pushPermission, setPushPermission] = useState('default');
     const dropdownRef = useRef(null);
+
+    // Register service worker & request notification permission on mount
+    useEffect(() => {
+        // Register SW
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+        // Ask for permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(p => setPushPermission(p));
+        } else if ('Notification' in window) {
+            setPushPermission(Notification.permission);
+        }
+    }, []);
 
     // Live Notifications: Load initial + Poll for new orders
     useEffect(() => {
@@ -38,11 +106,8 @@ const Navbar = () => {
             setNotifications(prev => [notification, ...prev].slice(0, 20));
             if (!silent) {
                 setUnreadCount(prev => prev + 1);
-                try {
-                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbsGczIjdjr+PkyoJXKClluOv/zINRISlnvO//0YdOIyxpvvP/04pPIi5qv/X/1IpOIi9rv/b/1YtOIjBswPf/1oxNITFtw/n/2I1MITJuw/v/2Y1MITNvxPz/2o5MITNvxf3/249LITRwxv7/3JBLITV');
-                    audio.volume = 0.3;
-                    audio.play().catch(() => {});
-                } catch (e) {}
+                playNotificationSound();
+                showBrowserNotification(notification);
             }
         };
 
@@ -217,6 +282,30 @@ const Navbar = () => {
                                     </button>
                                 )}
                             </div>
+
+                            {/* Enable notifications banner */}
+                            {pushPermission !== 'granted' && (
+                                <div style={{
+                                    padding: '0.75rem 1.25rem',
+                                    backgroundColor: '#eff6ff',
+                                    borderBottom: '1px solid #bfdbfe',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem'
+                                }}>
+                                    <span style={{ fontSize: '0.72rem', color: '#1e40af', fontWeight: 600 }}>
+                                        📱 Get alerts on your phone
+                                    </span>
+                                    <button
+                                        onClick={() => Notification.requestPermission().then(p => setPushPermission(p))}
+                                        style={{
+                                            fontSize: '0.7rem', fontWeight: 700, color: 'white',
+                                            backgroundColor: '#2563eb', border: 'none', borderRadius: '6px',
+                                            padding: '4px 10px', cursor: 'pointer', whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        Enable
+                                    </button>
+                                </div>
+                            )}
 
                             {/* Notifications List */}
                             <div style={{ maxHeight: '360px', overflowY: 'auto' }}>

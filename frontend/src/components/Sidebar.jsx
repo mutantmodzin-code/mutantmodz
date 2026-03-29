@@ -43,7 +43,7 @@ const Sidebar = () => {
                     <Bike size={24} />
                 </div>
                 <div>
-                    <h1 style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a' }}>ANTIGRAVITY</h1>
+                    <h1 style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a' }}>MUTANT MODZ ADMIN</h1>
                     <p style={{ fontSize: '0.625rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>Pitshop Inventory</p>
                 </div>
             </div>

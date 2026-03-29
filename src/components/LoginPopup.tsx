@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, Phone, ArrowRight, ShieldCheck, Loader2, CheckCircle } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 
-const API_URL = 'http://127.0.0.1:3001/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface LoginPopupProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     try {
       // Direct check in database instead of OTP
       const response = await fetch(`${API_URL}/customers/search?phone=${phoneNumber}`);
-      
+
       if (response.ok) {
         const userData = await response.json();
         if (userData && userData.id) {
@@ -156,11 +156,10 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
           <div className="flex items-center gap-3 mb-12">
             {['phone', 'email'].map((s, i) => (
               <div key={s} className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all duration-500 ${
-                  step === s ? 'bg-red-600 text-white scale-110 shadow-[0_0_20px_rgba(220,38,38,0.5)]' :
-                  (step === 'email' && s === 'phone') || step === 'success' ? 'bg-green-600 text-white' :
-                  'bg-zinc-800 text-zinc-500'
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all duration-500 ${step === s ? 'bg-red-600 text-white scale-110 shadow-[0_0_20px_rgba(220,38,38,0.5)]' :
+                    (step === 'email' && s === 'phone') || step === 'success' ? 'bg-green-600 text-white' :
+                      'bg-zinc-800 text-zinc-500'
+                  }`}>
                   {((step === 'email' && s === 'phone') || step === 'success') ? <CheckCircle size={14} /> : i + 1}
                 </div>
                 {i < 1 && <div className={`w-12 h-0.5 transition-colors duration-500 ${(step === 'email' || step === 'success') ? 'bg-green-600' : 'bg-zinc-800'}`}></div>}

@@ -9,32 +9,35 @@ const Navbar = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     const dropdownRef = useRef(null);
 
-    // Live Notifications: Polling + SSE (Fallback for Vercel)
+    // Live Notifications: Load initial + Poll for new orders
     useEffect(() => {
         let eventSource;
         let pollInterval;
-        let lastOrderId = localStorage.getItem('lastProcessedOrder');
+        // Use a ref so it persists across renders but resets each session
+        const lastOrderIdRef = { current: null };
 
-        // Function to handle new orders
-        const handleNewOrder = (data) => {
-            if (data.id && (lastOrderId === null || parseInt(data.id) > parseInt(lastOrderId))) {
-                lastOrderId = data.id;
-                localStorage.setItem('lastProcessedOrder', data.id);
-                
-                // Format data for the store
-                const notification = {
-                    type: 'new_order',
-                    orderId: data.id || data.orderId,
-                    customerName: data.customer_name || data.customerName,
-                    totalAmount: data.total_amount || data.totalAmount,
-                    paymentMethod: data.payment_method || data.paymentMethod,
-                    timestamp: data.created_at || data.timestamp || new Date().toISOString()
-                };
+        const API_BASE = import.meta.env.VITE_API_URL;
 
-                setNotifications(prev => [notification, ...prev].slice(0, 20));
+        // Format a raw DB row / SSE payload into a notification object
+        const buildNotification = (data) => ({
+            type: 'new_order',
+            orderId: data.id || data.orderId,
+            customerName: data.customer_name || data.customerName || 'Customer',
+            totalAmount: data.total_amount || data.totalAmount,
+            paymentMethod: data.payment_method || data.paymentMethod,
+            timestamp: data.created_at || data.timestamp || new Date().toISOString()
+        });
+
+        // Handle a single new-order event
+        const handleNewOrder = (data, silent = false) => {
+            if (!data?.id) return;
+            const id = parseInt(data.id);
+            if (lastOrderIdRef.current !== null && id <= lastOrderIdRef.current) return;
+            lastOrderIdRef.current = Math.max(lastOrderIdRef.current || 0, id);
+            const notification = buildNotification(data);
+            setNotifications(prev => [notification, ...prev].slice(0, 20));
+            if (!silent) {
                 setUnreadCount(prev => prev + 1);
-
-                // Play notification sound
                 try {
                     const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbsGczIjdjr+PkyoJXKClluOv/zINRISlnvO//0YdOIyxpvvP/04pPIi5qv/X/1IpOIi9rv/b/1YtOIjBswPf/1oxNITFtw/n/2I1MITJuw/v/2Y1MITNvxPz/2o5MITNvxf3/249LITRwxv7/3JBLITV');
                     audio.volume = 0.3;
@@ -43,32 +46,50 @@ const Navbar = () => {
             }
         };
 
-        // 1. SSE Connection (Works locally, inconsistent on Vercel)
-        const connectSSE = () => {
-            const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api';
-            eventSource = new EventSource(`${baseUrl}/notifications/stream`);
+        // 1. Load last 5 recent online orders on mount (so existing orders appear immediately)
+        const loadRecentOrders = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/notifications/recent`);
+                if (!response.ok) return;
+                const orders = await response.json();
+                if (Array.isArray(orders) && orders.length > 0) {
+                    // Set lastOrderId to the highest existing ID so we don't re-notify for these
+                    const maxId = Math.max(...orders.map(o => parseInt(o.id)));
+                    lastOrderIdRef.current = maxId;
+                    // Show them as notifications (silently – no sound, no badge increment)
+                    const mapped = orders.map(buildNotification);
+                    setNotifications(mapped);
+                }
+            } catch (e) {
+                console.error('Failed to load recent orders:', e);
+            }
+        };
 
+        // 2. SSE Connection (works locally)
+        const connectSSE = () => {
+            eventSource = new EventSource(`${API_BASE}/notifications/stream`);
             eventSource.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-                    if (data.type === 'new_order') {
-                        handleNewOrder(data);
-                    }
+                    if (data.type === 'new_order') handleNewOrder(data);
                 } catch (e) {}
             };
-
             eventSource.onerror = () => {
                 eventSource.close();
                 setTimeout(connectSSE, 10000);
             };
         };
 
-        // 2. Polling (Reliable on Vercel)
-        const checkLatestOrder = async () => {
+        // 3. Polling (reliable on Vercel – checks for orders newer than what we've seen)
+        const pollForNewOrders = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:3001/api'}/notifications/latest`);
+                const url = lastOrderIdRef.current
+                    ? `${API_BASE}/notifications/latest?afterId=${lastOrderIdRef.current}`
+                    : `${API_BASE}/notifications/latest`;
+                const response = await fetch(url);
+                if (!response.ok) return;
                 const data = await response.json();
-                if (data && data.id) {
+                if (data && data.id && parseInt(data.id) > (lastOrderIdRef.current || 0)) {
                     handleNewOrder(data);
                 }
             } catch (e) {
@@ -76,9 +97,9 @@ const Navbar = () => {
             }
         };
 
+        loadRecentOrders();
         connectSSE();
-        checkLatestOrder(); // Check immediately
-        pollInterval = setInterval(checkLatestOrder, 15000); // Check every 15 seconds
+        pollInterval = setInterval(pollForNewOrders, 10000); // Poll every 10s
 
         return () => {
             if (eventSource) eventSource.close();

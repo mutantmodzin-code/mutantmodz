@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../db');
 
 // In-memory store for SSE clients
 const clients = new Set();
@@ -29,8 +30,31 @@ router.get('/stream', (req, res) => {
     });
 });
 
-// Get latest online order for polling fallback
+// Get latest online order (supports ?afterId=X to only return newer orders)
 router.get('/latest', async (req, res) => {
+    try {
+        const { afterId } = req.query;
+        let query = `
+            SELECT i.id, i.total_amount, i.payment_method, i.created_at, c.name as customer_name
+            FROM invoices i
+            LEFT JOIN customers c ON i.customer_id = c.id
+            WHERE i.order_type = 'Online Order'
+        `;
+        const values = [];
+        if (afterId) {
+            query += ` AND i.id > $1`;
+            values.push(parseInt(afterId));
+        }
+        query += ` ORDER BY i.id DESC LIMIT 1`;
+        const result = await db.query(query, values);
+        res.json(result.rows[0] || null);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get recent online orders (last 5) for admin portal initial load
+router.get('/recent', async (req, res) => {
     try {
         const result = await db.query(`
             SELECT i.id, i.total_amount, i.payment_method, i.created_at, c.name as customer_name
@@ -38,9 +62,9 @@ router.get('/latest', async (req, res) => {
             LEFT JOIN customers c ON i.customer_id = c.id
             WHERE i.order_type = 'Online Order'
             ORDER BY i.id DESC
-            LIMIT 1
+            LIMIT 5
         `);
-        res.json(result.rows[0] || null);
+        res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

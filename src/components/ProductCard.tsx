@@ -124,7 +124,7 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
             handleAddToCart();
           }}
           disabled={product.stock <= 0}
-          className={`absolute bottom-8 right-8 z-20 w-14 h-14 rounded-2xl flex items-center justify-center text-white transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 ${product.stock > 0 ? 'bg-red-600 border border-red-500 shadow-red-600/40' : 'bg-zinc-800 border border-zinc-700 cursor-not-allowed hidden'}`}
+          className={`absolute bottom-8 right-8 z-20 w-14 h-14 rounded-2xl flex items-center justify-center text-white transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl ${product.stock > 0 ? 'bg-red-600 border border-red-500 shadow-red-600/40 opacity-100 sm:opacity-0 sm:translate-y-4 sm:group-hover:opacity-100 sm:group-hover:translate-y-0' : 'bg-zinc-800 border border-zinc-700 cursor-not-allowed hidden'}`}
         >
           <ShoppingBag size={24} />
         </button>
@@ -165,15 +165,15 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
               handleAddToCart();
             }}
             disabled={product.stock <= 0}
-            className={`w-full relative h-[60px] group/btn overflow-hidden rounded-2xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-zinc-800' : 'bg-zinc-900/50 cursor-not-allowed opacity-50'}`}
+            className={`w-full relative h-[60px] group/btn overflow-hidden rounded-2xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-red-600' : 'bg-zinc-900/50 cursor-not-allowed opacity-50'}`}
           >
-            <div className={`absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'group-hover/btn:-translate-y-full' : ''}`}>
-              <ShoppingCart size={18} className="text-red-600" />
+            <div className={`absolute inset-0 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'sm:group-hover/btn:-translate-y-full' : ''}`}>
+              <ShoppingCart size={18} className="text-white" />
               {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
             </div>
             {product.stock > 0 && (
-              <div className="absolute inset-0 bg-red-600 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] translate-y-full group-hover/btn:translate-y-0 transition-all duration-500">
-                Assemble Order <ArrowUpRight size={16} />
+              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-[11px] -translate-y-full sm:group-hover/btn:translate-y-0 transition-all duration-500">
+                Add to Cart <ArrowUpRight size={16} />
               </div>
             )}
           </button>

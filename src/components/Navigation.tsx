@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
   Menu, X, Search, Mic, User, ShoppingCart, ChevronDown,
   Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
-  ArrowRight, Flame, Star, ChevronRight, LogOut
+  ArrowRight, Flame, Star, ChevronRight, LogOut, Home, LayoutGrid
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
@@ -376,13 +376,32 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 </button>
               </div>
 
-              {/* Mobile Menu Toggle */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="lg:hidden text-white hover:text-red-500 transition-colors p-2 bg-zinc-900/50 rounded-lg border border-zinc-800 active:scale-95"
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+              {/* Mobile: Cart + Menu Toggle */}
+              <div className="lg:hidden flex items-center gap-3">
+                <button
+                  onClick={onOpenCart}
+                  className="relative text-white p-3 bg-zinc-800 rounded-xl border border-zinc-700 active:scale-95 touch-manipulation min-h-[48px] min-w-[48px] flex items-center justify-center"
+                  aria-label="Open Cart"
+                >
+                  <ShoppingCart size={22} />
+                  {totalCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
+                      {totalCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  aria-label={isMenuOpen ? 'Close Menu' : 'Open Menu'}
+                  className={`min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl active:scale-95 touch-manipulation transition-all duration-200 ${
+                    isMenuOpen
+                      ? 'bg-zinc-800 border border-zinc-600 text-white'
+                      : 'bg-red-600 border border-red-500 text-white shadow-[0_0_16px_rgba(220,38,38,0.5)]'
+                  }`}
+                >
+                  {isMenuOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
+                </button>
+              </div>
             </div>
 
             {/* Mobile Smart Search (Shows below logo on mobile) */}
@@ -542,11 +561,11 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
             </div>
           </div>
         </div>
-        {!isScrolled && <AnnouncementBar />}
+        <AnnouncementBar />
 
         {/* Mobile Navigation Menu */}
         <div className={`lg:hidden fixed inset-0 top-[100px] z-40 bg-zinc-950/98 backdrop-blur-2xl transition-all duration-500 overflow-y-auto ease-in-out ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
-          }`}>
+          }`} style={{ paddingBottom: '80px' }}>
           <div className="p-4 space-y-2 pb-24 border-t border-zinc-800/50">
             {/* Mobile Account / Cart */}
             <div className="flex gap-4 mb-6 pt-2">
@@ -650,16 +669,79 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
 
             <button
               onClick={() => handleNavClick('products')}
-              className="w-full mt-8 flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-orange-600 p-4 min-h-[48px] rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all duration-300 active:scale-95 transform touch-manipulation"
+              className="w-full mt-6 flex items-center justify-center gap-3 bg-red-600 p-4 min-h-[56px] rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:bg-red-500 transition-all duration-300 active:scale-95 touch-manipulation"
             >
-              <Flame size={20} className="text-white animate-pulse" />
-              <span className="font-bold text-white uppercase tracking-widest text-sm">Garage Sale</span>
+              <Flame size={20} className="text-white" />
+              <span className="font-black text-white uppercase tracking-widest text-sm">Shop All Products</span>
+              <ArrowRight size={18} className="text-white" />
             </button>
           </div>
         </div>
       </nav>
+
+      {/* ── STICKY BOTTOM NAV (Mobile Only) ── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-950/98 border-t border-zinc-800 backdrop-blur-xl" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="grid grid-cols-5 h-[60px]">
+          <button
+            onClick={() => { handleNavClick('home'); }}
+            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation"
+          >
+            <Home size={22} strokeWidth={2} />
+            <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
+          </button>
+          <button
+            onClick={() => { handleNavClick('products'); }}
+            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation"
+          >
+            <Flame size={22} strokeWidth={2} />
+            <span className="text-[9px] font-bold uppercase tracking-wide">Shop</span>
+          </button>
+          {/* Centre Menu Button – oversized for emphasis */}
+          <button
+            onClick={() => { setIsMenuOpen(!isMenuOpen); }}
+            className="flex flex-col items-center justify-center gap-1 touch-manipulation"
+          >
+            <div className={`flex flex-col items-center justify-center w-13 h-13 w-[52px] h-[52px] rounded-full -mt-4 shadow-[0_-4px_20px_rgba(220,38,38,0.5)] transition-all duration-300 ${
+              isMenuOpen ? 'bg-zinc-800 scale-90' : 'bg-red-600'
+            }`}>
+              {isMenuOpen ? <X size={22} strokeWidth={2.5} className="text-white" /> : <LayoutGrid size={22} className="text-white" />}
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-wide text-zinc-400 mt-0.5">{isMenuOpen ? 'Close' : 'Menu'}</span>
+          </button>
+          <button
+            onClick={onOpenCart}
+            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation relative"
+          >
+            <div className="relative">
+              <ShoppingCart size={22} strokeWidth={2} />
+              {totalCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">
+                  {totalCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[9px] font-bold uppercase tracking-wide">Cart</span>
+          </button>
+          <button
+            onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation"
+          >
+            {isLoggedIn ? (
+              <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
+                {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+            ) : (
+              <User size={22} strokeWidth={2} />
+            )}
+            <span className="text-[9px] font-bold uppercase tracking-wide">
+              {isLoggedIn ? (user?.displayName?.split(' ')[0] || 'Me') : 'Login'}
+            </span>
+          </button>
+        </div>
+      </nav>
+
       {/* Spacer to prevent content from going under the fixed nav */}
-      <div className={`transition-all duration-400 ${isScrolled ? 'h-[100px] md:h-[68px]' : 'h-[180px] md:h-[156px]'}`}></div>
+      <div className={`transition-all duration-400 ${isScrolled ? 'h-[70px] sm:h-[68px]' : 'h-[130px] sm:h-[156px]'}`}></div>
     </>
   );
 }

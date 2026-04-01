@@ -9,14 +9,14 @@ const videos = [
 
 export default function VideoReels() {
   return (
-    <section className="py-24 px-6 sm:px-12 bg-zinc-950 overflow-hidden">
+    <section className="py-14 sm:py-24 px-6 sm:px-12 bg-zinc-950 overflow-hidden">
       <div className="max-w-[1700px] mx-auto">
-        <div className="flex justify-between items-end mb-16">
-          <div className="space-y-4">
-            <div className="text-red-600 font-bold uppercase tracking-[0.3em] text-[10px]">Visual Protocols</div>
-            <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase">RIDER <span className="text-red-600">FEED</span></h2>
+        <div className="flex justify-between items-end mb-10 sm:mb-16">
+          <div className="space-y-3">
+            <div className="text-red-600 font-bold uppercase tracking-[0.3em] text-[10px]">Watch & Explore</div>
+            <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase">RIDER <span className="text-red-600">VIDEOS</span></h2>
           </div>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] hidden md:block">Real world testing protocols in 4k</p>
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] hidden md:block">See our products in real rides</p>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -39,12 +39,12 @@ export default function VideoReels() {
                   </div>
                </div>
 
-               <div className="absolute bottom-8 left-8 text-white z-10">
-                 <div className="flex items-center gap-2 mb-3">
+               <div className="absolute bottom-6 left-5 text-white z-10">
+                 <div className="flex items-center gap-2 mb-2">
                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">In Play</span>
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">Watch</span>
                  </div>
-                 <h4 className="text-lg font-black uppercase tracking-tight leading-none max-w-[120px]">{v.title}</h4>
+                 <h4 className="text-base sm:text-lg font-black uppercase tracking-tight leading-none max-w-[120px]">{v.title}</h4>
                </div>
 
                {/* Scanline Effect */}

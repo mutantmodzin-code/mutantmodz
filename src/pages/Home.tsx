@@ -89,22 +89,22 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* VIDEO FEED SECTION */}
       <VideoReels />
 
-      {/* FEATURED DROPS */}
-      <section className="py-32 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
+      {/* FEATURED PRODUCTS */}
+      <section className="py-16 sm:py-28 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
         <div className="max-w-[1700px] mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-10">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 sm:mb-20 gap-10">
             <div className="space-y-6">
-              <div className="text-red-600 font-black uppercase tracking-[0.5em] text-[12px]">Latest Hardware Releases</div>
+              <div className="text-red-600 font-black uppercase tracking-[0.5em] text-[12px]">Our Top Picks</div>
               <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
-                FEATURED <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-700 to-zinc-400">ARRAY</span>
+                FEATURED <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-700 to-zinc-400">PRODUCTS</span>
               </h2>
             </div>
             <div className="flex flex-col items-end gap-6 text-right">
               <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm max-w-sm">
-                Directly imported performance modules from elite global manufacturers.
+                Premium gear sourced from top brands worldwide.
               </p>
               <button onClick={() => onNavigate('products')} className="group flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs border-b border-red-600/50 pb-2 hover:text-red-500 transition-colors">
-                View Entire Catalog <ArrowUpRight size={16} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                See All Products <ArrowUpRight size={16} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
@@ -117,26 +117,26 @@ export default function Home({ onNavigate }: HomeProps) {
         </div>
       </section>
 
-      {/* 10. COMBO DEALS PREVIEW */}
-      <section className="py-40 px-6 sm:px-12 bg-black border-y border-white/5 relative overflow-hidden">
+      {/* COMBO DEALS PREVIEW */}
+      <section className="py-16 sm:py-32 px-6 sm:px-12 bg-black border-y border-white/5 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-red-600/5 skew-x-12 transform translate-x-1/2"></div>
-        <div className="max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-          <div className="space-y-12">
-            <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-8 py-3 rounded-full">
+        <div className="max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="space-y-8 sm:space-y-12">
+            <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-full">
               <Flame size={20} className="text-red-600 animate-pulse" />
-              <span className="text-red-500 text-[12px] font-black uppercase tracking-[0.5em]">Operation Synergy</span>
+              <span className="text-red-500 text-[12px] font-black uppercase tracking-[0.5em]">Bundle & Save</span>
             </div>
             <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
               COMBO <br /> <span className="text-red-600">DEALS</span>
             </h2>
             <p className="text-zinc-400 text-xl font-bold uppercase tracking-widest leading-relaxed max-w-xl">
-              Equip yourself with curated bundles designed for maximum tactical efficiency and optimized cost mapping.
+              Get everything you need at one great price.
             </p>
-            <button onClick={() => onNavigate('combos')} className="px-16 py-8 bg-white text-black rounded-[2.5rem] font-black uppercase tracking-widest text-sm hover:bg-red-600 hover:text-white transition-all transform hover:-translate-y-2 active:scale-95 shadow-2xl">
-              Access Bundle database
+            <button onClick={() => onNavigate('combos')} className="px-12 py-6 sm:px-16 sm:py-8 bg-white text-black rounded-[2.5rem] font-black uppercase tracking-widest text-sm hover:bg-red-600 hover:text-white transition-all transform hover:-translate-y-2 active:scale-95 shadow-2xl">
+              View All Combos
             </button>
           </div>
-          <div className="relative group">
+          <div className="relative group hidden lg:block">
             <div className="absolute -inset-4 bg-red-600 opacity-20 blur-3xl rounded-full animate-pulse"></div>
             <div className="relative bg-zinc-900/40 rounded-[4rem] border border-white/5 p-12 overflow-hidden backdrop-blur-3xl">
               <div className="flex gap-8 mb-10">
@@ -164,15 +164,15 @@ export default function Home({ onNavigate }: HomeProps) {
       <BrandCarousel onNavigate={onNavigate} />
 
       {/* SHOP BY BIKE */}
-      <section className="py-40 px-6 sm:px-12 bg-black">
-        <div className="max-w-[1700px] mx-auto text-center space-y-24">
+      <section className="py-16 sm:py-32 px-6 sm:px-12 bg-black">
+        <div className="max-w-[1700px] mx-auto text-center space-y-16 sm:space-y-24">
           <div className="space-y-6">
             <h2 className="text-5xl sm:text-8xl font-black text-white tracking-tighter uppercase leading-none">
-              ENGINEERED BY <br /> <span className="text-red-600">MODEL</span>
+              SHOP BY <br /> <span className="text-red-600">YOUR BIKE</span>
             </h2>
-            <p className="text-zinc-500 font-bold uppercase tracking-[0.5em] text-xs">Precise compatibility mapping for every machine.</p>
+            <p className="text-zinc-500 font-bold uppercase tracking-[0.5em] text-xs">Pick your bike and find the perfect accessories.</p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {bikeBrands.map((brand, idx) => (
               <BrandCard key={idx} brand={brand} />
             ))}
@@ -183,26 +183,26 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 6. TESTIMONIALS SLIDER */}
       <TestimonialSlider />
 
-      {/* 12. BLOG PREVIEW SECTION */}
-      <section className="py-40 px-6 sm:px-12 bg-black relative">
+      {/* BLOG PREVIEW SECTION */}
+      <section className="py-16 sm:py-32 px-6 sm:px-12 bg-black relative">
         <div className="max-w-[1700px] mx-auto">
-          <div className="flex justify-between items-end mb-24">
+          <div className="flex justify-between items-end mb-12 sm:mb-24">
             <div className="space-y-6">
-              <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase">RIDING <span className="text-red-600">INTEL</span></h2>
-              <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Field guides and technical analysis.</p>
+              <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase">TIPS & <span className="text-red-600">GUIDES</span></h2>
+              <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Helpful advice for every rider.</p>
             </div>
             <button onClick={() => onNavigate('blog')} className="text-white font-black uppercase tracking-widest text-xs flex items-center gap-2 hover:text-red-500 transition-colors">
-              Read All Entries &rarr;
+              See All Articles &rarr;
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
             {[
                { title: 'Choosing the Right Helmet', date: 'March 15, 2026', img: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=400' },
                { title: 'Monsoon Riding Essentials', date: 'March 12, 2026', img: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=400' },
                { title: 'Top 5 RE Modifications', date: 'March 10, 2026', img: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=400' }
             ].map((p, i) => (
               <div key={i} className="group cursor-pointer" onClick={() => onNavigate('blog')}>
-                <div className="h-80 rounded-[3rem] overflow-hidden border border-white/5 mb-8 relative">
+                <div className="h-52 sm:h-80 rounded-[3rem] overflow-hidden border border-white/5 mb-8 relative">
                   <img src={p.img} alt={p.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
                 </div>
@@ -219,27 +219,27 @@ export default function Home({ onNavigate }: HomeProps) {
       </section>
 
       {/* FINAL CALL */}
-      <section className="py-40 px-6 sm:px-12 bg-red-600 relative overflow-hidden group">
+      <section className="py-16 sm:py-32 px-6 sm:px-12 bg-red-600 relative overflow-hidden group">
         <div className="absolute inset-0 bg-black opacity-30 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"></div>
-        <div className="max-w-[1200px] mx-auto text-center relative z-10 space-y-12">
+        <div className="max-w-[1200px] mx-auto text-center relative z-10 space-y-8 sm:space-y-12">
           <h2 className="text-6xl sm:text-[10rem] font-black text-white leading-none tracking-tighter uppercase">
-            READY FOR <br /> <span className="text-black">UPGRADE?</span>
+            GEAR UP <br /> <span className="text-black">TODAY</span>
           </h2>
           <p className="text-xl sm:text-2xl text-white font-black uppercase tracking-[0.5em] max-w-2xl mx-auto leading-relaxed">
-            Enter the catalog or visit our Coimbatore HQ for elite modification protocols.
+            Shop online or visit us in Coimbatore.
           </p>
-          <div className="flex flex-col sm:flex-row gap-8 justify-center pt-8">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center pt-4 sm:pt-8">
             <button
               onClick={() => onNavigate('products')}
-              className="px-16 py-8 bg-black text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-white hover:text-red-700 transition-all transform hover:-translate-y-2 active:scale-95"
+              className="px-12 py-5 sm:px-16 sm:py-8 bg-black text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-white hover:text-red-700 transition-all transform hover:-translate-y-2 active:scale-95 min-h-[56px]"
             >
-              View Catalog
+              Shop Now
             </button>
             <button
               onClick={() => onNavigate('contact')}
-              className="px-16 py-8 bg-white text-red-700 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 active:scale-95"
+              className="px-12 py-5 sm:px-16 sm:py-8 bg-white text-red-700 rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 active:scale-95 min-h-[56px]"
             >
-              Secure Direct Channel
+              Contact Us
             </button>
           </div>
         </div>

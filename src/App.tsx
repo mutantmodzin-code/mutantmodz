@@ -12,6 +12,8 @@ import Blog from './pages/Blog';
 import Combos from './pages/Combos';
 import GarageSale from './pages/GarageSale';
 import Category from './pages/Category';
+import Categories from './pages/Categories';
+import MenuDrawer from './components/MenuDrawer';
 
 import Payment from './pages/Payment';
 import { CartProvider } from './context/CartContext';
@@ -22,6 +24,7 @@ import LoginPopup from './components/LoginPopup';
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMenuDrawerOpen, setIsMenuDrawerOpen] = useState(false);
   const { showLoginPopup, setShowLoginPopup } = useUserAuth();
 
   useEffect(() => {
@@ -63,6 +66,8 @@ function AppContent() {
         return <GarageSale onNavigate={navigate} />;
       case 'category':
         return <Category onNavigate={navigate} />;
+      case 'categories':
+        return <Categories onNavigate={navigate} />;
       case 'payment':
         return <Payment />;
       default:
@@ -76,6 +81,7 @@ function AppContent() {
         currentPage={currentPage}
         onNavigate={navigate}
         onOpenCart={() => setIsCartOpen(true)}
+        onOpenMenu={() => setIsMenuDrawerOpen(true)}
       />
       <main className="pt-20">{renderPage()}</main>
       <Footer />
@@ -90,6 +96,13 @@ function AppContent() {
       <LoginPopup
         isOpen={showLoginPopup}
         onClose={() => setShowLoginPopup(false)}
+      />
+
+      <MenuDrawer
+        isOpen={isMenuDrawerOpen}
+        onClose={() => setIsMenuDrawerOpen(false)}
+        onNavigate={navigate}
+        onOpenCart={() => setIsCartOpen(true)}
       />
     </div>
   );

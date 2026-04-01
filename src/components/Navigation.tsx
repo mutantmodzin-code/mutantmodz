@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Menu, X, Search, Mic, User, ShoppingCart, ChevronDown,
+  Menu, Search, Mic, User, ShoppingCart, ChevronDown,
   Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
   ArrowRight, Flame, Star, ChevronRight, LogOut, Home, LayoutGrid
 } from 'lucide-react';
@@ -12,15 +12,14 @@ interface NavigationProps {
   currentPage: string;
   onNavigate: (page: string, params?: string) => void;
   onOpenCart?: () => void;
+  onOpenMenu?: () => void;
 }
 
-export default function Navigation({ currentPage: _currentPage, onNavigate, onOpenCart }: NavigationProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default function Navigation({ currentPage: _currentPage, onNavigate, onOpenCart, onOpenMenu }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchCategory, setSearchCategory] = useState('All');
   const [isSearchCatOpen, setIsSearchCatOpen] = useState(false);
-  const [mobileExpandedCat, setMobileExpandedCat] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [activeBrand, setActiveBrand] = useState<string | null>('Royal Enfield');
@@ -237,7 +236,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
 
   const handleNavClick = (pageId: string, params: string = '') => {
     onNavigate(pageId, params);
-    setIsMenuOpen(false);
     setActiveDropdown(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -376,8 +374,8 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 </button>
               </div>
 
-              {/* Mobile: Cart + Menu Toggle */}
-              <div className="lg:hidden flex items-center gap-3">
+              {/* Desktop & Mobile: Cart + Menu Toggle */}
+              <div className="flex items-center gap-3">
                 <button
                   onClick={onOpenCart}
                   className="relative text-white p-3 bg-zinc-800 rounded-xl border border-zinc-700 active:scale-95 touch-manipulation min-h-[48px] min-w-[48px] flex items-center justify-center"
@@ -391,15 +389,11 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                   )}
                 </button>
                 <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  aria-label={isMenuOpen ? 'Close Menu' : 'Open Menu'}
-                  className={`min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl active:scale-95 touch-manipulation transition-all duration-200 ${
-                    isMenuOpen
-                      ? 'bg-zinc-800 border border-zinc-600 text-white'
-                      : 'bg-red-600 border border-red-500 text-white shadow-[0_0_16px_rgba(220,38,38,0.5)]'
-                  }`}
+                  onClick={() => onOpenMenu?.()}
+                  aria-label="Open Menu"
+                  className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl bg-red-600 border border-red-500 text-white shadow-[0_0_16px_rgba(220,38,38,0.5)] active:scale-95 touch-manipulation transition-all duration-200"
                 >
-                  {isMenuOpen ? <X size={24} strokeWidth={2.5} /> : <Menu size={24} strokeWidth={2.5} />}
+                  <Menu size={24} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
@@ -562,121 +556,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
           </div>
         </div>
         <AnnouncementBar />
-
-        {/* Mobile Navigation Menu */}
-        <div className={`lg:hidden fixed inset-0 top-[100px] z-40 bg-zinc-950/98 backdrop-blur-2xl transition-all duration-500 overflow-y-auto ease-in-out ${isMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'
-          }`} style={{ paddingBottom: '80px' }}>
-          <div className="p-4 space-y-2 pb-24 border-t border-zinc-800/50">
-            {/* Mobile Account / Cart */}
-            <div className="flex gap-4 mb-6 pt-2">
-              <button 
-                onClick={() => isLoggedIn ? logout() : setShowLoginPopup(true)}
-                className="flex-1 bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 min-h-[48px] flex flex-col items-center gap-2 hover:bg-zinc-800 hover:border-red-500/30 transition-colors active:scale-95 touch-manipulation"
-              >
-                {isLoggedIn ? (
-                  <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
-                    {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
-                  </div>
-                ) : (
-                  <User size={24} className="text-red-400" />
-                )}
-                <span className="text-white text-sm font-semibold">
-                  {isLoggedIn ? user?.displayName?.split(' ')[0] || 'Account' : 'Login'}
-                </span>
-              </button>
-              <button
-                onClick={onOpenCart}
-                className="flex-1 bg-zinc-900/50 border border-zinc-800/80 rounded-xl p-4 min-h-[48px] flex flex-col items-center gap-2 hover:bg-zinc-800 hover:border-red-500/30 transition-colors relative active:scale-95 touch-manipulation"
-              >
-                <ShoppingCart size={24} className="text-red-400" />
-                {totalCount > 0 && (
-                  <span className="absolute top-3 right-8 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
-                    {totalCount}
-                  </span>
-                )}
-                <span className="text-white text-sm font-semibold">Cart</span>
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {categoriesData.map((cat, idx) => (
-                <div key={cat.id} className="bg-zinc-900/30 rounded-xl border border-transparent hover:border-red-600/30 transition-all duration-300" style={{ animationDelay: `${idx * 50}ms` }}>
-                  <button
-                    onClick={() => setMobileExpandedCat(mobileExpandedCat === cat.id ? null : cat.id)}
-                    className="w-full flex items-center justify-between p-4 min-h-[48px] group active:scale-[0.98] touch-manipulation"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2.5 bg-zinc-800/80 rounded-lg group-hover:bg-red-600/20 transition-colors duration-300 shadow-inner group-hover:scale-110 transform">
-                        <cat.icon size={20} className="text-zinc-400 group-hover:text-red-500 transition-colors duration-300" />
-                      </div>
-                      <span className="text-white font-bold tracking-wide uppercase text-[13px]">{cat.label}</span>
-                    </div>
-                    <ChevronDown size={18} className={`text-zinc-600 transition-transform duration-300 ${mobileExpandedCat === cat.id ? 'rotate-180 text-red-500' : 'group-hover:text-red-500'}`} />
-                  </button>
-
-                  {/* Mobile Accordion Sub-menu */}
-                  <div className={`overflow-hidden transition-all duration-300 ${mobileExpandedCat === cat.id ? 'max-h-[800px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-                    <div className="px-4 ml-12 border-l border-zinc-800/80 pl-4 space-y-4">
-                      {cat.id === 'bike' && cat.brands ? (
-                        <div className="space-y-6">
-                          {cat.brands.map(brand => (
-                            <div key={brand.name}>
-                              <h4 className="text-red-500 text-[11px] font-bold uppercase tracking-widest mb-2">{brand.name}</h4>
-                              <div className="grid grid-cols-2 gap-2">
-                                {brand.models.map(model => (
-                                  <button
-                                    key={model}
-                                    onClick={() => handleNavClick('products', `?bike=${encodeURIComponent(model)}`)}
-                                    className="text-zinc-400 hover:text-white text-[11px] py-1 text-left transition-colors"
-                                  >
-                                    {model}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        cat.columns?.map((col, colIdx) => (
-                          <div key={colIdx}>
-                            <h4 className="text-zinc-400 text-[11px] font-bold uppercase tracking-widest mb-2">{col.title}</h4>
-                            <ul className="space-y-1">
-                              {col.links.slice(0, 4).map(link => (
-                                <li key={link}>
-                                  <button
-                                    onClick={() => handleNavClick('products')}
-                                    className="text-zinc-300 hover:text-white text-sm py-2 min-h-[40px] w-full text-left transition-colors flex items-center gap-2 touch-manipulation"
-                                  >
-                                    {link}
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))
-                      )}
-                      <button
-                        onClick={() => handleNavClick('products')}
-                        className="text-red-500 text-sm font-bold min-h-[40px] pt-1 w-full text-left touch-manipulation"
-                      >
-                        View All {cat.label} &rarr;
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => handleNavClick('products')}
-              className="w-full mt-6 flex items-center justify-center gap-3 bg-red-600 p-4 min-h-[56px] rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:bg-red-500 transition-all duration-300 active:scale-95 touch-manipulation"
-            >
-              <Flame size={20} className="text-white" />
-              <span className="font-black text-white uppercase tracking-widest text-sm">Shop All Products</span>
-              <ArrowRight size={18} className="text-white" />
-            </button>
-          </div>
-        </div>
       </nav>
 
       {/* ── STICKY BOTTOM NAV (Mobile Only) ── */}
@@ -698,15 +577,13 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
           </button>
           {/* Centre Menu Button – oversized for emphasis */}
           <button
-            onClick={() => { setIsMenuOpen(!isMenuOpen); }}
+            onClick={() => onOpenMenu?.()}
             className="flex flex-col items-center justify-center gap-1 touch-manipulation"
           >
-            <div className={`flex flex-col items-center justify-center w-13 h-13 w-[52px] h-[52px] rounded-full -mt-4 shadow-[0_-4px_20px_rgba(220,38,38,0.5)] transition-all duration-300 ${
-              isMenuOpen ? 'bg-zinc-800 scale-90' : 'bg-red-600'
-            }`}>
-              {isMenuOpen ? <X size={22} strokeWidth={2.5} className="text-white" /> : <LayoutGrid size={22} className="text-white" />}
+            <div className="flex flex-col items-center justify-center w-13 h-13 w-[52px] h-[52px] rounded-full -mt-4 shadow-[0_-4px_20px_rgba(220,38,38,0.5)] bg-red-600 transition-all duration-300">
+              <LayoutGrid size={22} className="text-white" />
             </div>
-            <span className="text-[9px] font-bold uppercase tracking-wide text-zinc-400 mt-0.5">{isMenuOpen ? 'Close' : 'Menu'}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wide text-zinc-400 mt-0.5">Menu</span>
           </button>
           <button
             onClick={onOpenCart}

@@ -9,46 +9,40 @@ const videos = [
 
 export default function VideoReels() {
   return (
-    <section className="py-14 sm:py-24 px-6 sm:px-12 bg-zinc-950 overflow-hidden">
-      <div className="max-w-[1700px] mx-auto">
-        <div className="flex justify-between items-end mb-10 sm:mb-16">
-          <div className="space-y-3">
-            <div className="text-red-600 font-bold uppercase tracking-[0.3em] text-[10px]">Watch & Explore</div>
-            <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase">RIDER <span className="text-red-600">VIDEOS</span></h2>
+    <section className="py-8 sm:py-24 bg-zinc-950 overflow-hidden border-b border-white/5">
+      <div className="max-w-[1700px] mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="flex justify-between items-end mb-6 sm:mb-10">
+          <div className="space-y-1 sm:space-y-2">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-none">
+              WATCH OUR <span className="text-red-600">REELS</span>
+            </h2>
+            <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] sm:text-xs">See our products in action</p>
           </div>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] hidden md:block">See our products in real rides</p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory -mx-4 px-4 pb-4">
           {videos.map((v) => (
-            <div key={v.id} className="group relative aspect-[9/16] rounded-3xl overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl">
+            <div key={v.id} className="flex-shrink-0 w-[160px] sm:w-[280px] aspect-[9/16] rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
                <video 
                  src={v.video} 
-                 className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-1000"
+                 className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-700"
                  muted 
                  loop 
                  playsInline
                  onMouseEnter={(e) => e.currentTarget.play()}
                  onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
                />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none group-hover:via-transparent transition-all duration-700"></div>
+               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent pointer-events-none"></div>
                
-               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    <Play size={24} className="text-white fill-white ml-1" />
+               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center">
+                    <Play size={20} className="text-white fill-white ml-1" />
                   </div>
                </div>
 
-               <div className="absolute bottom-6 left-5 text-white z-10">
-                 <div className="flex items-center gap-2 mb-2">
-                   <div className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">Watch</span>
-                 </div>
-                 <h4 className="text-base sm:text-lg font-black uppercase tracking-tight leading-none max-w-[120px]">{v.title}</h4>
+               <div className="absolute bottom-4 left-4 right-4 text-white z-10">
+                 <h4 className="text-xs sm:text-lg font-black uppercase tracking-tight leading-none line-clamp-2">{v.title}</h4>
                </div>
-
-               {/* Scanline Effect */}
-               <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] pointer-events-none opacity-20"></div>
             </div>
           ))}
         </div>

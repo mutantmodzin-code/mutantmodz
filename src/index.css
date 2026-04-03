@@ -61,6 +61,26 @@
   animation: pulse-glow 2s infinite;
 }
 
+/* Hide scrollbar for horizontal swipe sections */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Touch-optimised scroll sections */
+.scroll-smooth-x {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area for mobile bottom padding (since bottom nav removed) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;

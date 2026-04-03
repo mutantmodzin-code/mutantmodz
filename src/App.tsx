@@ -26,11 +26,11 @@ function AppContent() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuDrawerOpen, setIsMenuDrawerOpen] = useState(false);
   const { showLoginPopup, setShowLoginPopup } = useUserAuth();
-
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1).split('?')[0] || 'home';
       setCurrentPage(hash);
+      window.scrollTo(0, 0); // Scroll to top on navigation
     };
 
     window.addEventListener('hashchange', handleHashChange);
@@ -83,7 +83,7 @@ function AppContent() {
         onOpenCart={() => setIsCartOpen(true)}
         onOpenMenu={() => setIsMenuDrawerOpen(true)}
       />
-      <main className="pt-20">{renderPage()}</main>
+      <main>{renderPage()}</main>
       <Footer />
       <ChatBot />
 

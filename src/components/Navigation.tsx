@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, Search, Mic, User, ShoppingCart, ChevronDown,
   Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
-  ArrowRight, Flame, Star, ChevronRight, LogOut, Home, LayoutGrid
+  ArrowRight, Flame, Star, ChevronRight, LogOut, X
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
@@ -15,17 +15,19 @@ interface NavigationProps {
   onOpenMenu?: () => void;
 }
 
-export default function Navigation({ currentPage: _currentPage, onNavigate, onOpenCart, onOpenMenu }: NavigationProps) {
+export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpenMenu }: NavigationProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [searchCategory, setSearchCategory] = useState('All');
   const [isSearchCatOpen, setIsSearchCatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [activeBrand, setActiveBrand] = useState<string | null>('Royal Enfield');
   const { totalCount } = useCart();
   const { isLoggedIn, user, setShowLoginPopup, logout } = useUserAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   const handleMouseEnter = (id: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -37,6 +39,10 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
       setActiveDropdown(null);
     }, 200);
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -245,7 +251,42 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
     if (searchQuery.trim()) {
       onNavigate('products', `?search=${encodeURIComponent(searchQuery)}`);
       setSearchQuery('');
+      setShowMobileSearch(false);
     }
+  };
+
+  const handleVoiceSearch = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Voice search is not supported in your browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setSearchQuery(transcript);
+      setIsListening(false);
+      onNavigate('products', `?search=${encodeURIComponent(transcript)}`);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
   };
 
   return (
@@ -256,12 +297,67 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
           : 'bg-gradient-to-b from-zinc-950/95 to-zinc-950/80 backdrop-blur-md'
           }`}
       >
-        {/* TOP ROW: Logo & Search & Icons */}
-        <div className={`transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-zinc-800/40 ${isScrolled ? 'py-1' : 'py-5'}`}>
+        <div className="lg:hidden">
+          <div className="flex items-center justify-between h-[56px] px-4">
+            <button
+               onClick={() => onOpenMenu?.()}
+               aria-label="Open Navigation Menu"
+               className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-white active:scale-95 touch-manipulation transition-all"
+             >
+              <Menu size={24} strokeWidth={2} />
+            </button>
+
+            <div
+              className="flex items-center cursor-pointer group"
+              onClick={() => handleNavClick('home')}
+            >
+              <div className="font-extrabold tracking-tighter text-xl">
+                <span className="text-white">MUTANT</span>
+                <span className="text-red-600 ml-0.5 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]">MODZ</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+               <button
+                 onClick={() => setShowMobileSearch(true)}
+                 aria-label="Open Search"
+                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
+               >
+                <Search size={20} />
+              </button>
+              <button
+                onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
+                aria-label="Account"
+              >
+                {isLoggedIn ? (
+                  <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
+                    {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                ) : (
+                  <User size={20} />
+                )}
+              </button>
+              <button
+                onClick={onOpenCart}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation relative"
+                aria-label="Open Cart"
+              >
+                <ShoppingCart size={20} />
+                {totalCount > 0 && (
+                  <span className="absolute top-1 right-0.5 bg-red-600 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
+                    {totalCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className={`hidden lg:block transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] border-b border-zinc-800/40 ${isScrolled ? 'py-1' : 'py-5'}`}>
           <div className="max-w-[1536px] mx-auto px-6 sm:px-10 lg:px-12">
             <div className="flex justify-between items-center gap-6">
 
-              {/* Logo */}
               <div
                 className="flex items-center cursor-pointer group shrink-0"
                 onClick={() => handleNavClick('home')}
@@ -272,19 +368,17 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 </div>
               </div>
 
-              {/* Large Smart Search Bar (Desktop) */}
               <div className="hidden lg:flex flex-1 max-w-4xl mx-auto relative group z-10">
                 <div className={`flex w-full bg-zinc-900/50 backdrop-blur-sm border border-zinc-700/60 rounded-full transition-all duration-400 shadow-inner group-focus-within:bg-zinc-900/80 group-focus-within:border-red-500/50 group-focus-within:shadow-[0_0_20px_rgba(220,38,38,0.15)] ${isScrolled ? 'h-10' : 'h-12'}`}>
 
-                  {/* Category Selector inside search */}
                   <div className="relative flex items-center h-full border-r border-zinc-700/60 transition-colors group-focus-within:border-zinc-600">
                     <button
                       className="flex items-center gap-2 px-5 md:px-6 text-[13px] font-bold text-zinc-300 hover:text-white transition-all duration-300 uppercase tracking-tight"
                       onClick={() => setIsSearchCatOpen(!isSearchCatOpen)}
+                      aria-label="Select Search Category"
                     >
                       {searchCategory} <ChevronDown size={14} className={`transition-transform duration-300 ${isSearchCatOpen ? 'rotate-180' : ''}`} />
                     </button>
-                    {/* Search Category Dropdown */}
                     {isSearchCatOpen && (
                       <div className="absolute top-[120%] left-0 w-40 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl py-2 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
                         {searchCategories.map(cat => (
@@ -300,7 +394,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                     )}
                   </div>
 
-                  {/* Input Field */}
                   <form onSubmit={handleSearch} className="relative flex-1 flex items-center h-full">
                     <input
                       type="text"
@@ -309,12 +402,16 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full h-full bg-transparent text-white text-[15px] pl-5 pr-14 focus:outline-none placeholder-zinc-500 font-medium transition-all duration-300"
                     />
-                    {/* Micro-interaction icons inside input */}
                     <div className="absolute right-3 flex items-center gap-2 text-zinc-400">
-                      <button type="button" className="p-1.5 hover:text-red-500 hover:bg-zinc-800 rounded-full transition-colors duration-300 cursor-pointer group/mic">
-                        <Mic size={18} className="group-hover/mic:scale-110 group-hover/mic:animate-pulse transition-transform" />
+                      <button 
+                        type="button" 
+                        onClick={handleVoiceSearch}
+                        aria-label="Voice Search"
+                        className={`p-1.5 hover:text-red-500 hover:bg-zinc-800 rounded-full transition-all duration-300 cursor-pointer group/mic ${isListening ? 'text-red-500 bg-red-600/10 animate-pulse' : ''}`}
+                      >
+                        <Mic size={18} className={`group-hover/mic:scale-110 transition-transform ${isListening ? 'animate-bounce' : ''}`} />
                       </button>
-                      <button type="submit" className="p-1.5 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all duration-300 cursor-pointer shadow-[0_0_10px_rgba(220,38,38,0.2)] hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95">
+                      <button type="submit" aria-label="Submit Search" className="p-1.5 bg-red-600/10 text-red-500 hover:bg-red-600 hover:text-white rounded-full transition-all duration-300 cursor-pointer shadow-[0_0_10px_rgba(220,38,38,0.2)] hover:shadow-[0_0_15px_rgba(220,38,38,0.5)] hover:scale-105 active:scale-95">
                         <Search size={18} />
                       </button>
                     </div>
@@ -322,10 +419,10 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 </div>
               </div>
 
-              {/* Right Icons: User & Cart */}
               <div className="hidden lg:flex items-center space-x-5 shrink-0">
                 <button 
                   onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                  aria-label="Account Menu"
                   className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative"
                 >
                   <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1">
@@ -341,7 +438,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                     {isLoggedIn ? user?.displayName?.split(' ')[0] || 'Account' : 'Login'}
                   </span>
                   
-                  {/* User Dropdown Menu */}
                   {isLoggedIn && showUserMenu && (
                     <div className="absolute top-full mt-3 right-0 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl py-2 z-50">
                       <div className="px-4 py-3 border-b border-zinc-800">
@@ -360,6 +456,7 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 <div className="w-px h-8 bg-zinc-800"></div>
                 <button
                   onClick={onOpenCart}
+                  aria-label="Open Cart"
                   className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative"
                 >
                   <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1 group-hover:animate-[wiggle_1s_ease-in-out_infinite]">
@@ -374,49 +471,17 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 </button>
               </div>
 
-              {/* Desktop & Mobile: Cart + Menu Toggle */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={onOpenCart}
-                  className="relative text-white p-3 bg-zinc-800 rounded-xl border border-zinc-700 active:scale-95 touch-manipulation min-h-[48px] min-w-[48px] flex items-center justify-center"
-                  aria-label="Open Cart"
-                >
-                  <ShoppingCart size={22} />
-                  {totalCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-lg">
-                      {totalCount}
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => onOpenMenu?.()}
-                  aria-label="Open Menu"
-                  className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl bg-red-600 border border-red-500 text-white shadow-[0_0_16px_rgba(220,38,38,0.5)] active:scale-95 touch-manipulation transition-all duration-200"
-                >
-                  <Menu size={24} strokeWidth={2.5} />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Smart Search (Shows below logo on mobile) */}
-            <div className={`lg:hidden w-full mt-3 transition-all duration-500 ${isScrolled ? 'hidden' : 'block'}`}>
-              <form onSubmit={handleSearch} className="relative flex w-full bg-zinc-900/60 border border-zinc-800 rounded-full h-11 shadow-inner focus-within:border-red-500/50 transition-colors duration-300">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full h-full bg-transparent text-white text-sm pl-4 pr-10 focus:outline-none placeholder-zinc-500"
-                />
-                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-500 transition-colors">
-                  <Search size={18} />
-                </button>
-              </form>
+              <button
+                onClick={() => onOpenMenu?.()}
+                aria-label="Open Navigation Menu"
+                className="hidden lg:flex min-h-[48px] min-w-[48px] items-center justify-center rounded-xl bg-red-600 border border-red-500 text-white shadow-[0_0_16px_rgba(220,38,38,0.5)] active:scale-95 touch-manipulation transition-all duration-200"
+              >
+                <Menu size={24} strokeWidth={2.5} />
+              </button>
             </div>
           </div>
         </div>
 
-        {/* BOTTOM ROW: Category Navigation with Mega Menus */}
         <div className="hidden lg:block relative bg-zinc-950/40 backdrop-blur-md mega-menu-container">
           <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'h-0 opacity-0 overflow-hidden' : 'h-[52px] opacity-100'}`}>
@@ -435,21 +500,16 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                     >
                       <cat.icon size={18} className={`transition-all duration-500 group-hover/navlink:scale-125 group-hover/navlink:text-red-500 group-hover/navlink:drop-shadow-[0_0_8px_rgba(220,38,38,0.5)] ${activeDropdown === cat.id ? 'text-red-500' : 'text-zinc-500'}`} />
                       {cat.label}
-                      {/* Glow Highlight Background */}
                       <span className="absolute inset-x-0 inset-y-2 bg-red-600/0 group-hover/navlink:bg-red-600/5 rounded-xl transition-all duration-500 -z-10"></span>
-                      {/* Smooth Underline Animation */}
                       <span className={`absolute left-1/2 -translate-x-1/2 bottom-[4px] h-[3px] bg-red-600 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1) shadow-[0_0_15px_rgba(220,38,38,1)] rounded-full ${activeDropdown === cat.id ? 'w-[70%]' : 'w-0 group-hover:w-[70%]'}`}></span>
                     </button>
 
-                    {/* Dynamic Mega Menu Dropdown */}
                     <div className={`absolute left-0 top-full w-full bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-y border-zinc-800/80 shadow-[0_40px_80px_rgba(0,0,0,0.95)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) transform origin-top overflow-hidden ${activeDropdown === cat.id ? 'opacity-100 scale-y-100 translate-y-0 visible h-auto pb-4 max-h-[500px]' : 'opacity-0 scale-y-95 -translate-y-4 invisible h-0 pointer-events-none'
                       }`}>
                       <div className="max-w-[1500px] mx-auto px-8 py-10 flex gap-12">
-                        {/* Columns Container or Brand/Model Split */}
                         <div className="flex flex-1 gap-12 border-r border-zinc-800/50 pr-12">
                           {cat.id === 'bike' && cat.brands ? (
                             <div className="flex w-full gap-8">
-                              {/* Brands List (Left) */}
                               <div className="w-1/3 border-r border-zinc-800/50 pr-8">
                                 <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-6">Select Brand</h3>
                                 <div className="space-y-1">
@@ -464,7 +524,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                                   ))}
                                 </div>
                               </div>
-                              {/* Models List (Right) */}
                               <div className="flex-1">
                                 <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-6">Compatible Models</h3>
                                 <div className="grid grid-cols-2 gap-x-8 gap-y-4">
@@ -501,7 +560,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                                     </li>
                                   ))}
                                 </ul>
-                                {/* 'View All' Link at bottom of first column */}
                                 {idx === 0 && (
                                   <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
                                     View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
@@ -512,7 +570,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                           )}
                         </div>
 
-                        {/* Featured Image Cards (Right Sidebar of Mega Menu) */}
                         <div className="w-[30%] grid gap-5">
                           <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest pl-2">Featured</h3>
                           {cat.featured.map((card, fIdx) => (
@@ -539,7 +596,6 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
                 ))}
               </div>
 
-              {/* Animated CTA Garage Sale */}
               <button
                 onClick={() => handleNavClick('products')}
                 className="group relative inline-flex items-center justify-center shrink-0 ml-4 font-bold hidden xl:flex"
@@ -558,67 +614,50 @@ export default function Navigation({ currentPage: _currentPage, onNavigate, onOp
         <AnnouncementBar />
       </nav>
 
-      {/* ── STICKY BOTTOM NAV (Mobile Only) ── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-950/98 border-t border-zinc-800 backdrop-blur-xl" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="grid grid-cols-5 h-[60px]">
-          <button
-            onClick={() => { handleNavClick('home'); }}
-            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation"
-          >
-            <Home size={22} strokeWidth={2} />
-            <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
-          </button>
-          <button
-            onClick={() => { handleNavClick('products'); }}
-            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation"
-          >
-            <Flame size={22} strokeWidth={2} />
-            <span className="text-[9px] font-bold uppercase tracking-wide">Shop</span>
-          </button>
-          {/* Centre Menu Button – oversized for emphasis */}
-          <button
-            onClick={() => onOpenMenu?.()}
-            className="flex flex-col items-center justify-center gap-1 touch-manipulation"
-          >
-            <div className="flex flex-col items-center justify-center w-13 h-13 w-[52px] h-[52px] rounded-full -mt-4 shadow-[0_-4px_20px_rgba(220,38,38,0.5)] bg-red-600 transition-all duration-300">
-              <LayoutGrid size={22} className="text-white" />
-            </div>
-            <span className="text-[9px] font-bold uppercase tracking-wide text-zinc-400 mt-0.5">Menu</span>
-          </button>
-          <button
-            onClick={onOpenCart}
-            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation relative"
-          >
-            <div className="relative">
-              <ShoppingCart size={22} strokeWidth={2} />
-              {totalCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">
-                  {totalCount}
-                </span>
-              )}
-            </div>
-            <span className="text-[9px] font-bold uppercase tracking-wide">Cart</span>
-          </button>
-          <button
-            onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
-            className="flex flex-col items-center justify-center gap-1 text-zinc-400 hover:text-white active:text-red-500 transition-colors touch-manipulation"
-          >
-            {isLoggedIn ? (
-              <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
-                {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-            ) : (
-              <User size={22} strokeWidth={2} />
-            )}
-            <span className="text-[9px] font-bold uppercase tracking-wide">
-              {isLoggedIn ? (user?.displayName?.split(' ')[0] || 'Me') : 'Login'}
-            </span>
-          </button>
+      {showMobileSearch && (
+        <div className="lg:hidden fixed inset-0 z-[100] bg-zinc-950/95 backdrop-blur-xl flex flex-col">
+          <div className="flex items-center gap-3 p-4 border-b border-white/5">
+            <form onSubmit={handleSearch} className="flex-1 relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+                className="w-full h-12 bg-zinc-900/60 border border-zinc-800 rounded-xl text-white text-sm pl-12 pr-4 focus:outline-none focus:border-red-500/50 placeholder-zinc-500"
+              />
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
+            </form>
+            <button
+              onClick={() => setShowMobileSearch(false)}
+              className="min-h-[48px] min-w-[48px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          {/* Quick search suggestions */}
+          <div className="p-4 space-y-3">
+            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">Popular Searches</p>
+            {['Helmets', 'Riding Jackets', 'Crash Guards', 'LED Lights', 'Saddle Bags'].map((term) => (
+              <button
+                key={term}
+                onClick={() => {
+                  setSearchQuery(term);
+                  onNavigate('products', `?search=${encodeURIComponent(term)}`);
+                  setShowMobileSearch(false);
+                }}
+                className="block w-full text-left text-zinc-300 text-sm font-bold py-3 px-4 rounded-xl hover:bg-white/5 transition-colors touch-manipulation active:bg-red-600/10"
+              >
+                {term}
+              </button>
+            ))}
+          </div>
         </div>
-      </nav>
+      )}
 
       {/* Spacer to prevent content from going under the fixed nav */}
-      <div className={`transition-all duration-400 ${isScrolled ? 'h-[70px] sm:h-[68px]' : 'h-[130px] sm:h-[156px]'}`}></div>
+      <div className="h-[56px] lg:hidden"></div>
+      <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[70px] sm:h-[68px]' : 'h-[130px] sm:h-[156px]'}`}></div>
     </>
   );
 }

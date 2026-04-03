@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, Variants, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -21,7 +21,7 @@ interface HeroSlideshowProps {
     onNavigate: (page: string) => void;
 }
 
-export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
+export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
     const y2 = useTransform(scrollY, [0, 500], [0, -150]);
@@ -69,9 +69,9 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
     };
 
     return (
-        <section className="relative h-[70vh] md:h-[80vh] lg:h-screen w-full overflow-hidden bg-black">
+        <section className="relative h-[50vh] sm:h-[70vh] md:h-[80vh] lg:h-screen w-full overflow-hidden bg-black">
             {/* Background Slideshow */}
-            <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 z-0 scale-110 sm:scale-100">
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={current}
@@ -81,6 +81,12 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
                         animate="center"
                         exit="exit"
                         className="absolute inset-0 w-full h-full"
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        onDragEnd={(_, info) => {
+                            if (info.offset.x > 100) prevSlide();
+                            else if (info.offset.x < -100) nextSlide();
+                        }}
                     >
                         <div
                             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -106,26 +112,26 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="max-w-5xl"
                 >
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white mb-6 leading-[1.1] tracking-tighter">
+                    <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white mb-4 sm:mb-6 leading-[1.1] tracking-tighter uppercase">
                         Upgrade Your Ride with
-                        <span className="block text-red-600 mt-2 filter drop-shadow-lg">Premium Bike Accessories</span>
+                        <span className="block text-red-600 mt-1 sm:mt-2 filter drop-shadow-lg">Premium Gear</span>
                     </h1>
-                    <p className="text-lg sm:text-xl md:text-2xl text-gray-200 mb-10 leading-relaxed max-w-3xl mx-auto font-medium opacity-90">
-                        Coimbatore's trusted destination for helmets, riding gear, and custom bike modifications
+                    <p className="text-sm sm:text-xl md:text-2xl text-gray-200 mb-6 sm:mb-10 leading-relaxed max-w-3xl mx-auto font-medium opacity-95">
+                        Trusted destination for helmets, riding gear, and custom modifications
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-6 sm:px-0">
                         <button
                             onClick={() => onNavigate('products')}
-                            className="group bg-red-600 hover:bg-red-700 text-white px-10 py-5 rounded-xl text-lg font-bold flex items-center justify-center gap-3 transition-all transform hover:scale-105 shadow-xl shadow-red-600/20"
+                            className="group bg-red-600 hover:bg-red-700 text-white px-8 py-4 sm:px-10 sm:py-5 rounded-xl text-base sm:text-lg font-bold flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-xl shadow-red-600/20"
                         >
-                            Explore Products
+                            Explore Store
                             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                         <button
                             onClick={() => onNavigate('contact')}
-                            className="bg-white/10 backdrop-blur-md border-2 border-white/20 hover:bg-white hover:text-black text-white px-10 py-5 rounded-xl text-lg font-bold transition-all transform hover:scale-105"
+                            className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black text-white px-8 py-4 sm:px-10 sm:py-5 rounded-xl text-base sm:text-lg font-bold transition-all transform active:scale-95"
                         >
-                            Visit Our Store
+                            Get Contact
                         </button>
                     </div>
                 </motion.div>
@@ -148,7 +154,7 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
             </button>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+            <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-2.5 sm:gap-3">
                 {images.map((_, index) => (
                     <button
                         key={index}
@@ -157,8 +163,8 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
                             setCurrent(index);
                         }}
                         className={cn(
-                            "h-1.5 transition-all duration-300 rounded-full",
-                            current === index ? "w-10 bg-red-600" : "w-4 bg-white/30 hover:bg-white/50"
+                            "h-1.5 sm:h-2 transition-all duration-300 rounded-full",
+                            current === index ? "w-8 sm:w-10 bg-red-600" : "w-3 sm:w-4 bg-white/30 hover:bg-white/50"
                         )}
                         aria-label={`Go to slide ${index + 1}`}
                     />
@@ -182,14 +188,14 @@ export const HeroSlideshow: React.FC<HeroSlideshowProps> = ({ onNavigate }) => {
                 </div>
             </motion.div>
 
-            {/* Parallax elements */}
+            {/* Parallax elements (Hidden on small mobile) */}
             <motion.div
                 style={{ y: y2 }}
-                className="absolute top-20 right-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none z-10"
+                className="absolute top-20 right-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none z-10 hidden sm:block"
             />
             <motion.div
                 style={{ y: y1 }}
-                className="absolute bottom-20 left-20 w-96 h-96 bg-red-600/10 rounded-full blur-[120px] pointer-events-none z-10"
+                className="absolute bottom-20 left-20 w-96 h-96 bg-red-600/10 rounded-full blur-[120px] pointer-events-none z-10 hidden sm:block"
             />
         </section>
     );

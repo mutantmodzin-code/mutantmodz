@@ -4,9 +4,13 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const getProducts = async (): Promise<Product[]> => {
     try {
-        const response = await fetch(`${API_URL}/products`);
+        const url = API_URL ? `${API_URL}/products` : '/api/products';
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch products');
+        
+        // Ensure data is an array
         const data = await response.json();
+        if (!Array.isArray(data)) throw new Error('API returned invalid data format');
 
         // Map backend product (PostgreSQL) to main app's premium Product type
         return data.map((p: any) => {
@@ -36,8 +40,53 @@ export const getProducts = async (): Promise<Product[]> => {
             };
         });
     } catch (error) {
-        console.error('Database connection failed. Ensure backend is running:', error);
-        return [];
+        console.error('Database connection failed. Using fallback mock data for demo:', error);
+        
+        // Fallback Premium Mock Data for Demo
+        return [
+            {
+                id: 'mock-1', category: 'helmets', name: 'LS2 FF800 Storm II Matte Black',
+                description: 'KPA shell with integrated sun visor and Pinlock Max Vision included.',
+                price: '₹10,500', price_num: 10500, stock: 15, brand: 'LS2',
+                image: 'https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: ['https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=600']
+            },
+            {
+                id: 'mock-2', category: 'gear', name: 'Rynox Stealth Evo V3 Jacket',
+                description: 'All-weather adventure touring jacket with Level 2 armor.',
+                price: '₹12,450', price_num: 12450, stock: 8, brand: 'Rynox',
+                image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: ['https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=600']
+            },
+            {
+                id: 'mock-3', category: 'accessories', name: 'HJG Owl Night Drive LED (Pair)',
+                description: 'Intense 60W CREE LED fog lights for superior visibility.',
+                price: '₹2,999', price_num: 2999, stock: 25, brand: 'HJG',
+                image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']
+            },
+            {
+                id: 'mock-4', category: 'luggage', name: 'Viaterra Claw Mini Tail Bag',
+                description: '35L universal tail bag with rain cover and bungee mounts.',
+                price: '₹3,850', price_num: 3850, stock: 12, brand: 'Viaterra',
+                image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: ['https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=600']
+            },
+            {
+                id: 'mock-5', category: 'accessories', name: 'DynaMount Master Phone Holder',
+                description: 'Vibration dampened aluminium mobile mount with one-click lock.',
+                price: '₹1,599', price_num: 1599, stock: 45, brand: 'DynaMount',
+                image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: ['https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=600']
+            },
+            {
+                id: 'mock-6', category: 'protection', name: 'Axor Apex Venomous Helmet',
+                description: 'DOT & ECE certified with dual spoiler and pinlock ready visor.',
+                price: '₹5,450', price_num: 5450, stock: 20, brand: 'Axor',
+                image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: ['https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=600']
+            }
+        ];
     }
 };
 

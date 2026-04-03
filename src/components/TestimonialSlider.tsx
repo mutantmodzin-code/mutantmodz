@@ -7,35 +7,32 @@ const testimonials = [
     location: 'Coimbatore, TN',
     review: 'Elite-tier accessories. The crash guards for my Himalayan 450 fit perfectly and have already saved my bike once!',
     rating: 5,
-    role: 'Touring Enthusiast'
+    role: 'Touring Enthusiast',
+    productImg: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=100'
   },
   {
     name: 'ARUN PRASAD',
     location: 'Chennai, TN',
     review: 'Precision mods that transformed my KTM. The performance exhaust sound is exactly what I was looking for. Highly recommended!',
     rating: 5,
-    role: 'Track Rider'
+    role: 'Track Rider',
+    productImg: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=100'
   },
   {
     name: 'VIKRAM SINGH',
     location: 'Bangalore, KA',
     review: 'The helmet collection is massive. Got a carbon fiber LS2 at a great price. Service at the Coimbatore HQ was top-notch.',
-    rating: 4,
-    role: 'Daily Commuter'
+    rating: 5,
+    role: 'Daily Commuter',
+    productImg: 'https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=100'
   },
   {
     name: 'PRIYA RAVI',
     location: 'Madurai, TN',
-    review: 'Best riding gear for women I’ve found in south India. The Rynox jacket is super comfortable even on long summer rides.',
+    review: 'Best riding gear for women I’ve found. The Rynox jacket is super comfortable even on long summer rides.',
     rating: 5,
-    role: 'Long Distance Rider'
-  },
-  {
-    name: 'KARTHIK J',
-    location: 'Coimbatore, TN',
-    review: 'Mutant Modz is the go-to place for performance modules. Zero latency in support and rapid logistics for all my orders.',
-    rating: 5,
-    role: 'Superbike Tech'
+    role: 'Long Distance Rider',
+    productImg: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=100'
   }
 ];
 
@@ -53,58 +50,72 @@ export default function TestimonialSlider() {
   const prev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
-    <section className="py-32 px-6 sm:px-12 bg-zinc-950 relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-600/5 blur-[120px] rounded-full pointer-events-none"></div>
-      
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-24 space-y-6">
-          <div className="text-red-600 font-black uppercase tracking-[0.5em] text-[10px]">The Feedback Loop</div>
-          <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase">TRUSTED BY <span className="text-red-600">RIDERS</span></h2>
-          <p className="text-zinc-500 font-black uppercase tracking-widest text-xs">Direct reviews from our global community.</p>
+    <section className="py-8 sm:py-24 bg-zinc-950 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
+        <div className="text-center mb-8 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-none">
+            TRUSTED BY <span className="text-red-600">RIDERS</span>
+          </h2>
+          <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px] sm:text-xs mt-2">The Feedback Loop</p>
         </div>
 
-        <div className="relative group min-h-[400px]">
-          {/* Navigation */}
-          <button onClick={prev} className="absolute -left-4 xl:-left-20 top-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all opacity-0 group-hover:opacity-100 hidden sm:flex shadow-2xl">
-            <ChevronLeft size={32} />
+        {/* MOBILE: Vertical List */}
+        <div className="sm:hidden space-y-4">
+          {testimonials.map((t, i) => (
+            <div key={i} className="bg-zinc-900/40 p-4 rounded-2xl border border-white/5 flex gap-4">
+              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-zinc-800 border border-white/10">
+                <img src={t.productImg} alt="Product" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="flex gap-0.5">
+                  {[...Array(t.rating)].map((_, s) => (
+                    <Star key={s} size={10} className="fill-yellow-500 text-yellow-500" />
+                  ))}
+                </div>
+                <p className="text-white text-xs font-medium leading-tight">"{t.review}"</p>
+                <div className="flex items-center gap-2 pt-1 mt-1 border-t border-white/5">
+                  <span className="text-[9px] font-black uppercase text-red-500 tracking-wider font-bold">{t.name}</span>
+                  <span className="text-zinc-600 text-[9px] uppercase font-bold">{t.location}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* DESKTOP: Existing Slider */}
+        <div className="hidden sm:block relative group">
+          <button onClick={prev} className="absolute -left-12 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100 hidden lg:flex shadow-xl">
+            <ChevronLeft size={24} />
           </button>
-          <button onClick={next} className="absolute -right-4 xl:-right-20 top-1/2 -translate-y-1/2 z-20 w-16 h-16 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all opacity-0 group-hover:opacity-100 hidden sm:flex shadow-2xl">
-            <ChevronRight size={32} />
+          <button onClick={next} className="absolute -right-12 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-all opacity-0 group-hover:opacity-100 hidden lg:flex shadow-xl">
+            <ChevronRight size={24} />
           </button>
 
-          {/* Cards Carousel */}
-          <div className="relative h-full overflow-hidden px-4">
+          <div className="overflow-hidden rounded-[2.5rem]">
             <div 
               className="flex transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]"
               style={{ transform: `translateX(-${current * 100}%)` }}
             >
               {testimonials.map((t, i) => (
                 <div key={i} className="w-full flex-shrink-0 flex justify-center">
-                  <div className="max-w-4xl w-full p-12 sm:p-20 bg-zinc-900/40 rounded-[3rem] border border-white/5 relative group/card hover:border-red-600/30 transition-all duration-700">
-                    <Quote className="absolute top-10 right-10 text-red-600 opacity-20 w-24 h-24" />
-                    
-                    <div className="space-y-12">
-                      <div className="flex gap-2">
+                  <div className="max-w-4xl w-full p-12 lg:p-16 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 relative group/card hover:border-red-600/30 transition-all">
+                    <Quote className="absolute top-10 right-10 text-red-600 opacity-20 w-20 h-20" />
+                    <div className="space-y-8">
+                      <div className="flex gap-1">
                         {[...Array(t.rating)].map((_, s) => (
-                          <Star key={s} size={20} className="fill-red-600 text-red-600 drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
+                          <Star key={s} size={20} className="fill-yellow-500 text-yellow-500" />
                         ))}
                       </div>
-
-                      <p className="text-2xl sm:text-4xl font-black text-white leading-tight uppercase tracking-tighter line-clamp-4">
+                      <p className="text-2xl lg:text-3xl font-black text-white leading-tight uppercase tracking-tighter">
                         "{t.review}"
                       </p>
-
-                      <div className="flex items-center gap-8 pt-10 border-t border-white/5">
-                        <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center text-3xl font-black text-white shadow-2xl transform rotate-3 scale-110">
+                      <div className="flex items-center gap-6 pt-8 border-t border-white/5">
+                        <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-xl">
                           {t.name[0]}
                         </div>
-                        <div className="space-y-2">
-                          <h4 className="text-xl font-black text-white uppercase tracking-widest">{t.name}</h4>
-                          <div className="flex items-center gap-3">
-                            <span className="text-zinc-600 font-black text-[10px] uppercase tracking-[0.2em]">{t.role}</span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-red-600 shadow-[0_0_8px_rgba(220,38,38,1)]"></span>
-                            <span className="text-red-500 font-black text-[10px] uppercase tracking-[0.2em]">{t.location}</span>
-                          </div>
+                        <div className="space-y-1">
+                          <h4 className="text-lg font-black text-white uppercase tracking-widest">{t.name}</h4>
+                          <p className="text-red-500 font-bold text-[10px] uppercase tracking-widest">{t.role} | {t.location}</p>
                         </div>
                       </div>
                     </div>
@@ -113,14 +124,13 @@ export default function TestimonialSlider() {
               ))}
             </div>
           </div>
-
-          {/* Indicators */}
-          <div className="flex justify-center gap-3 mt-16 mt-12">
+          
+          <div className="flex justify-center gap-2 mt-8">
             {testimonials.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`transition-all duration-500 rounded-full h-1.5 ${current === i ? 'bg-red-600 w-12 shadow-[0_0_15px_rgba(220,38,38,0.5)]' : 'bg-white/10 w-4 hover:bg-white/30'}`}
+                className={`transition-all duration-500 rounded-full h-1 ${current === i ? 'bg-red-600 w-8' : 'bg-white/10 w-2 hover:bg-white/30'}`}
               />
             ))}
           </div>

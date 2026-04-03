@@ -3,9 +3,14 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { Resend } = require('resend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend = null;
+
+// Initialize Resend only if API key is available
+if (process.env.RESEND_API_KEY) {
+    const { Resend } = require('resend');
+    resend = new Resend(process.env.RESEND_API_KEY);
+}
 
 // Login Check Route (Check by phone number)
 router.post('/check-user', async (req, res) => {
@@ -86,17 +91,22 @@ router.post('/send-otp', async (req, res) => {
             return res.status(400).json({ error: 'User does not have an email linked for OTP' });
         }
 
-        // Use Resend to send OTP
-        const { data, error } = await resend.emails.send({
-            from: 'MutantModz <otp@mutantmodz.com>', // Replace with your verified domain
-            to: [emailToUse],
-            subject: 'Your Login OTP',
-            html: `<strong>Your OTP for login is: ${otp}</strong>. It will expire in 10 minutes.`
-        });
+        // Use Resend to send OTP if available, otherwise just log it
+        if (resend) {
+            const { data, error } = await resend.emails.send({
+                from: 'MutantModz <otp@mutantmodz.com>', // Replace with your verified domain
+                to: [emailToUse],
+                subject: 'Your Login OTP',
+                html: `<strong>Your OTP for login is: ${otp}</strong>. It will expire in 10 minutes.`
+            });
 
-        if (error) {
-            console.error('RESEND ERROR:', error);
-            return res.status(500).json({ error: 'Error sending OTP' });
+            if (error) {
+                console.error('RESEND ERROR:', error);
+                return res.status(500).json({ error: 'Error sending OTP' });
+            }
+        } else {
+            // Fallback: log OTP for development if Resend is not configured
+            console.log(`[DEV] OTP for ${emailToUse}: ${otp}`);
         }
 
         res.json({ message: 'OTP sent successfully' });

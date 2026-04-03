@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Phone, ArrowRight, ShieldCheck, Loader2, CheckCircle } from 'lucide-react';
+import { X, Phone, ArrowRight, ShieldCheck, Loader2, CheckCircle, Mail, Lock, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -9,16 +9,19 @@ interface LoginPopupProps {
   onClose: () => void;
 }
 
-type LoginStep = 'phone' | 'email' | 'success';
+type LoginStep = 'phone' | 'password' | 'otp' | 'register' | 'success';
 
 export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const { login } = useUserAuth();
   const [step, setStep] = useState<LoginStep>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [userData, setUserData] = useState<any>(null);
 
   const handleSubmitPhone = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
@@ -29,40 +32,108 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     setError('');
 
     try {
-      // Direct check in database instead of OTP
-      const response = await fetch(`${API_URL}/customers/search?phone=${phoneNumber}`);
+      const response = await fetch(`${API_URL}/auth/check-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber })
+      });
 
-      if (response.ok) {
-        const userData = await response.json();
-        if (userData && userData.id) {
-          // User exists, login directly
-          login({
-            uid: userData.id.toString(),
-            phone: userData.phone,
-            email: userData.email,
-            displayName: userData.name
-          });
-          setStep('success');
-          setTimeout(() => {
-            resetForm();
-            onClose();
-          }, 1500);
-          return;
+      const data = await response.json();
+
+      if (response.ok && data.exists) {
+        setUserData(data.user);
+        if (data.needsPassword) {
+          setStep('password');
+        } else {
+          // Send OTP if no password set
+          await handleSendOTP(data.user.email || email);
+          setStep('otp');
         }
+      } else {
+        // User doesn't exist, move to registration
+        setStep('register');
       }
-
-      // User doesn't exist, move to profile completion
-      setStep('email');
     } catch (err: any) {
       console.error('Login error:', err);
-      // Fallback for demo if server is down: move to profile anyway
-      setStep('email');
+      setError('Unable to connect to security server');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCompleteProfile = async () => {
+  const handleSendOTP = async (targetEmail: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/auth/send-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber, email: targetEmail })
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send OTP');
+      }
+    } catch (err: any) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (otp.length < 6) {
+      setError('Please enter the 6-digit code');
+      return;
+    }
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber, otp })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Invalid code');
+
+      completeLogin(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordLogin = async () => {
+    if (!password) {
+      setError('Please enter your password');
+      return;
+    }
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/auth/login-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneNumber, password })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Invalid password');
+
+      completeLogin(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
     if (!email || !displayName) {
       setError('Please fill in all fields');
       return;
@@ -71,49 +142,51 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     setError('');
 
     try {
-      // Save user to backend
       const response = await fetch(`${API_URL}/customers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: displayName,
           phone: phoneNumber,
-          email: email,
-          address: ''
+          email: email
         })
       });
 
-      if (!response.ok) throw new Error('Failed to save user profile');
-      const userData = await response.json();
-
-      // Login the user
-      login({
-        uid: userData.id?.toString() || Date.now().toString(),
-        phone: phoneNumber,
-        email: email,
-        displayName: displayName
-      });
-
-      setStep('success');
-
-      // Auto-close after success
-      setTimeout(() => {
-        resetForm();
-        onClose();
-      }, 1500);
+      if (!response.ok) throw new Error('Failed to create account');
+      
+      // After registration, send OTP to verify email
+      await handleSendOTP(email);
+      setStep('otp');
     } catch (err: any) {
-      setError(err.message || 'Failed to complete registration');
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const completeLogin = (data: any) => {
+    login({
+      uid: data.user.id.toString(),
+      phone: phoneNumber,
+      email: data.user.email,
+      displayName: data.user.name
+    });
+    setStep('success');
+    setTimeout(() => {
+      resetForm();
+      onClose();
+    }, 1500);
+  };
+
   const resetForm = () => {
     setStep('phone');
     setPhoneNumber('');
+    setPassword('');
+    setOtp('');
     setEmail('');
     setDisplayName('');
     setError('');
+    setUserData(null);
   };
 
   if (!isOpen) return null;
@@ -137,8 +210,8 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               <ShieldCheck size={20} className="text-red-500" />
             </div>
             <div>
-              <h2 className="text-white font-black uppercase tracking-widest text-sm">Login</h2>
-              <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest">Secure Protocol</p>
+              <h2 className="text-white font-black uppercase tracking-widest text-sm">Auth Access</h2>
+              <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest">Protocol secure</p>
             </div>
           </div>
           <button
@@ -152,34 +225,18 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-8 py-10 flex flex-col">
 
-          {/* Step Indicator */}
-          <div className="flex items-center gap-3 mb-12">
-            {['phone', 'email'].map((s, i) => (
-              <div key={s} className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black transition-all duration-500 ${step === s ? 'bg-red-600 text-white scale-110 shadow-[0_0_20px_rgba(220,38,38,0.5)]' :
-                    (step === 'email' && s === 'phone') || step === 'success' ? 'bg-green-600 text-white' :
-                      'bg-zinc-800 text-zinc-500'
-                  }`}>
-                  {((step === 'email' && s === 'phone') || step === 'success') ? <CheckCircle size={14} /> : i + 1}
-                </div>
-                {i < 1 && <div className={`w-12 h-0.5 transition-colors duration-500 ${(step === 'email' || step === 'success') ? 'bg-green-600' : 'bg-zinc-800'}`}></div>}
-              </div>
-            ))}
-          </div>
-
-          {/* Error Message */}
+          {/* Login Steps Rendering */}
           {error && (
-            <div className="mb-6 p-4 bg-red-600/10 border border-red-600/20 rounded-2xl text-red-500 text-xs font-bold uppercase tracking-widest animate-in fade-in duration-300">
+            <div className="mb-6 p-4 bg-red-600/10 border border-red-600/20 rounded-2xl text-red-500 text-xs font-bold uppercase tracking-widest">
               {error}
             </div>
           )}
 
-          {/* Phone Step */}
           {step === 'phone' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
               <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Enter Mobile</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Enter your number to access your account</p>
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Enter Identity</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Input your primary mobile number</p>
               </div>
               <div className="space-y-4">
                 <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
@@ -198,31 +255,103 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               </div>
               <button
                 onClick={handleSubmitPhone}
-                disabled={isLoading || phoneNumber.length < 10}
-                className="w-full bg-red-600 hover:bg-white hover:text-red-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                disabled={isLoading}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all group"
               >
-                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <><Phone size={16} /> Continue</>}
+                {isLoading ? <Loader2 className="animate-spin" size={24} /> : (
+                  <>
+                    <span className="tracking-[0.2em] text-sm">Verify Identity</span>
+                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
               </button>
             </div>
           )}
 
-          {/* Email Step */}
-          {step === 'email' && (
+          {step === 'password' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
               <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Complete Profile</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Add your email and name to continue</p>
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Access Secured</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Enter account password for {phoneNumber}</p>
+              </div>
+              <div className="space-y-4">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Password Key</label>
+                <div className="relative">
+                  <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-5 pl-16 pr-6 text-white text-lg font-black focus:border-red-600 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <button
+                  onClick={handlePasswordLogin}
+                  disabled={isLoading}
+                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all"
+                >
+                  {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Unlock Protocol"}
+                </button>
+                <button 
+                  onClick={() => {
+                    handleSendOTP(userData.email);
+                    setStep('otp');
+                  }}
+                  className="w-full text-zinc-600 hover:text-red-500 text-[10px] font-black uppercase tracking-widest transition-colors py-2"
+                >
+                   Request OTP instead
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step === 'otp' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="space-y-4">
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Verification</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Code sent to {userData?.email || email}</p>
+              </div>
+              <div className="space-y-4">
+                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">6-Digit Code</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                    placeholder="000 000"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-5 pl-16 pr-6 text-white text-2xl font-black focus:border-red-600 outline-none transition-colors tracking-[0.5em]"
+                  />
+                </div>
+              </div>
+              <button
+                onClick={handleVerifyOTP}
+                disabled={isLoading}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all"
+              >
+                {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Finalize Authentication"}
+              </button>
+            </div>
+          )}
+
+          {step === 'register' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+              <div className="space-y-4">
+                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Initialize User</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Setup your protocol profile</p>
               </div>
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Your Name</label>
+                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Full Name</label>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="John Rider"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 px-6 text-white text-sm font-bold focus:border-red-600 outline-none transition-colors placeholder:text-zinc-800 uppercase"
-                    autoFocus
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 px-6 text-white font-black outline-none focus:border-red-600 transition-colors"
                   />
                 </div>
                 <div className="space-y-3">
@@ -231,44 +360,39 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@email.com"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 px-6 text-white text-sm font-bold focus:border-red-600 outline-none transition-colors placeholder:text-zinc-800"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 px-6 text-white font-black outline-none focus:border-red-600 transition-colors"
                   />
                 </div>
               </div>
               <button
-                onClick={handleCompleteProfile}
-                disabled={isLoading || !email || !displayName}
-                className="w-full bg-red-600 hover:bg-white hover:text-red-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+                onClick={handleRegister}
+                disabled={isLoading}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all"
               >
-                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <><ArrowRight size={16} /> Complete Login</>}
-              </button>
-              <button
-                onClick={() => setStep('phone')}
-                className="w-full text-zinc-500 text-xs font-bold uppercase tracking-widest hover:text-white transition-colors py-3"
-              >
-                Change phone number
+                {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Create Profile"}
               </button>
             </div>
           )}
 
-          {/* Success Step */}
           {step === 'success' && (
-            <div className="flex-1 flex items-center justify-center animate-in fade-in zoom-in-95 duration-700">
-              <div className="text-center space-y-6">
-                <div className="w-24 h-24 bg-green-600/10 rounded-[2rem] flex items-center justify-center mx-auto border border-green-600/20">
-                  <CheckCircle size={48} className="text-green-500" />
-                </div>
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">You're In!</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Welcome to MutantModz</p>
+            <div className="flex-1 flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-500">
+              <div className="w-24 h-24 rounded-full bg-green-600/10 border border-green-600/20 flex items-center justify-center text-green-500">
+                <CheckCircle size={48} className="animate-bounce" />
+              </div>
+              <div className="text-center space-y-2">
+                <h3 className="text-3xl font-black text-white uppercase tracking-tight">Access Granted</h3>
+                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">Redirecting to Interface...</p>
               </div>
             </div>
           )}
+        </div>
 
-          {/* Branding Footer */}
-          <div className="mt-auto pt-10 text-center">
-            <p className="text-zinc-800 text-[9px] font-black uppercase tracking-[0.3em]">
-              Secured by MutantModz Protocol
+        {/* Footer */}
+        <div className="p-8 border-t border-white/5 bg-black/50">
+          <div className="flex items-center gap-4 opacity-50">
+            <ShieldCheck size={16} className="text-red-500" />
+            <p className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.1em]">
+              Encrypted session. 256-bit AES protection active.
             </p>
           </div>
         </div>
@@ -276,3 +400,4 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     </>
   );
 }
+

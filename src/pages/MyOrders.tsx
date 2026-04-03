@@ -30,6 +30,7 @@ export default function MyOrders() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [creatingTestOrder, setCreatingTestOrder] = useState(false);
 
     useEffect(() => {
         if (!isLoggedIn) {
@@ -41,19 +42,52 @@ export default function MyOrders() {
         fetchOrders();
     }, [isLoggedIn, user?.uid]);
 
+    const createTestOrder = async () => {
+        try {
+            setCreatingTestOrder(true);
+            const response = await fetch(`${API_URL}/test-orders/create-test-order/${user?.uid}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                console.log('✅ Test order created');
+                fetchOrders();
+            } else {
+                throw new Error('Failed to create test order');
+            }
+        } catch (err) {
+            console.error('Error creating test order:', err);
+            setError(err instanceof Error ? err.message : 'Failed to create test order');
+        } finally {
+            setCreatingTestOrder(false);
+        }
+    };
+
     const fetchOrders = async () => {
         try {
             setLoading(true);
             setError('');
 
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                setError('Authentication required');
+            if (!user?.uid) {
+                setError('User ID not found. Please login again.');
                 setLoading(false);
                 return;
             }
 
-            const response = await fetch(`${API_URL}/invoices/customer/${user?.uid}`, {
+            const token = localStorage.getItem('auth_token');
+            console.log('🔐 Auth Token:', token ? 'Present' : 'Missing');
+            console.log('👤 User UID:', user?.uid);
+            
+            if (!token) {
+                setError('Authentication token missing. Please login again.');
+                setLoading(false);
+                return;
+            }
+
+            const url = `${API_URL}/invoices/customer/${user.uid}`;
+            console.log('📍 Fetching from:', url);
+
+            const response = await fetch(url, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,19 +95,22 @@ export default function MyOrders() {
                 }
             });
 
+            console.log('✅ Response Status:', response.status);
+            const data = await response.json();
+            console.log('📦 Response Data:', data);
+
             if (!response.ok) {
-                if (response.status === 404) {
-                    setOrders([]);
-                    setError('');
-                } else {
-                    throw new Error('Failed to fetch orders');
-                }
-            } else {
-                const data = await response.json();
-                setOrders(Array.isArray(data) ? data : []);
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            setOrders(Array.isArray(data) ? data : []);
+            if (data.length === 0) {
+                setError('');
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to load orders');
+            const errorMsg = err instanceof Error ? err.message : 'Failed to load orders';
+            console.error('❌ Error:', errorMsg);
+            setError(errorMsg);
             setOrders([]);
         } finally {
             setLoading(false);
@@ -160,12 +197,21 @@ export default function MyOrders() {
 
                 {/* No Orders */}
                 {!loading && orders.length === 0 && !error && (
-                    <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-12 text-center">
-                        <ShoppingBag size={48} className="mx-auto text-zinc-600 mb-4" />
-                        <h3 className="text-2xl font-black text-white mb-2">No Orders Yet</h3>
-                        <p className="text-zinc-400 max-w-md mx-auto">
-                            Start shopping to place your first order
-                        </p>
+                    <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-12 text-center space-y-6">
+                        <div>
+                            <ShoppingBag size={48} className="mx-auto text-zinc-600 mb-4" />
+                            <h3 className="text-2xl font-black text-white mb-2">No Orders Yet</h3>
+                            <p className="text-zinc-400 max-w-md mx-auto">
+                                Start shopping to place your first order
+                            </p>
+                        </div>
+                        <button
+                            onClick={createTestOrder}
+                            disabled={creatingTestOrder}
+                            className="mx-auto px-6 py-3 bg-red-600 hover:bg-red-700 disabled:bg-zinc-700 text-white font-black uppercase text-sm rounded-xl transition-colors"
+                        >
+                            {creatingTestOrder ? 'Creating Test Order...' : 'Create Test Order'}
+                        </button>
                     </div>
                 )}
 

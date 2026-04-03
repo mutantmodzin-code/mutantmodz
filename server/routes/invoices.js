@@ -210,21 +210,11 @@ router.get('/online/all', authenticateToken, async (req, res) => {
     }
 });
 
-// Update Invoice Status
-router.patch('/:id/status', authenticateToken, async (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
-    try {
-        await db.query('UPDATE invoices SET status = $1 WHERE id = $2', [status, id]);
-        res.json({ message: 'Status updated successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Get Customer Orders (specific to logged-in user)
+// Get Customer Orders (specific to logged-in user) - MUST BE BEFORE /:id
 router.get('/customer/:customerId', authenticateToken, async (req, res) => {
     const { customerId } = req.params;
+    console.log('📦 Fetching orders for customer:', customerId);
+    
     try {
         const invoices = await db.query(
             `SELECT i.* FROM invoices i 
@@ -232,6 +222,8 @@ router.get('/customer/:customerId', authenticateToken, async (req, res) => {
              ORDER BY i.created_at DESC`,
             [customerId]
         );
+
+        console.log(`Found ${invoices.rows.length} invoices for customer ${customerId}`);
 
         if (invoices.rows.length === 0) {
             return res.json([]);
@@ -262,6 +254,18 @@ router.get('/customer/:customerId', authenticateToken, async (req, res) => {
         res.json(ordersWithItems);
     } catch (error) {
         console.error('GET CUSTOMER ORDERS ERROR:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update Invoice Status
+router.patch('/:id/status', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+    try {
+        await db.query('UPDATE invoices SET status = $1 WHERE id = $2', [status, id]);
+        res.json({ message: 'Status updated successfully' });
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });

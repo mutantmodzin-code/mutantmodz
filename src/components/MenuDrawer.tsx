@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Wrench, Shirt, Briefcase, Zap, Bike, Phone, Mail, MapPin, Instagram, Facebook } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -19,33 +19,63 @@ interface AccordionItemProps {
   onToggle: () => void;
 }
 
-const AccordionItem = ({ label, icon: Icon, items, onNavigate, isOpen, onToggle }: AccordionItemProps) => (
-  <div className="border-b border-white/5">
-    <button
-      onClick={onToggle}
-      className={`w-full flex items-center justify-between py-4 px-2 text-sm font-black uppercase tracking-widest transition-colors ${isOpen ? 'text-red-500' : 'text-zinc-300 hover:text-white'}`}
-    >
-      <div className="flex items-center gap-4">
-        <Icon size={20} className={isOpen ? 'text-red-500' : 'text-zinc-500'} />
-        {label}
-      </div>
-      <ChevronDown size={18} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-    </button>
-    <div className={`overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[500px] opacity-100 mb-2' : 'max-h-0 opacity-0'}`}>
-      <div className="grid grid-cols-1 gap-1 pl-12 pr-4">
-        {items.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => onNavigate('products', item.params)}
-            className="w-full text-left py-2.5 text-[13px] font-bold text-zinc-500 hover:text-white transition-colors"
-          >
-            {item.label}
-          </button>
-        ))}
+const AccordionItem = ({ label, icon: Icon, items, brands, onNavigate, isOpen, onToggle }: AccordionItemProps & { brands?: any[] }) => {
+  const [openBrand, setOpenBrand] = useState<string | null>(null);
+
+  return (
+    <div className="border-b border-white/5">
+      <button
+        onClick={onToggle}
+        className={`w-full flex items-center justify-between py-4 px-2 text-sm font-black uppercase tracking-widest transition-colors ${isOpen ? 'text-red-500' : 'text-zinc-300 hover:text-white'}`}
+      >
+        <div className="flex items-center gap-4">
+          <Icon size={20} className={isOpen ? 'text-red-500' : 'text-zinc-500'} />
+          {label}
+        </div>
+        <ChevronDown size={18} className={`transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      
+      <div className={`overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[2000px] opacity-100 mb-2' : 'max-h-0 opacity-0'}`}>
+        <div className="grid grid-cols-1 gap-1 pl-12 pr-4">
+          {items && items.map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => onNavigate('products', item.params)}
+              className="w-full text-left py-2.5 text-[13px] font-bold text-zinc-500 hover:text-white transition-colors"
+            >
+              {item.label}
+            </button>
+          ))}
+
+          {brands && brands.map((brand) => (
+            <div key={brand.name} className="py-1">
+              <button
+                onClick={() => setOpenBrand(openBrand === brand.name ? null : brand.name)}
+                className={`w-full flex items-center justify-between py-2 text-[13px] font-black uppercase tracking-wider ${openBrand === brand.name ? 'text-white' : 'text-zinc-500'}`}
+              >
+                {brand.name}
+                <ChevronDown size={14} className={`transition-transform ${openBrand === brand.name ? 'rotate-180' : ''}`} />
+              </button>
+              <div className={`overflow-hidden transition-all duration-300 ${openBrand === brand.name ? 'max-h-[1000px] mt-2 mb-4 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="grid grid-cols-1 gap-2 pl-4 border-l border-white/5">
+                  {brand.models.map((model: string) => (
+                    <button
+                      key={model}
+                      onClick={() => onNavigate('products', `?cat=${encodeURIComponent(model)}`)}
+                      className="w-full text-left py-1.5 text-[12px] font-bold text-zinc-600 hover:text-white"
+                    >
+                      {model}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: MenuDrawerProps) {
   const { isLoggedIn, logout, setShowLoginPopup } = useUserAuth();
@@ -61,65 +91,57 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
   }, [isOpen, onClose]);
 
   const categories = [
-    { 
+    {
       id: 'bike', label: 'Shop By Bike', icon: Bike,
-      subs: [
-        { label: 'KTM', params: '?bike=KTM' },
-        { label: 'Royal Enfield', params: '?bike=Royal%20Enfield' },
-        { label: 'Yamaha', params: '?bike=Yamaha' },
-        { label: 'Honda', params: '?bike=Honda' },
-        { label: 'Bajaj', params: '?bike=Bajaj' },
-        { label: 'TVS', params: '?bike=TVS' },
-        { label: 'Suzuki', params: '?bike=Suzuki' },
-        { label: 'Hero', params: '?bike=Hero' },
+      brands: [
+        { name: 'KTM', models: ['390/250 Adventure X', 'Gen 3 Duke 390', 'Duke 125', 'RC 125', 'RC 200', 'Duke 200', 'Duke 250', 'ADV 250', 'RC 390', 'Adv 390', 'Duke 390', 'Duke 790'] },
+        { name: 'Royal Enfield', models: ['Himalayan 450', 'Bear 650', 'Guerrilla 450', 'Himalayan', 'Himalayan Scram 411', 'Shotgun 650', 'Interceptor 650', 'Continental Gt 650', 'Hunter 350', 'Classic 350', 'Thunderbird 350', 'Meteor 650', 'Meteor 350', 'Classic 350 Reborn', 'Thunderbird-x', 'Classic 500', 'Bullet 350', 'Bullet 500', 'Thunderbird 500'] },
+        { name: 'Yamaha', models: ['Aerox 155', 'R15 v2', 'R15 v3', 'R15 v4', 'R15 M', 'MT-15', 'FZ-25', 'Fazer-250', 'Yamaha YZF R3'] },
+        { name: 'Honda', models: ['Honda NX-500', 'Honda X Blade', 'Honda CB200x', 'Honda CBR 250R', 'Honda CB300R', 'Honda CF300F', 'Honda H\'ness CB350', 'Honda CB350RS', 'Honda CB 500X', 'Honda CB650R', 'Honda CBR650F', 'Honda CB1000R', 'Honda CBR 1000RR Fireblade', 'Honda African Twin', 'Honda Gold Wing', 'Honda XL750 Transalp'] },
+        { name: 'Hero', models: ['Xpulse 210', 'Xpulse 200', 'Xtreme 160', 'Xpulse 200 4V', 'Xpulse 200T', 'Xtreme 200S', 'Xpulse 2004v Rally Edition'] },
+        { name: 'Suzuki', models: ['V Strom 250 XS', 'V Strom 650', 'V Strom 1000', 'Burgman Street 125', 'Gixxer SF 250', 'Hayabusa'] },
+        { name: 'Triumph', models: ['Speed 400', 'Scrambler 400X', 'Street Triple'] },
+        { name: 'Bajaj', models: ['NS 160', 'NS 200', 'RS 200', 'Avenger', 'Pulsar 150', 'Pulsar 180', 'Pulsar 220', 'Dominar 250', 'Dominar 400'] },
+        { name: 'BMW', models: ['BMW G310 GS', 'BMW G310R', 'BMW G310RR'] },
+        { name: 'TVS', models: ['Ntorq', 'Apache RTR 160', 'RTR 160 4V', 'RR 310', 'TVS Ronin'] },
+        { name: 'Kawasaki', models: ['Versys 650', 'Z900', 'Ninja 300', 'Ninja 400', 'Ninja 650', 'Z650', 'Z800', 'Z1000', 'Versys 1000', 'Ninja ZX10R', 'Ninja 1000SX'] },
+        { name: 'Harley', models: ['Davidson X440', 'HD Street 750', 'HD 48', 'HD IRON 883', 'HD Sportster S'] },
+        { name: 'Benelli', models: ['TRK 250', 'TNT 250', 'TNT 300', 'Imperiale 400', 'TRK 502', 'Leoncio 502', '600i'] },
+        { name: 'Aprilia', models: ['RS 457', 'SR 150', 'SR 160'] },
+        { name: 'Yezdi', models: ['Adventure', 'Scrambler'] },
+        { name: 'Jawa', models: ['Jawa 42', 'Jawa Peark', 'Jawa Standard'] },
+        { name: 'Scooters', models: ['Ola Scooter', 'Ather Scooter'] }
       ]
     },
-    { 
-      id: 'helmets', label: 'Helmets & Protection', icon: Shield,
+    {
+      id: 'combos', label: 'Combos', icon: Package,
       subs: [
-        { label: 'Full Face', params: '?search=full+face' },
-        { label: 'Modular', params: '?search=modular' },
-        { label: 'Open Face', params: '?search=open+face' },
-        { label: 'Off-Road', params: '?search=off-road' },
-        { label: 'Visors', params: '?search=visor' },
+        { label: 'General Combos', params: '?cat=General' },
+        { label: 'Riding Combo Kit', params: '?cat=Riding%20Combo%20Kit' },
+        { label: 'Monsoon Combo', params: '?cat=Monsoon%20Combo' },
       ]
     },
-    { 
-      id: 'gear', label: 'Riding Gear', icon: Shirt,
+    {
+      id: 'helmets', label: 'Helmet & Accessories', icon: Shield,
       subs: [
-        { label: 'Jackets', params: '?search=jacket' },
-        { label: 'Gloves', params: '?search=gloves' },
-        { label: 'Pants', params: '?search=pants' },
-        { label: 'Boots', params: '?search=boots' },
-        { label: 'Rain Gear', params: '?search=rain' },
+        { label: 'Helmet', params: '?cat=Helmet' },
+        { label: 'Helmet Accessories', params: '?cat=Helmet%20Accessories' },
+        { label: 'Bluetooth Intercoms', params: '?cat=Bluetooth%20Intercoms' },
       ]
     },
-    { 
-      id: 'accessories', label: 'Motorcycle Accessories', icon: Wrench,
+    {
+      id: 'additional', label: 'Other Categories', icon: ChevronDown,
       subs: [
-        { label: 'LED Lights', params: '?search=led' },
-        { label: 'Crash Guards', params: '?search=guard' },
-        { label: 'Mirrors', params: '?search=mirror' },
-        { label: 'Mobile Holders', params: '?search=mobile' },
+        { label: 'MOTORCYCLE ACCESSORIES', params: '?cat=MOTORCYCLE%20ACCESSORIES' },
+        { label: 'Lighting', params: '?cat=Lighting' },
+        { label: 'Lubricants', params: '?cat=Lubricants' },
+        { label: 'Performance Parts', params: '?cat=Performance%20Parts' },
+        { label: 'Riding Gear', params: '?cat=Riding%20Gear' },
+        { label: 'Luggage', params: '?cat=Luggage' },
+        { label: 'Apparels', params: '?cat=Apparels' },
+        { label: 'Wholesale', params: '?cat=Wholesale' },
       ]
-    },
-    { 
-      id: 'perf', label: 'Performance Parts', icon: Zap,
-      subs: [
-        { label: 'Exhausts', params: '?search=exhaust' },
-        { label: 'Frame Sliders', params: '?search=slider' },
-        { label: 'Racing Levers', params: '?search=lever' },
-      ]
-    },
-    { 
-      id: 'luggage', label: 'Luggage & Touring', icon: Briefcase,
-      subs: [
-        { label: 'Saddle Bags', params: '?search=saddle+bag' },
-        { label: 'Tank Bags', params: '?search=tank+bag' },
-        { label: 'Tail Bags', params: '?search=tail+bag' },
-        { label: 'Top Boxes', params: '?search=top+box' },
-      ]
-    },
+    }
   ];
 
   const handleNav = (page: string, params?: string) => {
@@ -159,8 +181,12 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
               <Home size={20} className="text-zinc-500" /> Home
             </button>
 
-            <button onClick={() => handleNav('combos')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
-              <Package size={20} className="text-zinc-500" /> Combos
+            <button onClick={() => handleNav('products', '?cat=new')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors border-b border-white/5">
+              <Flame size={20} /> New Arrivals!!
+            </button>
+
+            <button onClick={() => handleNav('products', '?brands=all')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
+              <Star size={20} className="text-zinc-500" /> Shop By Brands
             </button>
 
             {/* Accordion Categories */}
@@ -169,7 +195,8 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
                 key={cat.id}
                 label={cat.label}
                 icon={cat.icon}
-                items={cat.subs}
+                items={(cat as any).subs}
+                brands={(cat as any).brands}
                 isOpen={openAccordion === cat.id}
                 onToggle={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
                 onNavigate={handleNav}

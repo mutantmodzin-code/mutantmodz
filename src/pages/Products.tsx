@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, Shield, Wrench, Shirt, Cog, Zap, Phone } from 'lucide-react';
+import { Search, Filter, Zap, Phone } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
@@ -14,6 +14,8 @@ export default function Products({ onNavigate }: ProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('featured');
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -43,19 +45,30 @@ export default function Products({ onNavigate }: ProductsProps) {
     const checkUrlParams = () => {
       const searchParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
       const search = searchParams.get('search');
+      const cat = searchParams.get('cat');
+      
       if (search) setSearchQuery(decodeURIComponent(search));
+      if (cat) {
+        const decodedCat = decodeURIComponent(cat).toLowerCase();
+        // If it's one of our main categories, set category
+        if (['helmets', 'accessories', 'gear', 'mods', 'luggage'].includes(decodedCat)) {
+          setSelectedCategory(decodedCat);
+        } else {
+          // Otherwise treat it as a specific model/search filter
+          setSearchQuery(decodeURIComponent(cat));
+        }
+      }
     };
     checkUrlParams();
 
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  const categories = [
-    { id: 'all', name: 'All Manifest', icon: Cog },
-    { id: 'helmets', name: 'Ballistic Helmets', icon: Shield },
-    { id: 'accessories', name: 'Tech Accessories', icon: Wrench },
-    { id: 'gear', name: 'Tactical Gear', icon: Shirt },
-    { id: 'mods', name: 'Performance Mods', icon: Zap },
+  const sortOptions = [
+    { id: 'featured', name: 'Featured' },
+    { id: 'price-low', name: 'Price: Low to High' },
+    { id: 'price-high', name: 'Price: High to Low' },
+    { id: 'newest', name: 'Newest Arrivals' },
   ];
 
   const filteredProducts = products.filter(p => {
@@ -67,6 +80,19 @@ export default function Products({ onNavigate }: ProductsProps) {
       p.description.toLowerCase().includes(selectedBrand) ||
       (p as any).brand?.toLowerCase() === selectedBrand;
     return matchesCategory && matchesSearch && matchesBrand;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === 'price-low') {
+      return (a.price_num || 0) - (b.price_num || 0);
+    }
+    if (sortBy === 'price-high') {
+      return (b.price_num || 0) - (a.price_num || 0);
+    }
+    if (sortBy === 'newest') {
+      return parseInt(b.id || '0') - parseInt(a.id || '0'); // Assuming string integer IDs
+    }
+    return 0; // Default featured
   });
 
 
@@ -118,30 +144,45 @@ export default function Products({ onNavigate }: ProductsProps) {
       </section>
 
       {/* Control Center: Filter Bar */}
-      <section className="sticky top-[73px] z-40  border-y border-white/5 bg-zinc-950/70 backdrop-blur-3xl">
-        <div className="max-w-[1700px] mx-auto px-6 py-6 flex flex-col lg:flex-row items-center justify-between gap-10">
+      <section className="sticky top-[73px] z-40 border-y border-white/5 bg-zinc-950/70 backdrop-blur-3xl shadow-2xl">
+        <div className="max-w-[1700px] mx-auto px-6 py-6 flex flex-row items-center justify-between gap-4">
+          
+          <div className="flex items-center gap-2 sm:gap-4 relative">
+            <button 
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              className="group flex items-center gap-3 px-4 sm:px-8 py-3.5 rounded-2xl bg-zinc-900/60 border border-white/10 hover:border-red-600/50 text-[11px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden active:scale-95"
+            >
+              <Filter size={16} className="text-red-600 group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-zinc-300 group-hover:text-white hidden sm:inline">Sort By:</span>
+              <span className="text-white">{sortOptions.find(o => o.id === sortBy)?.name}</span>
+            </button>
 
-          <div className="flex items-center gap-5 overflow-x-auto no-scrollbar w-full lg:w-auto pb-4 lg:pb-0">
-            <div className="flex items-center gap-3 text-zinc-500 mr-6 shrink-0 border-r border-white/5 pr-6 py-2">
-              <Filter size={16} className="text-red-600" />
-              <span className="text-[11px] font-black uppercase tracking-widest text-zinc-300">Classification</span>
-            </div>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex items-center gap-3 px-8 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all relative group overflow-hidden ${selectedCategory === cat.id
-                  ? 'text-white'
-                  : 'text-zinc-500 hover:text-white bg-white/5'
-                  }`}
-              >
-                {selectedCategory === cat.id && (
-                  <div className="absolute inset-0 bg-red-600 transition-all duration-500 animate-in fade-in zoom-in shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
-                )}
-                <cat.icon size={16} className="relative z-10" />
-                <span className="relative z-10">{cat.name}</span>
-              </button>
-            ))}
+            {showSortMenu && (
+              <>
+                <div 
+                  className="fixed inset-0 z-[45]" 
+                  onClick={() => setShowSortMenu(false)}
+                />
+                <div className="absolute top-full left-0 mt-3 w-[260px] bg-zinc-900/95 backdrop-blur-3xl border border-zinc-800 rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] py-4 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                  <div className="px-6 py-3 border-b border-white/5 mb-2">
+                    <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">Choose Order</p>
+                  </div>
+                  {sortOptions.map(option => (
+                    <button
+                      key={option.id}
+                      onClick={() => { setSortBy(option.id); setShowSortMenu(false); }}
+                      className={`w-full text-left px-8 py-4 text-[11px] font-black uppercase tracking-widest transition-all ${
+                        sortBy === option.id 
+                          ? 'text-red-500 bg-red-600/5' 
+                          : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {option.name}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="relative w-full lg:w-[450px] group">
@@ -161,7 +202,7 @@ export default function Products({ onNavigate }: ProductsProps) {
       {/* Grid Assembly */}
       <section className="py-24 px-6 sm:px-12">
         <div className="max-w-[1700px] mx-auto">
-          {filteredProducts.length === 0 ? (
+          {sortedProducts.length === 0 ? (
             <div className="text-center py-48 glass-card rounded-[3rem] border border-white/5">
               <div className="w-24 h-24 bg-zinc-900/50 rounded-full flex items-center justify-center mx-auto mb-8 relative">
                 <div className="absolute inset-0 bg-red-600/10 rounded-full animate-ping"></div>
@@ -176,8 +217,8 @@ export default function Products({ onNavigate }: ProductsProps) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-              {filteredProducts.map((product, index) => (
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-12">
+              {sortedProducts.map((product, index) => (
                 <ProductCard 
                   key={product.id || index}
                   product={product}

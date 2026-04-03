@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Menu, Search, Mic, User, ShoppingCart, ChevronDown,
-  Bike, Zap, Wrench, Shirt, Briefcase, Shield, Package, Calendar,
+  Bike, Shield, Package,
   ArrowRight, Flame, Star, ChevronRight, LogOut, X
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -31,6 +31,11 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
 
   const handleMouseEnter = (id: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    const cat = categoriesData.find(c => c.id === id);
+    if (cat?.isLink) {
+      setActiveDropdown(null);
+      return;
+    }
     setActiveDropdown(id);
   };
 
@@ -65,139 +70,41 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
     };
   }, []);
 
-  // Complex Mega Menu Structure Data
+  // Comprehensive Mega Menu Structure Data
   const categoriesData = [
+    {
+      id: 'new',
+      label: 'New Arrivals!!',
+      icon: Flame,
+      isLink: true,
+      onClick: () => handleNavClick('products', '?cat=new')
+    },
     {
       id: 'bike',
       label: 'Shop by Bike',
       icon: Bike,
       isMega: true,
       brands: [
-        { 
-          name: 'Royal Enfield', 
-          models: ['Classic 350', 'Meteor 350', 'Himalayan 450', 'Hunter 350', 'Interceptor 650', 'Continental GT 650', 'Super Meteor 650'] 
-        },
-        { 
-          name: 'KTM', 
-          models: ['Duke 125', 'Duke 200', 'Duke 390', 'Adventure 390', 'RC 390'] 
-        },
-        { 
-          name: 'Yamaha', 
-          models: ['R15 V3', 'R15 V4', 'MT-15', 'FZ-S', 'Aerox 155'] 
-        },
-        { 
-          name: 'Honda', 
-          models: ['CB300R', 'CB350', 'CB500X', 'Hornet 160R', 'CBR 650R'] 
-        },
-        { 
-          name: 'Bajaj', 
-          models: ['Pulsar 150', 'Pulsar 220', 'Pulsar NS200', 'Dominar 400'] 
-        },
-        { 
-          name: 'TVS', 
-          models: ['Apache RTR 160', 'Apache RTR 200', 'Apache RTX 300', 'Ronin'] 
-        },
-        { 
-          name: 'Suzuki', 
-          models: ['Gixxer', 'Gixxer SF', 'V-Strom 250'] 
-        },
-        { 
-          name: 'Hero', 
-          models: ['Xpulse 200', 'Xpulse 210'] 
-        }
+        { name: 'KTM', models: ['390/250 Adventure X', 'Gen 3 Duke 390', 'Duke 125', 'RC 125', 'RC 200', 'Duke 200', 'Duke 250', 'ADV 250', 'RC 390', 'Adv 390', 'Duke 390', 'Duke 790'] },
+        { name: 'Royal Enfield', models: ['Himalayan 450', 'Bear 650', 'Guerrilla 450', 'Himalayan', 'Himalayan Scram 411', 'Shotgun 650', 'Interceptor 650', 'Continental Gt 650', 'Hunter 350', 'Classic 350', 'Thunderbird 350', 'Meteor 650', 'Meteor 350', 'Classic 350 Reborn', 'Thunderbird-x', 'Classic 500', 'Bullet 350', 'Bullet 500', 'Thunderbird 500'] },
+        { name: 'Yamaha', models: ['Aerox 155', 'R15 v2', 'R15 v3', 'R15 v4', 'R15 M', 'MT-15', 'FZ-25', 'Fazer-250', 'Yamaha YZF R3'] },
+        { name: 'Honda', models: ['Honda NX-500', 'Honda X Blade', 'Honda CB200x', 'Honda CBR 250R', 'Honda CB300R', 'Honda CF300F', 'Honda H\'ness CB350', 'Honda CB350RS', 'Honda CB 500X', 'Honda CB650R', 'Honda CBR650F', 'Honda CB1000R', 'Honda CBR 1000RR Fireblade', 'Honda African Twin', 'Honda Gold Wing', 'Honda XL750 Transalp'] },
+        { name: 'Hero', models: ['Xpulse 210', 'Xpulse 200', 'Xtreme 160', 'Xpulse 200 4V', 'Xpulse 200T', 'Xtreme 200S', 'Xpulse 2004v Rally Edition'] },
+        { name: 'Suzuki', models: ['V Strom 250 XS', 'V Strom 650', 'V Strom 1000', 'Burgman Street 125', 'Gixxer SF 250', 'Hayabusa'] },
+        { name: 'Triumph', models: ['Speed 400', 'Scrambler 400X', 'Street Triple'] },
+        { name: 'Bajaj', models: ['NS 160', 'NS 200', 'RS 200', 'Avenger', 'Pulsar 150', 'Pulsar 180', 'Pulsar 220', 'Dominar 250', 'Dominar 400'] },
+        { name: 'BMW', models: ['BMW G310 GS', 'BMW G310R', 'BMW G310RR'] },
+        { name: 'TVS', models: ['Ntorq', 'Apache RTR 160', 'RTR 160 4V', 'RR 310', 'TVS Ronin'] },
+        { name: 'Kawasaki', models: ['Versys 650', 'Z900', 'Ninja 300', 'Ninja 400', 'Ninja 650', 'Z650', 'Z800', 'Z1000', 'Versys 1000', 'Ninja ZX10R', 'Ninja 1000SX'] },
+        { name: 'Harley', models: ['Davidson X440', 'HD Street 750', 'HD 48', 'HD IRON 883', 'HD Sportster S'] },
+        { name: 'Benelli', models: ['TRK 250', 'TNT 250', 'TNT 300', 'Imperiale 400', 'TRK 502', 'Leoncio 502', '600i'] },
+        { name: 'Aprilia', models: ['RS 457', 'SR 150', 'SR 160'] },
+        { name: 'Yezdi', models: ['Adventure', 'Scrambler'] },
+        { name: 'Jawa', models: ['Jawa 42', 'Jawa Peark', 'Jawa Standard'] },
+        { name: 'Scooters', models: ['Ola Scooter', 'Ather Scooter'] }
       ],
       featured: [
-        { title: 'Himalayan 450 Mods', image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'New' }
-      ]
-    },
-    {
-      id: 'super',
-      label: 'Super Bikes',
-      icon: Zap,
-      columns: [
-        {
-          title: 'Premium Brands',
-          links: ['Ducati', 'Kawasaki', 'BMW Motorrad', 'Triumph', 'Aprilia', 'Honda BigWing']
-        },
-        {
-          title: 'Performance Parts',
-          links: ['Performance Exhausts', 'Frame Sliders', 'Racing Mirrors', 'Carbon Fiber Parts', 'Racing Levers']
-        }
-      ],
-      featured: [
-        { title: 'Track Day Essentials', image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Hot' }
-      ]
-    },
-    {
-      id: 'accessories',
-      label: 'Motorcycle Accessories',
-      icon: Wrench,
-      columns: [
-        {
-          title: 'Essentials',
-          links: ['Mobile Holders', 'LED Lights', 'Mirrors', 'Crash Guards', 'Bike Covers']
-        },
-        {
-          title: 'Add-ons',
-          links: ['Engine Guards', 'Windshields', 'USB Chargers', 'Handlebar Accs', 'Number Plates']
-        }
-      ],
-      featured: [
-        { title: 'Premium Mounts', image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Top Rated' }
-      ]
-    },
-    {
-      id: 'gear',
-      label: 'Riding Gear',
-      icon: Shirt,
-      columns: [
-        {
-          title: 'Apparel',
-          links: ['Riding Jackets', 'Riding Pants', 'Rain Gear', 'Riding Balaclavas']
-        },
-        {
-          title: 'Protection & Wear',
-          links: ['Riding Gloves', 'Riding Boots', 'Riding Backpacks', 'Knee Guards', 'Elbow Guards']
-        }
-      ],
-      featured: [
-        { title: 'All-Weather Jackets', image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Bestseller' }
-      ]
-    },
-    {
-      id: 'luggage',
-      label: 'Luggage & Touring',
-      icon: Briefcase,
-      columns: [
-        {
-          title: 'Hard & Soft Luggage',
-          links: ['Saddle Bags', 'Tank Bags', 'Tail Bags', 'Top Boxes', 'Side Panniers']
-        },
-        {
-          title: 'Touring Accessories',
-          links: ['Waterproof Bags', 'Bungee Cords', 'Cargo Nets', 'Touring Accessories']
-        }
-      ],
-      featured: [
-        { title: 'Expedition Saddle Bags', image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'New' }
-      ]
-    },
-    {
-      id: 'helmets',
-      label: 'Helmets & Protection',
-      icon: Shield,
-      columns: [
-        {
-          title: 'Helmets',
-          links: ['Full Face Helmets', 'Modular Helmets', 'Open Face Helmets', 'Off-Road Helmets']
-        },
-        {
-          title: 'Accessories & Armor',
-          links: ['Helmet Visors', 'Helmet Locks', 'Helmet Accessories', 'Body Armor', 'Chest Guards']
-        }
-      ],
-      featured: [
-        { title: 'Carbon Fiber Series', image: 'https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Premium' }
+        { title: 'New Arrival Bike Mods', image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'New' }
       ]
     },
     {
@@ -206,34 +113,51 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       icon: Package,
       columns: [
         {
-          title: 'Bundles',
-          links: ['Rider Starter Kits', 'Touring Combo Packs', 'Helmet + Gloves Combos']
-        },
-        {
-          title: 'Special Offers',
-          links: ['Riding Gear Bundles', 'Accessory Combo Deals', 'Seasonal Discount Packs']
+          title: 'Specialty Combos',
+          links: ['General Combos', 'Riding Combo Kit', 'Monsoon Combo']
         }
       ],
       featured: [
-        { title: 'Starter Kit: Save 20%', image: 'https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Sale' }
+        { title: 'Monsoon Sale: Up to 30% Off', image: 'https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Offer' }
       ]
     },
     {
-      id: 'events',
-      label: 'Events',
-      icon: Calendar,
+      id: 'brands',
+      label: 'Shop by Brands',
+      icon: Star,
+      isLink: true,
+      onClick: () => handleNavClick('products', '?brands=all')
+    },
+    {
+      id: 'helmets',
+      label: 'Helmet & Accessories',
+      icon: Shield,
       columns: [
         {
-          title: 'Community',
-          links: ['Upcoming Rides', 'Track Days', 'Bike Meetups', 'Riding Workshops']
-        },
-        {
-          title: 'Media',
-          links: ['Community Events', 'Brand Launch Events', 'Photo Gallery', 'Event Highlights']
+          title: 'Helmets & Tech',
+          links: ['Helmet', 'Helmet Accessories', 'Bluetooth Intercoms']
         }
       ],
       featured: [
-        { title: 'Track Day 2026', image: 'https://images.pexels.com/photos/2416812/pexels-photo-2416812.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Register' }
+        { title: 'Premium Bluetooth Intercoms', image: 'https://images.pexels.com/photos/1715193/pexels-photo-1715193.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Premium' }
+      ]
+    },
+    {
+      id: 'additional',
+      label: 'Other Categories',
+      icon: ChevronDown,
+      columns: [
+        {
+          title: 'Mechanical & Lighting',
+          links: ['MOTORCYCLE ACCESSORIES', 'Lighting', 'Lubricants', 'Performance Parts']
+        },
+        {
+          title: 'Apparel & Storage',
+          links: ['Riding Gear', 'Luggage', 'Apparels', 'Wholesale']
+        }
+      ],
+      featured: [
+        { title: 'High Performance Lubes', image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Trending' }
       ]
     },
   ];
@@ -495,7 +419,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                     onMouseLeave={handleMouseLeave}
                   >
                     <button
-                      onClick={() => setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}
+                      onClick={() => cat.isLink ? cat.onClick?.() : setActiveDropdown(activeDropdown === cat.id ? null : cat.id)}
                       className={`flex items-center gap-2 px-5 py-5 text-[13px] xl:text-[14px] font-black tracking-widest uppercase transition-all duration-500 relative group/navlink hover:-translate-y-0.5 ${activeDropdown === cat.id ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
                     >
                       <cat.icon size={18} className={`transition-all duration-500 group-hover/navlink:scale-125 group-hover/navlink:text-red-500 group-hover/navlink:drop-shadow-[0_0_8px_rgba(220,38,38,0.5)] ${activeDropdown === cat.id ? 'text-red-500' : 'text-zinc-500'}`} />
@@ -524,13 +448,13 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                   ))}
                                 </div>
                               </div>
-                              <div className="flex-1">
-                                <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-6">Compatible Models</h3>
+                              <div className="flex-1 max-h-[400px] overflow-y-auto pr-4 no-scrollbar">
+                                <h3 className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-6 sticky top-0 bg-transparent backdrop-blur-sm pt-0">Compatible Models</h3>
                                 <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                                  {cat.brands.find(b => b.name === activeBrand)?.models.map((model) => (
+                                  {cat.brands.find(b => b.name === activeBrand)?.models?.map((model) => (
                                     <button
                                       key={model}
-                                      onClick={() => handleNavClick('products', `?bike=${encodeURIComponent(model)}`)}
+                                      onClick={() => handleNavClick('products', `?cat=${encodeURIComponent(model)}`)}
                                       className="text-left text-zinc-300 hover:text-red-500 text-[13px] font-bold transition-colors flex items-center gap-2 group/model"
                                     >
                                       <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/model:opacity-100 transition-all shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
@@ -551,7 +475,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                   {col.links.map((link, lIdx) => (
                                     <li key={link} className={`transition-all duration-500 transform ${activeDropdown === cat.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} style={{ transitionDelay: `${(idx * 50) + (lIdx * 30)}ms` }}>
                                       <button
-                                        onClick={() => handleNavClick('products')}
+                                        onClick={() => handleNavClick('products', `?cat=${encodeURIComponent(link)}`)}
                                         className="text-zinc-400 hover:text-white text-[15px] font-bold transition-all duration-300 hover:translate-x-3 flex items-center gap-3 group/link"
                                       >
                                         <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/link:opacity-100 transition-all duration-300 shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
@@ -572,7 +496,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
 
                         <div className="w-[30%] grid gap-5">
                           <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest pl-2">Featured</h3>
-                          {cat.featured.map((card, fIdx) => (
+                          {cat.featured?.map((card, fIdx) => (
                             <div key={fIdx}
                               className={`group/card relative cursor-pointer rounded-2xl overflow-hidden hover:shadow-[0_15px_40px_rgba(220,38,38,0.2)] transition-all duration-700 h-48 border border-zinc-800/50 hover:border-red-600/50 transform ${activeDropdown === cat.id ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
                               style={{ transitionDelay: `${400 + (fIdx * 100)}ms` }}

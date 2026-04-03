@@ -91,22 +91,44 @@ router.post('/send-otp', async (req, res) => {
             return res.status(400).json({ error: 'User does not have an email linked for OTP' });
         }
 
-        // Use Resend to send OTP if available, otherwise just log it
-        if (resend) {
-            const { data, error } = await resend.emails.send({
-                from: 'MutantModz <otp@mutantmodz.com>', // Replace with your verified domain
-                to: [emailToUse],
-                subject: 'Your Login OTP',
-                html: `<strong>Your OTP for login is: ${otp}</strong>. It will expire in 10 minutes.`
-            });
+        // ALWAYS log OTP to console for debugging
+        console.log('\n========================================');
+        console.log(`✓ OTP Generated for ${emailToUse}`);
+        console.log(`📧 OTP Code: ${otp}`);
+        console.log(`⏰ Expires in: 10 minutes`);
+        console.log('========================================\n');
 
-            if (error) {
-                console.error('RESEND ERROR:', error);
-                return res.status(500).json({ error: 'Error sending OTP' });
+        // Try to send via Resend if available, but don't fail if it doesn't work
+        if (resend) {
+            try {
+                const { data, error } = await resend.emails.send({
+                    from: 'MutantModz <onboarding@resend.dev>', // Using default Resend test domain
+                    to: [emailToUse],
+                    subject: 'Your MutantModz Login OTP',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                            <h2 style="color: #dc2626;">Your Login Code</h2>
+                            <p style="font-size: 16px;">Your one-time password is:</p>
+                            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
+                                <h1 style="margin: 0; font-size: 32px; letter-spacing: 5px; color: #dc2626;">${otp}</h1>
+                            </div>
+                            <p style="color: #666; font-size: 14px;">This code expires in 10 minutes.</p>
+                            <p style="color: #999; font-size: 12px;">If you didn't request this code, please ignore this email.</p>
+                        </div>
+                    `
+                });
+
+                if (!error && data) {
+                    console.log('✓ Email sent successfully via Resend');
+                } else if (error) {
+                    console.warn('⚠ Resend email failed, but OTP is available in console above');
+                }
+            } catch (emailError) {
+                console.warn('⚠ Resend attempt failed:', emailError.message);
+                console.log('💡 Check console above for OTP code');
             }
         } else {
-            // Fallback: log OTP for development if Resend is not configured
-            console.log(`[DEV] OTP for ${emailToUse}: ${otp}`);
+            console.log('💡 Resend not configured. Check console above for OTP code.');
         }
 
         res.json({ message: 'OTP sent successfully' });

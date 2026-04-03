@@ -314,6 +314,19 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                 <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Verification</h3>
                 <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Code sent to {userData?.email || email}</p>
               </div>
+              
+              {/* Development mode notice */}
+              {import.meta.env.DEV && (
+                <div className="p-4 bg-blue-600/10 border border-blue-600/30 rounded-2xl">
+                  <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest">
+                    🔧 DEV MODE: Check server console for OTP code
+                  </p>
+                  <p className="text-blue-300/70 text-[9px] font-bold mt-2">
+                    The OTP will be displayed in the terminal where npm start is running
+                  </p>
+                </div>
+              )}
+              
               <div className="space-y-4">
                 <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">6-Digit Code</label>
                 <div className="relative">

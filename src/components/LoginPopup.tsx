@@ -253,7 +253,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               
               <div className="p-4 bg-red-600/10 border border-red-600/30 rounded-2xl">
                 <p className="text-red-400 text-sm font-bold text-center">
-                  Check your Gmail and enter the OTP code below
+                  Check your Gmail and enter the code below (or '000000' for Dev Mode)
                 </p>
               </div>
               

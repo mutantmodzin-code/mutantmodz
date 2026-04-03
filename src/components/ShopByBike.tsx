@@ -2,16 +2,19 @@ interface ShopByBikeProps {
   onNavigate: (page: string, params?: string) => void;
 }
 
-const bikes = [
-  { name: 'Royal Enfield', image: 'https://i.postimg.cc/PfYfZnpM/Screenshot-13-3-2026-113212-www-bing-com.jpg' },
-  { name: 'KTM', image: 'https://i.postimg.cc/ZRJHcSYJ/Screenshot-13-3-2026-114152-www-bing-com.jpg' },
-  { name: 'Yamaha', image: 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Honda', image: 'https://i.postimg.cc/RZPQfVgF/Screenshot-2026-03-13-135421.png' },
-  { name: 'Kawasaki', image: 'https://images.unsplash.com/photo-1620038891632-6bf590b10e53?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Ducati', image: 'https://images.unsplash.com/photo-1568772585428-1cdbc1276d33?auto=format&fit=crop&w=400&q=80' },
-  { name: 'BMW', image: 'https://images.unsplash.com/photo-1599819811279-d5ad9ceced8d?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Triumph', image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=400&q=80' },
-  { name: 'Bajaj', image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=400' },
+export const bikes = [
+  { name: 'Royal Enfield', image: '/bike brands/royal Enfield.png' },
+  { name: 'KTM', image: '/bike brands/ktm.png' },
+  { name: 'Yamaha', image: '/bike brands/Yamaha.png' },
+  { name: 'Honda', image: '/bike brands/honda.png' },
+  { name: 'Kawasaki', image: '/bike brands/Kawasaki.png' },
+  { name: 'Ducati', image: '/bike brands/ducati.png' },
+  { name: 'BMW', image: '/bike brands/Bmw.png' },
+  { name: 'Triumph', image: '/bike brands/NicePng_red-solo-cup-png_5412282.png' },
+  { name: 'Bajaj', image: '/bike brands/Bajaj.png' },
+  { name: 'Jawa', image: '/bike brands/jawa.webp' },
+  { name: 'Yezdi', image: '/bike brands/yezdi.webp' },
+  { name: 'Suzuki', image: '/bike brands/suzuki.png' }
 ];
 
 export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
@@ -33,15 +36,15 @@ export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
           {bikes.map((bike, idx) => (
             <button
               key={idx}
-              onClick={() => onNavigate('products', `?bike=${encodeURIComponent(bike.name)}`)}
+              onClick={() => onNavigate('products', `?bike=${encodeURIComponent(bike.name.trim())}`)}
               className="flex flex-col items-center gap-2 sm:gap-3 group touch-manipulation active:scale-95 transition-transform"
             >
-              {/* Circular Image */}
-              <div className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full overflow-hidden border-2 border-white/10 group-hover:border-red-600/50 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.2)]">
+              {/* Circular Image with White Background */}
+              <div className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full overflow-hidden bg-white border-2 border-white/10 group-hover:border-red-600 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.3)] flex items-center justify-center p-1 sm:p-2">
                 <img
-                  src={bike.image}
+                  src={bike.image.trim()}
                   alt={bike.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-[100%] h-[100%] object-contain group-hover:scale-110 transition-transform duration-500"
                   loading="lazy"
                 />
               </div>

@@ -258,14 +258,30 @@ router.get('/customer/:customerId', authenticateToken, async (req, res) => {
     }
 });
 
-// Update Invoice Status
+// Update Invoice Status with Shipment Tracking
 router.patch('/:id/status', authenticateToken, async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, expected_delivery } = req.body;
     try {
-        await db.query('UPDATE invoices SET status = $1 WHERE id = $2', [status, id]);
-        res.json({ message: 'Status updated successfully' });
+        let query = 'UPDATE invoices SET status = $1';
+        let params = [status, id];
+        
+        // If status improved to Shipped/Completed, set shipped timestamp
+        if (status === 'Shipped' || status === 'Completed') {
+            query += ', shipped_at = CURRENT_TIMESTAMP';
+        }
+        
+        if (expected_delivery) {
+            query += ', expected_delivery = $' + (params.length + 1);
+            params.push(expected_delivery);
+        }
+        
+        query += ' WHERE id = $2';
+        
+        await db.query(query, params);
+        res.json({ message: 'Order status and delivery schedule updated' });
     } catch (error) {
+        console.error('STATUS UPDATE ERROR:', error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -3,6 +3,8 @@ import { Search, Filter, Zap, Phone } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
+import { brands } from '../data/brands';
+import { bikes } from '../components/ShopByBike';
 
 interface ProductsProps {
   onNavigate: (page: string) => void;
@@ -16,6 +18,10 @@ export default function Products({ onNavigate }: ProductsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [showSortMenu, setShowSortMenu] = useState(false);
+
+  const activeFilterName = selectedBrand || searchQuery;
+  const activeBrandInfo = brands.find(b => b.name.toLowerCase() === activeFilterName?.toLowerCase());
+  const activeBikeInfo = !activeBrandInfo ? bikes.find(b => b.name.toLowerCase() === activeFilterName?.toLowerCase()) : null;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -46,8 +52,15 @@ export default function Products({ onNavigate }: ProductsProps) {
       const searchParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
       const search = searchParams.get('search');
       const cat = searchParams.get('cat');
+      const brand = searchParams.get('brand');
+      const bike = searchParams.get('bike');
+      const model = searchParams.get('model');
       
       if (search) setSearchQuery(decodeURIComponent(search));
+      if (brand) setSelectedBrand(decodeURIComponent(brand).toLowerCase());
+      if (bike) setSearchQuery(decodeURIComponent(bike));
+      if (model) setSearchQuery(decodeURIComponent(model));
+      
       if (cat) {
         const decodedCat = decodeURIComponent(cat).toLowerCase();
         // If it's one of our main categories, set category
@@ -74,11 +87,14 @@ export default function Products({ onNavigate }: ProductsProps) {
   const filteredProducts = products.filter(p => {
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+      p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p as any).bike_brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p as any).bike_model?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesBrand = !selectedBrand ||
       p.name.toLowerCase().includes(selectedBrand) ||
       p.description.toLowerCase().includes(selectedBrand) ||
-      (p as any).brand?.toLowerCase() === selectedBrand;
+      (p as any).brand?.toLowerCase() === selectedBrand ||
+      (p as any).bike_brand?.toLowerCase() === selectedBrand;
     return matchesCategory && matchesSearch && matchesBrand;
   });
 
@@ -94,8 +110,6 @@ export default function Products({ onNavigate }: ProductsProps) {
     }
     return 0; // Default featured
   });
-
-
 
   return (
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
@@ -116,19 +130,45 @@ export default function Products({ onNavigate }: ProductsProps) {
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Operational Manifest 2026</span>
           </div>
-          <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-            ELITE <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">HARDWARE</span>
-          </h1>
-          <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
-            High-performance modules engineered for the extreme.
-          </p>
-          {selectedBrand && (
-            <div className="mt-8 inline-flex items-center gap-4 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-2xl animate-in fade-in zoom-in duration-500">
-              <span className="text-red-500 font-black uppercase text-[10px] tracking-[0.3em]">Sector: {selectedBrand}</span>
+          
+          {activeFilterName && (activeBrandInfo || activeBikeInfo) ? (
+            <div className="flex flex-col items-center animate-in fade-in zoom-in duration-700">
+               <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full p-4 sm:p-6 mb-8 shadow-2xl flex items-center justify-center border-4 border-red-600/20">
+                  <img 
+                    src={activeBrandInfo?.logo || activeBikeInfo?.image} 
+                    alt={activeFilterName} 
+                    className="w-full h-full object-contain"
+                  />
+               </div>
+               <h1 className="text-5xl sm:text-8xl font-black text-white tracking-tighter leading-none uppercase mb-2">
+                 {activeFilterName}
+               </h1>
+                <p className="text-red-500 font-black uppercase tracking-[0.6em] text-[10px] sm:text-[12px] opacity-80">
+                  {activeBrandInfo ? 'Certified Hardware Partner' : 'Precision Components'}
+                </p>
+            </div>
+          ) : (
+            <>
+              <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+                ELITE <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">HARDWARE</span>
+              </h1>
+              <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+                High-performance modules engineered for the extreme.
+              </p>
+            </>
+          )}
+
+          {(selectedBrand || searchQuery) && (
+            <div className="mt-12 inline-flex items-center gap-4 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-2xl animate-in fade-in zoom-in duration-500 hover:bg-red-600/20 transition-colors group">
+              <span className="text-red-500 font-black uppercase text-[10px] tracking-[0.3em] group-hover:text-white transition-colors">Sector: {selectedBrand || searchQuery}</span>
               <button
-                onClick={() => window.location.hash = 'products'}
-                className="text-zinc-500 hover:text-white transition-colors text-xs"
+                onClick={() => {
+                  window.location.hash = 'products';
+                  setSearchQuery('');
+                  setSelectedBrand(null);
+                }}
+                className="text-zinc-500 hover:text-red-600 transition-colors p-1"
               >
                 ✕
               </button>
@@ -217,7 +257,7 @@ export default function Products({ onNavigate }: ProductsProps) {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-6">
               {sortedProducts.map((product, index) => (
                 <ProductCard 
                   key={product.id || index}

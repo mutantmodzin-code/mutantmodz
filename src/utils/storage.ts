@@ -36,6 +36,8 @@ export const getProducts = async (): Promise<Product[]> => {
                 image: images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
                 images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
                 brand: p.brand || '',
+                bike_brand: p.bike_brand || '',
+                bike_model: p.bike_model || '',
                 date_added: p.created_at || null
             };
         });

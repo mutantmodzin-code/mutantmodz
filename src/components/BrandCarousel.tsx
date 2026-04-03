@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { brands } from '../data/brands';
 
 export default function BrandCarousel({ onNavigate }: { onNavigate: (page: string, params?: string) => void }) {

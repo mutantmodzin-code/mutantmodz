@@ -5,7 +5,7 @@ const { authenticateToken } = require('./auth');
 
 // Get all products (with optional filtering)
 router.get('/', async (req, res) => {
-    const { category, brand, search, sku } = req.query;
+    const { category, brand, search, sku, bike_brand, bike_model } = req.query;
     let query = 'SELECT p.*, c.name as category_name, v.name as vendor_name FROM products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN vendors v ON p.vendor_id = v.id';
     let values = [];
     let conditions = [];
@@ -21,6 +21,14 @@ router.get('/', async (req, res) => {
     if (sku) {
         conditions.push('p.sku = $' + (values.length + 1));
         values.push(sku);
+    }
+    if (bike_brand) {
+        conditions.push('p.bike_brand = $' + (values.length + 1));
+        values.push(bike_brand);
+    }
+    if (bike_model) {
+        conditions.push('p.bike_model = $' + (values.length + 1));
+        values.push(bike_model);
     }
     if (search) {
         conditions.push('(p.name ILIKE $' + (values.length + 1) + ' OR p.sku ILIKE $' + (values.length + 1) + ')');
@@ -52,11 +60,11 @@ router.get('/categories', async (req, res) => {
 
 // Add Product
 router.post('/', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url } = req.body;
-    console.log('DEBUG: Attempting to add product:', { name, sku, price });
+    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model } = req.body;
+    console.log('DEBUG: Attempting to add product:', { name, sku, price, bike_brand, bike_model });
     try {
         const result = await db.query(
-            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
             [
                 name,
                 category_id ? parseInt(category_id) : null,
@@ -66,7 +74,9 @@ router.post('/', async (req, res) => {
                 vendor_id ? parseInt(vendor_id) : null,
                 sku || null,
                 parseFloat(purchase_price) || 0,
-                image_url || null
+                image_url || null,
+                bike_brand || null,
+                bike_model || null
             ]
         );
 
@@ -97,11 +107,11 @@ router.post('/', async (req, res) => {
 
 // Update Product
 router.put('/:id', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url } = req.body;
+    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model } = req.body;
     const { id } = req.params;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9 WHERE id = $10 RETURNING *',
+            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9, bike_brand = $10, bike_model = $11 WHERE id = $12 RETURNING *',
             [
                 name,
                 category_id ? parseInt(category_id) : null,
@@ -112,6 +122,8 @@ router.put('/:id', async (req, res) => {
                 sku || null,
                 parseFloat(purchase_price) || 0,
                 image_url || null,
+                bike_brand || null,
+                bike_model || null,
                 id
             ]
         );

@@ -6,10 +6,35 @@ const OnlineOrders = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState('');
+    const [deliveryDates, setDeliveryDates] = useState({});
 
     useEffect(() => {
         fetchOrders();
     }, [selectedDate]);
+
+    const handleDateChange = (orderId, date) => {
+        setDeliveryDates(prev => ({ ...prev, [orderId]: date }));
+    };
+
+    const markAsShipped = async (orderId) => {
+        const deliveryDate = deliveryDates[orderId];
+        if (!deliveryDate) {
+            alert('Please select a delivery date first');
+            return;
+        }
+
+        try {
+            await api.patch(`/invoices/${orderId}/status`, { 
+                status: 'Shipped',
+                expected_delivery: deliveryDate
+            });
+            // Update local state
+            setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'Shipped', expected_delivery: deliveryDate } : o));
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            alert('Failed to update status.');
+        }
+    };
 
     const fetchOrders = async () => {
         try {
@@ -171,18 +196,38 @@ const OnlineOrders = () => {
                             </div>
 
                             {/* Action Area */}
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid #f1f5f9', marginTop: '0.5rem' }}>
-                                {order.status !== 'Completed' ? (
-                                    <button 
-                                        className="btn btn-primary" 
-                                        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#16a34a', borderColor: '#16a34a' }}
-                                        onClick={() => markAsCompleted(order.id)}
-                                    >
-                                        <CheckCircle size={16} /> Mark as Shipped (Completed)
-                                    </button>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9', marginTop: '0.5rem' }}>
+                                {order.status !== 'Shipped' && order.status !== 'Completed' ? (
+                                    <>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                                            <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Set Delivery Date</label>
+                                            <input 
+                                                type="date" 
+                                                value={deliveryDates[order.id] || ''}
+                                                onChange={(e) => handleDateChange(order.id, e.target.value)}
+                                                style={{ border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '0.4rem 0.75rem', fontSize: '0.875rem', outline: 'none' }}
+                                            />
+                                        </div>
+                                        <button 
+                                            className="btn btn-primary" 
+                                            style={{ height: 'fit-content', alignSelf: 'flex-end', display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: '#dc2626', borderColor: '#dc2626', fontWeight: 800, padding: '0.6rem 1.25rem' }}
+                                            onClick={() => markAsShipped(order.id)}
+                                        >
+                                            <Package size={16} /> Mark as Shipped
+                                        </button>
+                                    </>
                                 ) : (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#16a34a', fontWeight: 600, fontSize: '0.875rem' }}>
-                                        <CheckCircle size={18} /> Order Shipped
+                                    <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '1rem', border: '1px solid #dcfce7' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#16a34a' }}>
+                                            <CheckCircle size={20} />
+                                            <div>
+                                                <p style={{ fontWeight: 800, fontSize: '0.875rem', textTransform: 'uppercase' }}>Shipment Dispatched</p>
+                                                {order.expected_delivery && <p style={{ fontSize: '0.75rem', opacity: 0.8 }}>Estimate: {new Date(order.expected_delivery).toLocaleDateString('en-IN')}</p>}
+                                            </div>
+                                        </div>
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', textTransform: 'uppercase' }}>
+                                            Live on Customer Feed
+                                        </div>
                                     </div>
                                 )}
                             </div>

@@ -10,6 +10,8 @@ export interface Product {
     date_added?: string;
     price_num: number;
     brand?: string;
+    bike_brand?: string;
+    bike_model?: string;
     isBestSeller?: boolean;
     isNew?: boolean;
     freeShipping?: boolean;

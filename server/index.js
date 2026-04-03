@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 5000;
 console.log('--- Server Debug ---');
 console.log('PORT:', PORT);
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'PRESENT' : 'MISSING');
+console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'PRESENT' : 'MISSING');
 console.log('--------------------');
 
 // Middleware

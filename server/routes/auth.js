@@ -3,76 +3,40 @@ const router = express.Router();
 const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { Resend } = require('resend');
 
+// Initialize Resend with API key (lazy initialization)
 let resend = null;
 
-// Initialize Resend only if API key is available
-if (process.env.RESEND_API_KEY) {
-    const { Resend } = require('resend');
-    resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+    if (!resend && process.env.RESEND_API_KEY) {
+        console.log('🔌 Initializing Resend with API key');
+        resend = new Resend(process.env.RESEND_API_KEY);
+    } else if (!process.env.RESEND_API_KEY) {
+        console.warn('⚠️ RESEND_API_KEY not found in environment variables');
+    }
+    return resend;
 }
 
-// In-memory store for development OTPs
-const otpStore = {};
-
-// Debug endpoint to check OTPs in development
-router.get('/debug-otp', (req, res) => {
-    if (process.env.NODE_ENV === 'production') {
-        return res.status(403).json({ error: 'Not available in production' });
-    }
-    res.json({ 
-        otps: otpStore,
-        note: 'This endpoint is only available in development mode'
-    });
-});
 
 // Login Check Route (Check by phone number)
+// Always requires OTP verification
 router.post('/check-user', async (req, res) => {
     const { phone } = req.body;
     try {
-        const result = await db.query('SELECT id, name, phone, email, password_hash FROM customers WHERE phone = $1', [phone]);
+        const result = await db.query('SELECT id, name, phone, email FROM customers WHERE phone = $1', [phone]);
         if (result.rows.length === 0) {
             // Check if user is an admin (in users table)
-            const adminResult = await db.query('SELECT id, username, phone, email, password_hash FROM users WHERE phone = $1', [phone]);
+            const adminResult = await db.query('SELECT id, username, phone, email FROM users WHERE phone = $1', [phone]);
             if (adminResult.rows.length === 0) {
                 return res.status(404).json({ exists: false, message: 'User not found' });
             }
-            return res.json({ exists: true, userType: 'admin', user: adminResult.rows[0], needsPassword: !!adminResult.rows[0].password_hash });
+            return res.json({ exists: true, userType: 'admin', user: adminResult.rows[0] });
         }
         const user = result.rows[0];
-        return res.json({ exists: true, userType: 'customer', user, needsPassword: !!user.password_hash });
+        return res.json({ exists: true, userType: 'customer', user });
     } catch (error) {
         console.error('CHECK USER ERROR:', error);
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Password Login Route
-router.post('/login-password', async (req, res) => {
-    const { phone, password } = req.body;
-    try {
-        // Find in customers or users
-        let userResult = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
-        let userType = 'customer';
-        if (userResult.rows.length === 0) {
-            userResult = await db.query('SELECT * FROM users WHERE phone = $1', [phone]);
-            userType = 'admin';
-        }
-
-        if (userResult.rows.length === 0) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        const user = userResult.rows[0];
-        const isMatch = await bcrypt.compare(password, user.password_hash);
-        if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        const token = jwt.sign({ id: user.id, username: user.username || user.name, role: user.role || 'customer' }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.json({ token, user: { id: user.id, name: user.name || user.username, role: user.role || 'customer' } });
-    } catch (error) {
-        console.error('PASS LOGIN ERROR:', error);
         res.status(500).json({ error: 'Server error' });
     }
 });
@@ -81,6 +45,9 @@ router.post('/login-password', async (req, res) => {
 router.post('/send-otp', async (req, res) => {
     const { email, phone } = req.body;
     try {
+        console.log('📧 Send-OTP endpoint called');
+        console.log('RESEND_API_KEY at runtime:', process.env.RESEND_API_KEY ? 'PRESENT' : 'MISSING');
+        
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otp_hash = await bcrypt.hash(otp, 10);
         const otp_expiry = new Date(Date.now() + 10 * 60000); // 10 minutes from now
@@ -105,62 +72,57 @@ router.post('/send-otp', async (req, res) => {
             return res.status(400).json({ error: 'User does not have an email linked for OTP' });
         }
 
-        // Store OTP in memory for development
-        otpStore[emailToUse] = {
-            otp,
-            phone,
-            email: emailToUse,
-            createdAt: new Date(),
-            expiresAt: otp_expiry
-        };
-
-        // ALWAYS log OTP to console for debugging
-        console.log('\n' + '='.repeat(50));
-        console.log('✓ OTP GENERATED');
-        console.log('='.repeat(50));
-        console.log(`📧 Email: ${emailToUse}`);
-        console.log(`📱 Phone: ${phone}`);
-        console.log(`🔐 OTP Code: ${otp}`);
-        console.log(`⏰ Expires in: 10 minutes`);
-        console.log('='.repeat(50) + '\n');
-
-        // Try to send via Resend if available, but don't fail if it doesn't work
-        if (resend) {
-            try {
-                const { data, error } = await resend.emails.send({
-                    from: 'MutantModz <onboarding@resend.dev>',
-                    to: [emailToUse],
-                    subject: 'Your MutantModz Login OTP',
-                    html: `
-                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2 style="color: #dc2626;">Your Login Code</h2>
-                            <p style="font-size: 16px;">Your one-time password is:</p>
-                            <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0;">
-                                <h1 style="margin: 0; font-size: 32px; letter-spacing: 5px; color: #dc2626;">${otp}</h1>
-                            </div>
-                            <p style="color: #666; font-size: 14px;">This code expires in 10 minutes.</p>
-                            <p style="color: #999; font-size: 12px;">If you didn't request this code, please ignore this email.</p>
-                        </div>
-                    `
-                });
-
-                if (!error && data) {
-                    console.log('✓ Email sent successfully via Resend');
-                } else if (error) {
-                    console.warn('⚠ Resend email failed (OTP available above in console)');
-                }
-            } catch (emailError) {
-                console.warn('⚠ Resend attempt failed:', emailError.message);
-                console.log('💡 Check console above for OTP code');
-            }
-        } else {
-            console.log('💡 Resend not configured - OTP available in console above');
+        // Send OTP via Resend
+        const resendClient = getResend();
+        if (!resendClient) {
+            console.error('RESEND NOT CONFIGURED');
+            return res.status(500).json({ error: 'Email service not configured. Please contact support.' });
         }
 
-        res.json({ message: 'OTP sent successfully', debugUrl: '/api/auth/debug-otp' });
+        const { data, error } = await resendClient.emails.send({
+            from: 'onboarding@resend.dev',  // Using Resend onboarding domain (verified for testing)
+            to: [emailToUse],
+            subject: 'Your MutantModz Login OTP',
+            html: `
+                <div style="font-family: 'Arial', sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h2 style="color: #dc2626; margin-top: 0; text-align: center;">Your Login Code</h2>
+                        <p style="font-size: 16px; color: #333; text-align: center;">Your one-time password is:</p>
+                        
+                        <div style="background: #f3f4f6; padding: 25px; border-radius: 8px; text-align: center; margin: 25px 0; border: 2px solid #dc2626;">
+                            <h1 style="margin: 0; font-size: 36px; letter-spacing: 8px; color: #dc2626; font-weight: bold;">${otp}</h1>
+                        </div>
+                        
+                        <p style="color: #666; font-size: 14px; text-align: center;">
+                            <strong>⏰ This code expires in 10 minutes</strong>
+                        </p>
+                        
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+                        
+                        <p style="color: #999; font-size: 12px; margin-bottom: 0;">
+                            If you didn't request this code, please ignore this email. Your account is secure.
+                        </p>
+                        
+                        <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                            <p style="color: #999; font-size: 11px; margin: 0;">
+                                © 2026 MutantModz. All rights reserved.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `
+        });
+
+        if (error) {
+            console.error('RESEND ERROR:', error);
+            return res.status(500).json({ error: 'Failed to send OTP. Please try again.' });
+        }
+
+        console.log(`✓ OTP sent successfully to ${emailToUse}`);
+        res.json({ message: 'OTP sent successfully to your email' });
     } catch (error) {
         console.error('SEND OTP ERROR:', error);
-        res.status(500).json({ error: 'Server error' });
+        res.status(500).json({ error: 'Server error. Please try again.' });
     }
 });
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Phone, ArrowRight, ShieldCheck, Loader2, CheckCircle, Mail, Lock, KeyRound } from 'lucide-react';
+import { X, ArrowRight, ShieldCheck, Loader2, CheckCircle, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -9,13 +9,12 @@ interface LoginPopupProps {
   onClose: () => void;
 }
 
-type LoginStep = 'phone' | 'password' | 'otp' | 'register' | 'success';
+type LoginStep = 'phone' | 'otp' | 'register' | 'success';
 
 export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const { login } = useUserAuth();
   const [step, setStep] = useState<LoginStep>('phone');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -41,16 +40,13 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const data = await response.json();
 
       if (response.ok && data.exists) {
+        // Existing user - send OTP
         setUserData(data.user);
-        if (data.needsPassword) {
-          setStep('password');
-        } else {
-          // Send OTP if no password set
-          await handleSendOTP(data.user.email || email);
-          setStep('otp');
-        }
+        setEmail(data.user.email);
+        await handleSendOTP(data.user.email);
+        setStep('otp');
       } else {
-        // User doesn't exist, move to registration
+        // New user - go to registration
         setStep('register');
       }
     } catch (err: any) {
@@ -98,32 +94,6 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Invalid code');
-
-      completeLogin(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handlePasswordLogin = async () => {
-    if (!password) {
-      setError('Please enter your password');
-      return;
-    }
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${API_URL}/auth/login-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, password })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Invalid password');
 
       completeLogin(data);
     } catch (err: any) {
@@ -181,7 +151,6 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const resetForm = () => {
     setStep('phone');
     setPhoneNumber('');
-    setPassword('');
     setOtp('');
     setEmail('');
     setDisplayName('');
@@ -265,46 +234,6 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                   </>
                 )}
               </button>
-            </div>
-          )}
-
-          {step === 'password' && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Access Secured</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Enter account password for {phoneNumber}</p>
-              </div>
-              <div className="space-y-4">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Password Key</label>
-                <div className="relative">
-                  <Lock className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-5 pl-16 pr-6 text-white text-lg font-black focus:border-red-600 outline-none transition-colors"
-                  />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <button
-                  onClick={handlePasswordLogin}
-                  disabled={isLoading}
-                  className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all"
-                >
-                  {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Unlock Protocol"}
-                </button>
-                <button 
-                  onClick={() => {
-                    handleSendOTP(userData.email);
-                    setStep('otp');
-                  }}
-                  className="w-full text-zinc-600 hover:text-red-500 text-[10px] font-black uppercase tracking-widest transition-colors py-2"
-                >
-                   Request OTP instead
-                </button>
-              </div>
             </div>
           )}
 

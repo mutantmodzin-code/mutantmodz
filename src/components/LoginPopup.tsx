@@ -317,13 +317,39 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               
               {/* Development mode notice */}
               {import.meta.env.DEV && (
-                <div className="p-4 bg-blue-600/10 border border-blue-600/30 rounded-2xl">
-                  <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest">
-                    🔧 DEV MODE: Check server console for OTP code
-                  </p>
-                  <p className="text-blue-300/70 text-[9px] font-bold mt-2">
-                    The OTP will be displayed in the terminal where npm start is running
-                  </p>
+                <div className="space-y-3">
+                  <div className="p-4 bg-blue-600/10 border border-blue-600/30 rounded-2xl">
+                    <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest">
+                      🔧 DEV MODE: OTP AVAILABLE
+                    </p>
+                    <p className="text-blue-300/70 text-[9px] font-bold mt-2">
+                      Method 1: Check server console for OTP code
+                    </p>
+                    <p className="text-blue-300/70 text-[9px] font-bold mt-1">
+                      Method 2: Click below to autofill OTP
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch(`${API_URL}/auth/debug-otp`);
+                        const data = await response.json();
+                        const existingEmail = userData?.email || email;
+                        if (data.otps && data.otps[existingEmail]) {
+                          const devOtp = data.otps[existingEmail].otp;
+                          setOtp(devOtp);
+                          setError('');
+                        } else {
+                          setError('OTP not found. Check server console.');
+                        }
+                      } catch (err) {
+                        setError('Could not fetch OTP from debug endpoint');
+                      }
+                    }}
+                    className="w-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-600/50 text-blue-400 font-black uppercase py-3 rounded-2xl text-[10px] transition-all"
+                  >
+                    Auto-fill OTP from Server
+                  </button>
                 </div>
               )}
               

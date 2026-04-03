@@ -12,6 +12,20 @@ if (process.env.RESEND_API_KEY) {
     resend = new Resend(process.env.RESEND_API_KEY);
 }
 
+// In-memory store for development OTPs
+const otpStore = {};
+
+// Debug endpoint to check OTPs in development
+router.get('/debug-otp', (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'Not available in production' });
+    }
+    res.json({ 
+        otps: otpStore,
+        note: 'This endpoint is only available in development mode'
+    });
+});
+
 // Login Check Route (Check by phone number)
 router.post('/check-user', async (req, res) => {
     const { phone } = req.body;
@@ -91,18 +105,30 @@ router.post('/send-otp', async (req, res) => {
             return res.status(400).json({ error: 'User does not have an email linked for OTP' });
         }
 
+        // Store OTP in memory for development
+        otpStore[emailToUse] = {
+            otp,
+            phone,
+            email: emailToUse,
+            createdAt: new Date(),
+            expiresAt: otp_expiry
+        };
+
         // ALWAYS log OTP to console for debugging
-        console.log('\n========================================');
-        console.log(`✓ OTP Generated for ${emailToUse}`);
-        console.log(`📧 OTP Code: ${otp}`);
+        console.log('\n' + '='.repeat(50));
+        console.log('✓ OTP GENERATED');
+        console.log('='.repeat(50));
+        console.log(`📧 Email: ${emailToUse}`);
+        console.log(`📱 Phone: ${phone}`);
+        console.log(`🔐 OTP Code: ${otp}`);
         console.log(`⏰ Expires in: 10 minutes`);
-        console.log('========================================\n');
+        console.log('='.repeat(50) + '\n');
 
         // Try to send via Resend if available, but don't fail if it doesn't work
         if (resend) {
             try {
                 const { data, error } = await resend.emails.send({
-                    from: 'MutantModz <onboarding@resend.dev>', // Using default Resend test domain
+                    from: 'MutantModz <onboarding@resend.dev>',
                     to: [emailToUse],
                     subject: 'Your MutantModz Login OTP',
                     html: `
@@ -121,17 +147,17 @@ router.post('/send-otp', async (req, res) => {
                 if (!error && data) {
                     console.log('✓ Email sent successfully via Resend');
                 } else if (error) {
-                    console.warn('⚠ Resend email failed, but OTP is available in console above');
+                    console.warn('⚠ Resend email failed (OTP available above in console)');
                 }
             } catch (emailError) {
                 console.warn('⚠ Resend attempt failed:', emailError.message);
                 console.log('💡 Check console above for OTP code');
             }
         } else {
-            console.log('💡 Resend not configured. Check console above for OTP code.');
+            console.log('💡 Resend not configured - OTP available in console above');
         }
 
-        res.json({ message: 'OTP sent successfully' });
+        res.json({ message: 'OTP sent successfully', debugUrl: '/api/auth/debug-otp' });
     } catch (error) {
         console.error('SEND OTP ERROR:', error);
         res.status(500).json({ error: 'Server error' });

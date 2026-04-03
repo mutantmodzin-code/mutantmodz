@@ -222,6 +222,50 @@ router.patch('/:id/status', authenticateToken, async (req, res) => {
     }
 });
 
+// Get Customer Orders (specific to logged-in user)
+router.get('/customer/:customerId', authenticateToken, async (req, res) => {
+    const { customerId } = req.params;
+    try {
+        const invoices = await db.query(
+            `SELECT i.* FROM invoices i 
+             WHERE i.customer_id = $1 
+             ORDER BY i.created_at DESC`,
+            [customerId]
+        );
+
+        if (invoices.rows.length === 0) {
+            return res.json([]);
+        }
+
+        const invoiceIds = invoices.rows.map(inv => inv.id);
+        const items = await db.query(
+            `SELECT ii.*, p.name as product_name, p.image_url
+             FROM invoice_items ii 
+             LEFT JOIN products p ON ii.product_id = p.id 
+             WHERE ii.invoice_id = ANY($1)`,
+            [invoiceIds]
+        );
+
+        const itemsByInvoice = {};
+        items.rows.forEach(item => {
+            if (!itemsByInvoice[item.invoice_id]) {
+                itemsByInvoice[item.invoice_id] = [];
+            }
+            itemsByInvoice[item.invoice_id].push(item);
+        });
+
+        const ordersWithItems = invoices.rows.map(invoice => ({
+            ...invoice,
+            items: itemsByInvoice[invoice.id] || []
+        }));
+
+        res.json(ordersWithItems);
+    } catch (error) {
+        console.error('GET CUSTOMER ORDERS ERROR:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get Specific Invoice Details
 router.get('/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;

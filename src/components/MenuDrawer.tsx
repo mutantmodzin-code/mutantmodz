@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star, ShoppingBag } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -211,9 +211,18 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
               <User size={20} className="text-zinc-500" /> {isLoggedIn ? 'Account Settings' : 'Login / Register'}
             </button>
 
+            {isLoggedIn && (
+              <button 
+                onClick={() => handleNav('orders')}
+                className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5"
+              >
+                <ShoppingBag size={20} className="text-zinc-500" /> My Orders
+              </button>
+            )}
+
             <button 
               onClick={() => { onClose(); onOpenCart(); }}
-              className="w-full flex items-center justify-between py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors"
+              className="w-full flex items-center justify-between py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5"
             >
               <div className="flex items-center gap-4">
                 <ShoppingCart size={20} className="text-zinc-500" /> My Cart

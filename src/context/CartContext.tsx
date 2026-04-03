@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useUserAuth } from './UserAuthContext';
 import { Product } from '../types';
 
 export interface CartItem {
@@ -19,17 +20,26 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    const [items, setItems] = useState<CartItem[]>(() => {
-        try {
-            return JSON.parse(localStorage.getItem('mm_cart') || '[]');
-        } catch {
-            return [];
-        }
-    });
+    const { user } = useUserAuth();
+    const [items, setItems] = useState<CartItem[]>([]);
 
+    // Generate user-specific storage key
+    const storageKey = user?.uid ? `mm_cart_${user.uid}` : 'mm_cart_guest';
+
+    // Load cart from localStorage based on user
     useEffect(() => {
-        localStorage.setItem('mm_cart', JSON.stringify(items));
-    }, [items]);
+        try {
+            const saved = localStorage.getItem(storageKey);
+            setItems(saved ? JSON.parse(saved) : []);
+        } catch {
+            setItems([]);
+        }
+    }, [storageKey, user?.uid]);
+
+    // Save cart to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem(storageKey, JSON.stringify(items));
+    }, [items, storageKey]);
 
     const addToCart = (product: Product) => {
         setItems(prev => {

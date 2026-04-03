@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     Package,
     ChevronDown,
@@ -9,9 +9,11 @@ import {
     Building2,
     ArrowLeft,
     Check,
-    Truck
+    Truck,
+    X
 } from 'lucide-react';
-import { getProducts, createInvoice, createCustomer } from '../utils/storage';
+import { useCart } from '../context/CartContext';
+import { useUserAuth } from '../context/UserAuthContext';
 
 const SectionHeader = ({ title, icon: Icon }: { title: string, icon?: any }) => (
     <div className="flex items-center gap-3 mb-8 pb-4 border-b border-zinc-800/50">
@@ -34,113 +36,104 @@ const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
 );
 
 export default function Payment() {
-    const [product, setProduct] = useState<any>(null);
+    const { items: cartItems, totalPrice, clearCart } = useCart();
+    const { user } = useUserAuth();
     const [paymentDone, setPaymentDone] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('razorpay');
-    // Guard flag: ensures processOrder() can only execute ONCE per checkout session
+    const [paymentMethod, setPaymentMethod] = useState('cod');
     const orderProcessed = { current: false };
 
     // Customer Detail State
     const [customer, setCustomer] = useState({
-        email: '',
-        firstName: '',
-        lastName: '',
-        phone: '',
+        email: user?.email || '',
+        firstName: user?.name?.split(' ')[0] || '',
+        lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+        phone: user?.phone || '',
         address: '',
         city: '',
         state: 'Tamil Nadu',
         zip: ''
     });
 
-    useEffect(() => {
-        const fetchProduct = async () => {
-            const params = new URLSearchParams(window.location.hash.split('?')[1]);
-            const productId = params.get('productId');
+    // Redirect if no cart items
+    if (cartItems.length === 0 && !paymentDone) {
+        return (
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center pt-20 px-4">
+                <div className="text-center space-y-6 animate-on-scroll">
+                    <div className="w-24 h-24 bg-zinc-900 rounded-[2rem] flex items-center justify-center mx-auto border border-zinc-800">
+                        <Package size={40} className="text-zinc-600" />
+                    </div>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Cart Empty</h2>
+                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Please add items to proceed with checkout.</p>
+                    <a href="/products" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-4 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase mt-8">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        );
+    }
 
-            const products = await getProducts();
-            const selectedProduct = products.find((p: any) => p.id === productId || p.id === Number(productId)?.toString());
-
-            if (selectedProduct) {
-                setProduct(selectedProduct);
-            }
-        };
-        fetchProduct();
-    }, []);
-
-    const loadRazorpayScript = () => {
-        return new Promise((resolve) => {
-            // If already loaded, resolve immediately — don't inject a duplicate script tag
-            if (document.querySelector('script[src*="razorpay"]')) {
-                resolve(true);
-                return;
-            }
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = () => resolve(true);
-            script.onerror = () => resolve(false);
-            document.body.appendChild(script);
-        });
-    };
-
-    const processOrder = async (priceNum: number, shippingNum: number) => {
+    const processOrder = async () => {
         // Idempotency guard: if order was already processed, do nothing
         if (orderProcessed.current) return;
         orderProcessed.current = true;
 
         try {
-            // Read size/color/quantity from product details selection
-            const selectedSize = localStorage.getItem('checkout_size') || '';
-            const selectedColor = localStorage.getItem('checkout_color') || '';
-            const selectedQty = parseInt(localStorage.getItem('checkout_quantity') || '1') || 1;
+            if (!user) {
+                alert('Please log in to complete the order');
+                orderProcessed.current = false;
+                return;
+            }
 
-            // 1. Create/Update Customer
-            const customerRes = await createCustomer({
-                name: `${customer.firstName} ${customer.lastName}`,
-                phone: customer.phone,
-                email: customer.email,
-                address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`
-            });
-
-            // 2. Prepare Invoice Data
-            const subtotal = priceNum * selectedQty;
+            const shippingNum = 100;
+            const subtotal = totalPrice;
             const tax = subtotal * 0.18;
             const totalAmt = subtotal + tax + shippingNum;
 
-            const invoiceData = {
-                customer_id: customerRes.id,
-                order_type: 'Online Order',
-                subtotal: subtotal,
-                tax: tax,
-                discount: 0,
-                total_amount: totalAmt,
-                payment_method: paymentMethod.toUpperCase(),
+            // Build items array from cart
+            const items = cartItems.map(cartItem => ({
+                product_id: cartItem.product.id,
+                quantity: cartItem.quantity,
+                unit_price: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')),
+                line_total: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity,
                 gst_percentage: 18,
-                items: [{
-                    product_id: parseInt(product.id),
-                    quantity: selectedQty,
-                    unit_price: priceNum,
-                    line_total: subtotal,
+                taxable_amount: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity
+            }));
+
+            // Create invoice using API
+            const authToken = localStorage.getItem('auth_token');
+            const invoiceResponse = await fetch('http://localhost:3001/api/invoices', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    customer_id: user.uid,
+                    order_type: 'Online Order',
+                    subtotal: subtotal,
+                    tax: tax,
+                    discount: 0,
+                    total_amount: totalAmt,
+                    payment_method: paymentMethod.toUpperCase(),
                     gst_percentage: 18,
-                    taxable_amount: subtotal,
-                    selected_size: selectedSize,
-                    selected_color: selectedColor
-                }]
-            };
+                    items: items,
+                    shipping_address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`
+                })
+            });
 
-            // 3. Create Invoice (Backend handles stock deduction)
-            await createInvoice(invoiceData);
+            if (!invoiceResponse.ok) {
+                const errorData = await invoiceResponse.json();
+                throw new Error(errorData.message || 'Failed to create invoice');
+            }
 
-            // Cleanup localStorage
-            localStorage.removeItem('checkout_size');
-            localStorage.removeItem('checkout_color');
-            localStorage.removeItem('checkout_quantity');
-
+            // Clear cart after successful order
+            clearCart();
             setPaymentDone(true);
         } catch (error: any) {
-            // Reset the guard on failure so user can retry
             orderProcessed.current = false;
-            alert(error.message || 'Failed to process order sequence.');
+            alert(error.message || 'Failed to process order. Please try again.');
+            console.error('Order processing error:', error);
         } finally {
             setIsLoading(false);
         }
@@ -148,69 +141,17 @@ export default function Payment() {
 
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Block double-submit: if already processing, do nothing
         if (isLoading) return;
         setIsLoading(true);
 
-        const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, '')) || 0;
-        const shippingNum = 100;
-        const total = priceNum + shippingNum;
-
-        if (paymentMethod === 'cod') {
-            await processOrder(priceNum, shippingNum);
-            return;
-        }
-
-        const res = await loadRazorpayScript();
-
-        if (!res) {
-            alert('Razorpay SDK failed to load. Are you online?');
+        try {
+            await processOrder();
+        } catch (error: any) {
+            alert(error.message || 'Payment processing failed');
             setIsLoading(false);
-            return;
+            orderProcessed.current = false;
         }
-
-        const options = {
-            key: 'rzp_test_SOlLKQpQcZ29sB',
-            amount: Math.round(total * 100),
-            currency: 'INR',
-            name: 'MutantModz',
-            description: `Payment for ${product.name}`,
-            image: 'https://cdn.razorpay.com/logos/FFxP8XfW1m9M0t_medium.png',
-            handler: async function (_response: any) {
-                // Razorpay handler may fire more than once; the guard in processOrder stops duplication
-                await processOrder(priceNum, shippingNum);
-            },
-            prefill: {
-                name: `${customer.firstName} ${customer.lastName}`,
-                email: customer.email,
-                contact: customer.phone
-            },
-            theme: {
-                color: '#dc2626'
-            }
-        };
-
-        const paymentObject = new (window as any).Razorpay(options);
-        paymentObject.on('payment.failed', function (response: any) {
-            alert(`Payment failed! Reason: ${response.error.description}`);
-            setIsLoading(false);
-        });
-        paymentObject.open();
     };
-
-    if (!product) {
-        return (
-            <div className="min-h-screen bg-zinc-950 flex items-center justify-center pt-20">
-                <div className="text-center space-y-6 animate-on-scroll">
-                    <div className="w-24 h-24 bg-zinc-900 rounded-[2rem] flex items-center justify-center mx-auto border border-zinc-800">
-                        <Package size={40} className="text-zinc-600" />
-                    </div>
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Payment Failed</h2>
-                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">No product sequence detected in core.</p>
-                </div>
-            </div>
-        );
-    }
 
     if (paymentDone) {
         return (
@@ -219,19 +160,25 @@ export default function Payment() {
                     <div className="w-24 h-24 bg-red-600/10 rounded-[2rem] flex items-center justify-center mx-auto mb-10 border border-red-600/20">
                         <Check size={48} className="text-red-600" />
                     </div>
-                    <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Order Decoded</h2>
-                    <p className="text-zinc-500 mb-12 font-medium leading-relaxed">Your hardware request for <span className="text-white">{product.name}</span> has been successfully logged.</p>
-                    <a href="/" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
-                        Back to Homepage
-                    </a>
+                    <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Order Confirmed</h2>
+                    <p className="text-zinc-500 mb-12 font-medium leading-relaxed">Your order for <span className="text-white">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''}</span> has been successfully placed.</p>
+                    <div className="space-y-4">
+                        <a href="/orders" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
+                            View Order Details
+                        </a>
+                        <a href="/products" className="inline-block w-full bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
+                            Continue Shopping
+                        </a>
+                    </div>
                 </div>
             </div>
         );
     }
 
-    const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, '')) || 0;
     const shippingNum = 100;
-    const total = priceNum + shippingNum;
+    const subtotal = totalPrice;
+    const tax = subtotal * 0.18;
+    const total = subtotal + tax + shippingNum;
     const currencyFormat = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
 
 
@@ -352,14 +299,10 @@ export default function Payment() {
                             </div>
 
                             <div className="animate-on-scroll">
-                                <SectionHeader title="Currency Bridge" icon={ShieldCheck} />
+                                <SectionHeader title="Payment Method" icon={CreditCard} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                                     {[
-                                        { id: 'razorpay', label: 'RAZORPAY GATEWAY', icon: ShieldCheck },
                                         { id: 'cod', label: 'CASH ON DELIVERY', icon: Truck },
-                                        { id: 'card', label: 'DIRECT CARD', icon: CreditCard },
-                                        { id: 'upi', label: 'UPI PAYMENT', icon: Smartphone },
-                                        { id: 'netbanking', label: 'BANK TRANSFER', icon: Building2 },
                                     ].map((method) => (
                                         <button
                                             key={method.id}
@@ -381,30 +324,43 @@ export default function Payment() {
                         <div className="glass-card p-10 rounded-[3rem] border border-white/5 sticky top-32 space-y-10 animate-on-scroll">
                             <SectionHeader title="Order Summary" />
 
-                            <div className="flex gap-8 items-center bg-black/40 p-6 rounded-[2.5rem] border border-zinc-900">
-                                <div className="w-24 h-24 bg-white rounded-2xl p-4 flex-shrink-0 relative">
-                                    <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
-                                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-red-600 text-white text-[10px] font-black rounded-xl flex items-center justify-center border-4 border-zinc-950">1</div>
-                                </div>
-                                <div className="space-y-2">
-                                    <h4 className="text-xs font-black text-white uppercase tracking-widest leading-tight">{product.name}</h4>
-                                    <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Standard Issue</p>
-                                </div>
+                            {/* Cart Items List */}
+                            <div className="space-y-4 max-h-80 overflow-y-auto">
+                                {cartItems.map((item, idx) => {
+                                    const itemPrice = parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''));
+                                    const itemTotal = itemPrice * item.quantity;
+                                    return (
+                                        <div key={idx} className="flex gap-4 p-4 bg-black/40 rounded-2xl border border-zinc-800">
+                                            <div className="w-20 h-20 bg-white rounded-lg p-2 flex-shrink-0">
+                                                <img src={item.product.image} alt={item.product.name} className="w-full h-full object-contain" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-xs font-black text-white uppercase tracking-wider truncate">{item.product.name}</h4>
+                                                <p className="text-[9px] text-zinc-600 font-bold uppercase mt-1">Qty: {item.quantity}</p>
+                                                <p className="text-sm font-black text-red-600 mt-2">{currencyFormat.format(itemTotal)}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
-                            <div className="space-y-4 pt-10 border-t border-zinc-800/50">
+                            <div className="space-y-4 pt-4 border-t border-zinc-800/50">
                                 <div className="flex justify-between items-center px-4">
                                     <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Subtotal</span>
-                                    <span className="text-sm font-black text-white uppercase">{product.price}</span>
+                                    <span className="text-sm font-black text-white uppercase">{currencyFormat.format(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between items-center px-4">
-                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Logistics</span>
-                                    <span className="text-sm font-black text-white uppercase">₹100.00</span>
+                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">GST (18%)</span>
+                                    <span className="text-sm font-black text-white uppercase">{currencyFormat.format(tax)}</span>
+                                </div>
+                                <div className="flex justify-between items-center px-4">
+                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Shipping</span>
+                                    <span className="text-sm font-black text-white uppercase">{currencyFormat.format(shippingNum)}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-8 bg-zinc-950 rounded-[2rem] border border-zinc-900 mt-6">
                                     <div className="space-y-1">
-                                        <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em]">Total Value</span>
-                                        <p className="text-[9px] text-zinc-600 font-black uppercase">Incl. GST @ 18%</p>
+                                        <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em]">Total Amount</span>
+                                        <p className="text-[9px] text-zinc-600 font-black uppercase">Incl. GST & Shipping</p>
                                     </div>
                                     <span className="text-4xl font-black text-white tracking-tighter">{currencyFormat.format(total)}</span>
                                 </div>
@@ -418,7 +374,7 @@ export default function Payment() {
                                 {isLoading ? (
                                     <div className="w-6 h-6 border-4 border-black/20 border-t-black rounded-full animate-spin"></div>
                                 ) : (
-                                    <>Pay Now <ShieldCheck size={18} /></>
+                                    <>Place Order <ShieldCheck size={18} /></>
                                 )}
                             </button>
                         </div>

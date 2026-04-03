@@ -126,7 +126,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       label: 'Shop by Brands',
       icon: Star,
       isLink: true,
-      onClick: () => handleNavClick('products', '?brands=all')
+      onClick: () => handleNavClick('brands')
     },
     {
       id: 'helmets',

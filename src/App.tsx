@@ -13,6 +13,7 @@ import Combos from './pages/Combos';
 import GarageSale from './pages/GarageSale';
 import Category from './pages/Category';
 import Categories from './pages/Categories';
+import Brands from './pages/Brands';
 import MenuDrawer from './components/MenuDrawer';
 
 import Payment from './pages/Payment';
@@ -64,6 +65,8 @@ function AppContent() {
         return <Combos />;
       case 'garage-sale':
         return <GarageSale onNavigate={navigate} />;
+      case 'brands':
+        return <Brands onNavigate={navigate} />;
       case 'category':
         return <Category onNavigate={navigate} />;
       case 'categories':

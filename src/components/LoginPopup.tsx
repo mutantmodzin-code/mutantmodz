@@ -94,7 +94,10 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Invalid code');
-
+      // Store JWT token from registration
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
       completeLogin(data);
     } catch (err: any) {
       setError(err.message);
@@ -135,6 +138,10 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   };
 
   const completeLogin = (data: any) => {
+    // Store JWT token for API authentication
+    if (data.token) {
+      localStorage.setItem('auth_token', data.token);
+    }
     login({
       uid: data.user.id.toString(),
       phone: phoneNumber,

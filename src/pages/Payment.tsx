@@ -102,7 +102,8 @@ export default function Payment() {
 
             // Create invoice using API
             const authToken = localStorage.getItem('auth_token');
-            const invoiceResponse = await fetch('http://localhost:3001/api/invoices', {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+            const invoiceResponse = await fetch(`${apiUrl}/invoices`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

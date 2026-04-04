@@ -164,10 +164,10 @@ export default function Payment() {
                     <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Order Confirmed</h2>
                     <p className="text-zinc-500 mb-12 font-medium leading-relaxed">Your order for <span className="text-white">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''}</span> has been successfully placed.</p>
                     <div className="space-y-4">
-                        <a href="/orders" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
+                        <a href="/#orders" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
                             View Order Details
                         </a>
-                        <a href="/products" className="inline-block w-full bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
+                        <a href="/#products" className="inline-block w-full bg-zinc-800 hover:bg-zinc-700 text-white px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
                             Continue Shopping
                         </a>
                     </div>

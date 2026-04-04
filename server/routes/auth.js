@@ -172,6 +172,37 @@ router.post('/verify-otp', async (req, res) => {
     }
 });
 
+// Admin Login Route
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const user = result.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            token,
+            user: { id: user.id, username: user.username, role: user.role }
+        });
+    } catch (err) {
+        console.error('LOGIN ERROR:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 // Auth Middleware
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];

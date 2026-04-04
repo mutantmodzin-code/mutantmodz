@@ -43,7 +43,8 @@ const Products = () => {
         name: '', brand: '', category_id: '',
         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
         image_urls: ['', '', '', ''],
-        bike_brand: '', bike_model: ''
+        bike_brand: '', bike_model: '',
+        description: ''
     });
 
     useEffect(() => {
@@ -84,7 +85,8 @@ const Products = () => {
                 name: '', brand: '', category_id: '',
                 price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                 image_urls: ['', '', '', ''],
-                bike_brand: '', bike_model: ''
+                bike_brand: '', bike_model: '',
+                description: ''
             });
         } catch (error) {
             console.error(error);
@@ -155,7 +157,8 @@ const Products = () => {
             purchase_price: p.purchase_price || '',
             image_urls: urls,
             bike_brand: p.bike_brand || '',
-            bike_model: p.bike_model || ''
+            bike_model: p.bike_model || '',
+            description: p.description || ''
         });
         setIsModalOpen(true);
     };
@@ -350,6 +353,17 @@ const Products = () => {
                             <div style={{ gridColumn: 'span 2' }}>
                                 <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Initial Stock</label>
                                 <input className="input" type="number" placeholder="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Product Description</label>
+                                <textarea 
+                                    className="input" 
+                                    placeholder="Enter product description..." 
+                                    style={{ width: '100%', minHeight: '100px', resize: 'vertical', padding: '0.5rem' }} 
+                                    value={formData.description} 
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                />
                             </div>
 
                             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', gridColumn: 'span 2' }}>

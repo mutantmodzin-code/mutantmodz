@@ -60,11 +60,11 @@ router.get('/categories', async (req, res) => {
 
 // Add Product
 router.post('/', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model } = req.body;
+    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description } = req.body;
     console.log('DEBUG: Attempting to add product:', { name, sku, price, bike_brand, bike_model });
     try {
         const result = await db.query(
-            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
             [
                 name,
                 category_id ? parseInt(category_id) : null,
@@ -76,7 +76,8 @@ router.post('/', async (req, res) => {
                 parseFloat(purchase_price) || 0,
                 image_url || null,
                 bike_brand || null,
-                bike_model || null
+                bike_model || null,
+                description || null
             ]
         );
 
@@ -107,11 +108,11 @@ router.post('/', async (req, res) => {
 
 // Update Product
 router.put('/:id', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model } = req.body;
+    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description } = req.body;
     const { id } = req.params;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9, bike_brand = $10, bike_model = $11 WHERE id = $12 RETURNING *',
+            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9, bike_brand = $10, bike_model = $11, description = $12 WHERE id = $13 RETURNING *',
             [
                 name,
                 category_id ? parseInt(category_id) : null,
@@ -124,6 +125,7 @@ router.put('/:id', async (req, res) => {
                 image_url || null,
                 bike_brand || null,
                 bike_model || null,
+                description || null,
                 id
             ]
         );

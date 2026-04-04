@@ -289,7 +289,7 @@ export default function ProductDetails() {
                 {/* Sub-Section Navigation */}
                 <div className="border-b border-zinc-900 mb-20 animate-on-scroll">
                     <div className="flex gap-16">
-                        {['description', 'specifications', 'reviews'].map(tab => (
+                        {['description'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -311,85 +311,8 @@ export default function ProductDetails() {
                         <div className="max-w-4xl space-y-12 animate-on-scroll">
                             <div className="space-y-6">
                                 <h3 className="text-4xl font-black text-white tracking-tighter uppercase">{product.name} Engineering Overview</h3>
-                                <p className="text-zinc-400 text-lg leading-relaxed font-medium">
-                                    {product.description}
-                                </p>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-12 border-t border-zinc-900">
-                                <div className="space-y-4">
-                                    <h4 className="text-white font-black uppercase tracking-widest text-sm">Key Capabilities</h4>
-                                    <ul className="space-y-4">
-                                        {['High-impact thermoplastic shell', 'Optically corrected clear visor', 'Advanced ventilation matrix', 'Removable hypo-allergenic liner'].map(item => (
-                                            <li key={item} className="flex items-center gap-4 text-zinc-500 text-xs font-black uppercase tracking-widest">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-red-600"></div>
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div className="bg-zinc-900/50 p-8 rounded-[2rem] border border-zinc-800">
-                                    <p className="text-zinc-500 text-xs font-bold leading-relaxed uppercase tracking-widest">
-                                        "Designed for riders who seek no compromise between safety and style. Every unit undergoes rigorous 5-stage quality validation."
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'specifications' && (
-                        <div className="max-w-2xl animate-on-scroll">
-                            <div className="bg-zinc-900 rounded-[2.5rem] border border-zinc-800 overflow-hidden">
-                                {[
-                                    { label: 'Hardware Mass', value: '1.45 KG ± 50G' },
-                                    { label: 'Safety Index', value: 'DOT + ECE 22.05' },
-                                    { label: 'Origin', value: 'Mutant Certified' },
-                                    { label: 'Interior', value: 'Precision Mesh' }
-                                ].map((spec, i) => (
-                                    <div key={i} className={`flex justify-between p-8 ${i !== 0 ? 'border-t border-zinc-800' : ''}`}>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{spec.label}</span>
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-white">{spec.value}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'reviews' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 animate-on-scroll">
-                            <div className="space-y-12">
-                                <div className="space-y-4">
-                                    <h3 className="text-white font-black uppercase tracking-widest text-2xl">RIDER FEEDBACK</h3>
-                                    <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest leading-loose">
-                                        Read authentic experiences from riders who have already integrated this hardware into their gear.
-                                    </p>
-                                </div>
-                                <div className="space-y-8">
-                                    <div className="p-8 bg-zinc-900/40 rounded-[2rem] border border-zinc-800 space-y-4 relative group">
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-white font-black text-xs uppercase tracking-widest">Rahul S. <span className="text-zinc-600 lowercase ml-2">@verified_rider</span></p>
-                                            <div className="flex gap-1">
-                                                {[1, 2, 3, 4, 5].map(s => <Star key={s} size={10} className="text-red-600 fill-red-600" />)}
-                                            </div>
-                                        </div>
-                                        <p className="text-zinc-400 text-sm font-medium italic">"Best investment for my long tours. The wind noise is minimal even at high speeds."</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-zinc-900 p-12 rounded-[3.5rem] border border-zinc-800 space-y-8 h-fit">
-                                <h4 className="text-white font-black uppercase tracking-widest text-sm">LOG NEW REVIEW</h4>
-                                <div className="space-y-6">
-                                    <div className="space-y-3">
-                                        <label className="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Hardware Rating</label>
-                                        <div className="flex gap-2">
-                                            {[1, 2, 3, 4, 5].map(s => <button key={s} className="w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-red-500 transition-all"><Star size={14} /></button>)}
-                                        </div>
-                                    </div>
-                                    <textarea
-                                        className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-6 text-white text-xs font-bold focus:outline-none focus:border-red-600 min-h-[150px] uppercase placeholder:text-zinc-800"
-                                        placeholder="Enter message..."
-                                    ></textarea>
-                                    <button className="w-full bg-red-600 py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] text-white hover:bg-white hover:text-red-600 transition-all">Submit Entry</button>
+                                <div className="text-zinc-400 text-lg leading-relaxed font-medium whitespace-pre-wrap">
+                                    {product.description || "Technical specifications and engineering details pending for this hardware unit."}
                                 </div>
                             </div>
                         </div>

@@ -64,13 +64,14 @@ export default function Products({ onNavigate }: ProductsProps) {
       if (cat) {
         const decodedCat = decodeURIComponent(cat).toLowerCase();
         // If it's one of our main categories, set category
-        if (['helmets', 'accessories', 'gear', 'mods', 'luggage'].includes(decodedCat)) {
+        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts'].includes(decodedCat)) {
           setSelectedCategory(decodedCat);
         } else {
-          // Otherwise treat it as a specific model/search filter
+          // Otherwise treat it as a specific model/search filter (including subcategories)
           setSearchQuery(decodeURIComponent(cat));
         }
       }
+
     };
     checkUrlParams();
 
@@ -85,18 +86,30 @@ export default function Products({ onNavigate }: ProductsProps) {
   ];
 
   const filteredProducts = products.filter(p => {
-    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    // If we're filtering by a main category
+    const matchesCategory = selectedCategory === 'all' || 
+        p.category.toLowerCase() === selectedCategory.toLowerCase() ||
+        p.sub_category_type?.toLowerCase() === selectedCategory.toLowerCase();
+
+    // Search query matches name, description, brand, bike info, OR sub_category info
+    const matchesSearch = !searchQuery || 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p as any).bike_brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p as any).bike_model?.toLowerCase().includes(searchQuery.toLowerCase());
+      p.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.bike_brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.bike_model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.sub_category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.sub_category_type?.toLowerCase().includes(searchQuery.toLowerCase());
+
     const matchesBrand = !selectedBrand ||
       p.name.toLowerCase().includes(selectedBrand) ||
       p.description.toLowerCase().includes(selectedBrand) ||
-      (p as any).brand?.toLowerCase() === selectedBrand ||
-      (p as any).bike_brand?.toLowerCase() === selectedBrand;
+      p.brand?.toLowerCase() === selectedBrand ||
+      p.bike_brand?.toLowerCase() === selectedBrand;
+      
     return matchesCategory && matchesSearch && matchesBrand;
   });
+
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortBy === 'price-low') {

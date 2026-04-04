@@ -38,8 +38,11 @@ export const getProducts = async (): Promise<Product[]> => {
                 brand: p.brand || '',
                 bike_brand: p.bike_brand || '',
                 bike_model: p.bike_model || '',
+                sub_category: p.sub_category || '',
+                sub_category_type: p.sub_category_type || '',
                 date_added: p.created_at || null
             };
+
         });
     } catch (error) {
         console.error('Database connection failed. Using fallback mock data for demo:', error);

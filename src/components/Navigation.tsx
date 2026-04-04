@@ -22,7 +22,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
   const [isSearchCatOpen, setIsSearchCatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<any>(null);
   const [activeBrand, setActiveBrand] = useState<string | null>('Royal Enfield');
   const { totalCount } = useCart();
   const { isLoggedIn, user, setShowLoginPopup, logout } = useUserAuth();
@@ -148,12 +148,57 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       icon: ChevronDown,
       columns: [
         {
-          title: 'Mechanical & Lighting',
-          links: ['MOTORCYCLE ACCESSORIES', 'Lighting', 'Lubricants', 'Performance Parts']
+          title: 'MOTORCYCLE ACCESSORIES',
+          links: [
+            'Bike Protection',
+            'Handlebar',
+            'Electronic',
+            'Essentials',
+            'Rain Cover',
+            'Cameras'
+          ]
         },
         {
-          title: 'Apparel & Storage',
-          links: ['Riding Gear', 'Luggage', 'Apparels', 'Wholesale']
+          title: 'Lighting',
+          links: [
+            'Auxiliary Light',
+            'Headlight',
+            'Hazards',
+            'Light Accessories'
+          ]
+        },
+        {
+          title: 'Riding Gear ',
+          links: [
+            'Jackets',
+            'Jerseys',
+            'Pants',
+            'Gloves',
+            'Boots'
+          ]
+        },
+        {
+          title: 'Luggage',
+          links: [
+            'Racks',
+            'Bag and panniers',
+            'Jerry can',
+            'GPS mount',
+            'Air seat'
+          ]
+        },
+        {
+          title: 'Performance Parts',
+          links: [
+            'Air Filter',
+            'Brake Pads',
+            'Bendpipe',
+            'Chain Sprocket',
+            'Exhaust',
+            'ECU',
+            'Spark Plug',
+            'Oil Filter'
+          ]
         }
       ],
       featured: [

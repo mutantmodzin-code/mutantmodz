@@ -14,11 +14,15 @@ console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'PRESENT' : 'MISSING');
 console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'PRESENT' : 'MISSING');
 console.log('--------------------');
 
+
+
 // Middleware
 app.use(cors());
 app.use(helmet());
+app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 
 // Main Route Check
 app.get('/', (req, res) => {

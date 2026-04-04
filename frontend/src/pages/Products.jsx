@@ -11,6 +11,25 @@ const PARTNER_BRANDS = [
     'Liqui Moly', 'JB Racing'
 ];
 
+const SUB_CATEGORIES = {
+    'Accessories': {
+        'Motorcycle Accessories': ['Bike Protection', 'Handlebar', 'Electronic', 'Essentials', 'Rain Cover', 'Cameras'],
+        'Lighting': ['Auxiliary Light', 'Headlight', 'Hazards', 'Light Accessories'],
+        'Luggage': ['Racks', 'Bag and panniers', 'Jerry can', 'GPS mount', 'Air seat'],
+        'Performance Parts': ['Air Filter', 'Brake Pads', 'Bendpipe', 'Chain Sprocket', 'Exhaust', 'ECU', 'Spark Plug', 'Oil Filter']
+    },
+    'Riding Gear': {
+        'Jackets': ['Textile Jackets', 'Mesh Jackets', 'Leather Jackets', 'Rain Jackets'],
+        'Jerseys': ['Off-road Jerseys', 'Street Jerseys'],
+        'Pants': ['Riding Pants', 'Rain Pants'],
+        'Gloves': ['Short Cuff', 'Long Cuff', 'Winter Gloves'],
+        'Boots': ['Adventure Boots', 'Street Boots', 'Short Boots']
+    },
+    'Helmets': ['Full Face', 'Open Face', 'Modular', 'Motocross', 'Kids'],
+    'Others': []
+};
+
+
 const BIKE_DATA = [
     { name: 'KTM', models: ['390 Adventure', 'Duke 390', 'Duke 250', 'RC 390', 'Duke 200', 'Adv 340', 'Gen 3 Duke 390', 'RC 200'] },
     { name: 'Royal Enfield', models: ['Himalayan 450', 'Bear 650', 'Guerrilla 450', 'Himalayan', 'Interceptor 650', 'Continental Gt 650', 'Hunter 350', 'Classic 350', 'Meteor 350', 'Bullet 350'] },
@@ -40,12 +59,13 @@ const Products = () => {
     };
 
     const [formData, setFormData] = useState({
-        name: '', brand: '', category_id: '',
+        name: '', brand: '', category_id: '', sub_category: '', sub_category_type: '',
         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
         image_urls: ['', '', '', ''],
         bike_brand: '', bike_model: '',
-        description: ''
+        description: '', discount_percent: 0
     });
+
 
     useEffect(() => {
         fetchProducts();
@@ -82,12 +102,13 @@ const Products = () => {
             fetchProducts();
             setEditingProduct(null);
             setFormData({
-                name: '', brand: '', category_id: '',
+                name: '', brand: '', category_id: '', sub_category: '', sub_category_type: '',
                 price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                 image_urls: ['', '', '', ''],
                 bike_brand: '', bike_model: '',
-                description: ''
+                description: '', discount_percent: 0
             });
+
         } catch (error) {
             console.error(error);
             alert('Error saving product: ' + (error.response?.data?.error || error.message));
@@ -150,6 +171,8 @@ const Products = () => {
             name: p.name,
             brand: p.brand || '',
             category_id: p.category_id,
+            sub_category: p.sub_category || '',
+            sub_category_type: p.sub_category_type || '', // We might need to derive this or store it
             price: p.price,
             stock: p.stock,
             vendor_id: p.vendor_id,
@@ -158,13 +181,24 @@ const Products = () => {
             image_urls: urls,
             bike_brand: p.bike_brand || '',
             bike_model: p.bike_model || '',
-            description: p.description || ''
+            description: p.description || '',
+            discount_percent: p.discount_percent || 0
         });
+
         setIsModalOpen(true);
     };
 
     const categoryName = getSelectedCategoryName();
-    const isCompatibilityNeeded = categoryName === 'Accessories' || categoryName === 'Bike Parts';
+    const categoryData = SUB_CATEGORIES[categoryName] || [];
+    const isNested = !Array.isArray(categoryData);
+    
+    const subCategoryTypes = isNested ? Object.keys(categoryData) : [];
+    const subCategories = isNested 
+        ? (categoryData[formData.sub_category_type] || []) 
+        : categoryData;
+
+    const isCompatibilityNeeded = categoryName === 'Accessories' || categoryName === 'Bike Parts' || categoryName === 'Performance Parts';
+
 
     return (
         <div>
@@ -173,11 +207,12 @@ const Products = () => {
                 <button className="btn btn-primary" onClick={() => {
                     setEditingProduct(null);
                     setFormData({
-                        name: '', brand: '', category_id: '',
+                        name: '', brand: '', category_id: '', sub_category: '', sub_category_type: '',
                         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                         image_urls: ['', '', '', ''],
-                        bike_brand: '', bike_model: ''
+                        bike_brand: '', bike_model: '', description: '', discount_percent: 0
                     });
+
                     setIsModalOpen(true);
                 }}>
                     <Plus size={20} /> Add New Product
@@ -247,128 +282,151 @@ const Products = () => {
             </div>
 
             {isModalOpen && (
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: '2rem' }}>
-                    <div className="card" style={{ width: '600px', maxWidth: '100%' }}>
-                        <h2 style={{ marginBottom: '1.5rem' }}>{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
-                        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Product Name</label>
-                                <input className="input" placeholder="e.g. Full Face helmet" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: '20px' }}>
+                    <div className="card shadow-2xl" style={{ width: '800px', maxWidth: '100%', borderRadius: '1.5rem', border: '1px solid #e2e8f0', animation: 'modalSlideUp 0.3s ease-out' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>{editingProduct ? '📝 Edit Product' : '✨ Add New Product'}</h2>
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', color: '#64748b' }}>✕</button>
+                        </div>
+                        
+                        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.25rem' }}>
+                            <div style={{ gridColumn: 'span 8' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Product Name</label>
+                                <input className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} placeholder="e.g. Full Face helmet" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                             </div>
 
-                            <div>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>SKU (Unique Number)</label>
-                                <input className="input" placeholder="e.g. PROD-001" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
+                            <div style={{ gridColumn: 'span 4' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>SKU / Barcode</label>
+                                <input className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} placeholder="PROD-001" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
                             </div>
 
-                            <div>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Category</label>
-                                <select className="input" required value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}>
+                            <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Category</label>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} required value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value, sub_category_type: '', sub_category: '' })}>
                                     <option value="">Select Category</option>
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
 
-                            <div>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Vendor</label>
-                                <select className="input" value={formData.vendor_id} onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}>
-                                    <option value="">Select Vendor</option>
-                                    {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                            {isNested && (
+                                <div style={{ gridColumn: 'span 3' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Type</label>
+                                    <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.sub_category_type} onChange={(e) => setFormData({ ...formData, sub_category_type: e.target.value, sub_category: '' })}>
+                                        <option value="">Select Type</option>
+                                        {subCategoryTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                    </select>
+                                </div>
+                            )}
+
+                            <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>{isNested ? 'Item' : 'Sub Category'}</label>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.sub_category} onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })} disabled={!subCategories.length}>
+                                    <option value="">{subCategories.length ? 'Select' : 'N/A'}</option>
+                                    {subCategories.map(sc => <option key={sc} value={sc}>{sc}</option>)}
                                 </select>
                             </div>
 
-                            <div>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Manufacturer Brand</label>
-                                <select className="input" value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })}>
+                            <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
+
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Manufacturer</label>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })}>
                                     <option value="">Select Brand</option>
                                     {PARTNER_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                                    <option value="Other">Other</option>
                                 </select>
                             </div>
 
-                            {isCompatibilityNeeded && (
-                                <div style={{ border: '1px solid #e2e8f0', borderRadius: '0.75rem', padding: '1rem', gridColumn: 'span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: '#f8fafc' }}>
-                                    <div style={{ gridColumn: 'span 2', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.1em' }}>Bike Compatibility</div>
+                            <div style={{ gridColumn: 'span 12', backgroundColor: '#f8fafc', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #e2e8f0' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#334155', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>🏍️ Bike Compatibility</span>
+                                    <div style={{ height: '1px', flex: 1, backgroundColor: '#e2e8f0' }}></div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div>
-                                        <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Bike Brand</label>
-                                        <select className="input" value={formData.bike_brand} onChange={(e) => setFormData({ ...formData, bike_brand: e.target.value, bike_model: '' })}>
-                                            <option value="">Select bike brand</option>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.35rem', display: 'block' }}>BRAND</label>
+                                        <select className="input" style={{ borderRadius: '0.6rem' }} value={formData.bike_brand} onChange={(e) => setFormData({ ...formData, bike_brand: e.target.value, bike_model: '' })}>
+                                            <option value="">Universal / No Brand</option>
                                             {BIKE_DATA.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
                                         </select>
                                     </div>
                                     <div>
-                                        <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Bike Model</label>
-                                        <select className="input" disabled={!formData.bike_brand} value={formData.bike_model} onChange={(e) => setFormData({ ...formData, bike_model: e.target.value })}>
-                                            <option value="">Select bike model</option>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.35rem', display: 'block' }}>MODEL</label>
+                                        <select className="input" style={{ borderRadius: '0.6rem' }} disabled={!formData.bike_brand} value={formData.bike_model} onChange={(e) => setFormData({ ...formData, bike_model: e.target.value })}>
+                                            <option value="">All Models</option>
                                             {BIKE_DATA.find(b => b.name === formData.bike_brand)?.models.map(m => <option key={m} value={m}>{m}</option>)}
                                         </select>
                                     </div>
                                 </div>
-                            )}
-
-                            <div>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Purchase Price (₹)</label>
-                                <input className="input" type="number" step="0.01" placeholder="0.00" value={formData.purchase_price} onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })} />
                             </div>
 
-                            <div>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Selling Price (₹)</label>
-                                <input className="input" type="number" step="0.01" placeholder="0.00" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
+                            <div style={{ gridColumn: 'span 4' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Purchase Price</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>₹</span>
+                                    <input className="input" style={{ paddingLeft: '1.75rem', borderRadius: '0.75rem' }} type="number" step="0.01" value={formData.purchase_price} onChange={(e) => setFormData({ ...formData, purchase_price: e.target.value })} />
+                                </div>
+                            </div>
+
+                            <div style={{ gridColumn: 'span 4' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Selling Price</label>
+                                <div style={{ position: 'relative' }}>
+                                    <span style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>₹</span>
+                                    <input className="input" style={{ paddingLeft: '1.75rem', borderRadius: '0.75rem' }} type="number" step="0.01" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
+                                </div>
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.75rem', display: 'block' }}>Product Images (Up to 4)</label>
-                                <div
-                                    style={{ border: '2px dashed #e2e8f0', borderRadius: '0.5rem', padding: '1rem', backgroundColor: '#f8fafc', cursor: 'pointer', textAlign: 'center', transition: 'border-color 0.2s', userSelect: 'none' }}
-                                    onClick={() => document.getElementById('multi-image-input').click()}
-                                >
-                                    <div style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '0.25rem' }}>🖼️ Click to select up to 4 images</div>
-                                    <div style={{ color: '#94a3b8', fontSize: '0.7rem' }}>Hold Ctrl / ⌘ to pick multiple files</div>
-                                    <input
-                                        id="multi-image-input"
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={handleFileChange}
-                                        style={{ display: 'none' }}
-                                    />
-                                </div>
-                                {formData.image_urls.some(u => u) && (
-                                    <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Discount %</label>
+                                <input className="input" style={{ borderRadius: '0.75rem' }} type="number" value={formData.discount_percent} onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })} />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Stock</label>
+                                <input className="input" style={{ borderRadius: '0.75rem' }} type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 12' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Product Images</label>
+                                <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                                    <div
+                                        style={{ width: '120px', height: '120px', border: '2px dashed #cbd5e1', borderRadius: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc', cursor: 'pointer', transition: 'all 0.2s' }}
+                                        onClick={() => document.getElementById('multi-image-input').click()}
+                                        onMouseOver={(e) => e.currentTarget.style.borderColor = '#2563eb'}
+                                        onMouseOut={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                                    >
+                                        <Plus size={24} color="#64748b" />
+                                        <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#64748b', marginTop: '0.5rem' }}>ADD IMAGES</span>
+                                        <input id="multi-image-input" type="file" accept="image/*" multiple onChange={handleFileChange} style={{ display: 'none' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                                         {formData.image_urls.map((url, idx) => url ? (
-                                            <div key={idx} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '0.5rem', overflow: 'hidden', border: '2px solid #e2e8f0', flexShrink: 0 }}>
+                                            <div key={idx} style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '1rem', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
                                                 <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Image ${idx + 1}`} />
                                                 <button
                                                     type="button"
-                                                    style={{ position: 'absolute', top: '2px', right: '2px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', cursor: 'pointer', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}
+                                                    style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}
                                                     onClick={(e) => { e.stopPropagation(); const newUrls = [...formData.image_urls]; newUrls[idx] = ''; setFormData({ ...formData, image_urls: newUrls }); }}
                                                 >✕</button>
-                                                <span style={{ position: 'absolute', bottom: '2px', left: '2px', background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '9px', padding: '1px 3px', borderRadius: '3px' }}>{idx + 1}</span>
+                                                <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', background: 'rgba(15, 23, 42, 0.6)', color: 'white', fontSize: '10px', padding: '2px', textAlign: 'center', fontWeight: 700 }}>SLOT {idx + 1}</div>
                                             </div>
                                         ) : null)}
                                     </div>
-                                )}
+                                </div>
                             </div>
 
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Initial Stock</label>
-                                <input className="input" type="number" placeholder="0" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
-                            </div>
-
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem', display: 'block' }}>Product Description</label>
+                            <div style={{ gridColumn: 'span 12' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Description</label>
                                 <textarea 
                                     className="input" 
-                                    placeholder="Enter product description..." 
-                                    style={{ width: '100%', minHeight: '100px', resize: 'vertical', padding: '0.5rem' }} 
+                                    placeholder="Write a compelling product description..." 
+                                    style={{ width: '100%', minHeight: '80px', borderRadius: '0.75rem', padding: '0.75rem', resize: 'vertical' }} 
                                     value={formData.description} 
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
 
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', gridColumn: 'span 2' }}>
-                                <button className="btn btn-primary" style={{ flex: 1 }}>Save Product</button>
-                                <button type="button" className="btn" style={{ backgroundColor: '#e2e8f0', flex: 1 }} onClick={() => setIsModalOpen(false)}>Cancel</button>
+                            <div style={{ gridColumn: 'span 12', display: 'flex', gap: '1rem', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid #f1f5f9' }}>
+                                <button type="button" className="btn" style={{ flex: 1, backgroundColor: '#f1f5f9', color: '#64748b', fontWeight: 700, borderRadius: '0.75rem' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                <button className="btn btn-primary" style={{ flex: 2, padding: '1rem', borderRadius: '0.75rem', fontWeight: 800, letterSpacing: '0.025em', boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.3)' }}>{editingProduct ? 'UPDATE PRODUCT' : 'CREATE PRODUCT'}</button>
                             </div>
                         </form>
                     </div>

@@ -12,10 +12,14 @@ export interface Product {
     brand?: string;
     bike_brand?: string;
     bike_model?: string;
+    sub_category?: string;
+    sub_category_type?: string;
     isBestSeller?: boolean;
     isNew?: boolean;
     freeShipping?: boolean;
+    discount_percent?: number;
 }
+
 
 export type Category = {
     id: string;

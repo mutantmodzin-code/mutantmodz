@@ -72,6 +72,11 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
   };
 
   const status = stockStatus();
+  
+  // Calculate original price if discount exists
+  const discount = product.discount_percent || 0;
+  const currentPrice = product.price_num;
+  const originalPrice = discount > 0 ? Math.round(currentPrice / (1 - discount / 100)) : null;
 
   return (
     <div
@@ -98,6 +103,11 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
             <div className="bg-emerald-600 border border-emerald-400 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
               <Truck size={10} />
               Free Shipping
+            </div>
+          )}
+          {discount > 0 && (
+            <div className="bg-red-600 border border-red-400 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+              SAVE {Math.round(discount)}%
             </div>
           )}
         </div>
@@ -130,7 +140,12 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
         </button>
 
         {/* Price Element */}
-        <div className="absolute bottom-4 left-4 z-20">
+        <div className="absolute bottom-4 left-4 z-20 flex flex-col items-start gap-1">
+          {originalPrice && (
+            <div className="bg-zinc-950/60 backdrop-blur-md text-zinc-400 px-2 py-0.5 rounded-lg text-[10px] font-bold line-through">
+              ₹{originalPrice.toLocaleString()}
+            </div>
+          )}
           <div className="bg-white text-zinc-950 px-4 py-2 rounded-xl text-[14px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110">
             {product.price}
           </div>

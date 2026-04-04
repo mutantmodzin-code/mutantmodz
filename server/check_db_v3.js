@@ -1,6 +1,5 @@
 
-import pg from 'pg';
-const { Pool } = pg;
+const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: 'postgresql://neondb_owner:npg_Uj5Xcte4uIiV@ep-small-mode-adaizi3d-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require'

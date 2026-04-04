@@ -60,11 +60,12 @@ router.get('/categories', async (req, res) => {
 
 // Add Product
 router.post('/', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, discount_percent } = req.body;
-    console.log('DEBUG: Attempting to add product:', { name, sku, price, bike_brand, bike_model, sub_category, discount_percent });
+    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, sub_category_type, discount_percent } = req.body;
+    console.log('DEBUG: Attempting to add product:', { name, sku, price, bike_brand, bike_model, sub_category, sub_category_type, discount_percent });
+
     try {
         const result = await db.query(
-            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, discount_percent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, sub_category_type, discount_percent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
             [
                 name,
                 category_id ? parseInt(category_id) : null,
@@ -79,9 +80,11 @@ router.post('/', async (req, res) => {
                 bike_model || null,
                 description || null,
                 sub_category || null,
+                sub_category_type || null,
                 parseFloat(discount_percent) || 0
             ]
         );
+
 
         // Log vendor price history
         if (result.rows[0].id) {
@@ -110,11 +113,12 @@ router.post('/', async (req, res) => {
 
 // Update Product
 router.put('/:id', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, discount_percent } = req.body;
+    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, sub_category_type, discount_percent } = req.body;
+
     const { id } = req.params;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9, bike_brand = $10, bike_model = $11, description = $12, sub_category = $13, discount_percent = $14 WHERE id = $15 RETURNING *',
+            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9, bike_brand = $10, bike_model = $11, description = $12, sub_category = $13, sub_category_type = $14, discount_percent = $15 WHERE id = $16 RETURNING *',
             [
                 name,
                 category_id ? parseInt(category_id) : null,
@@ -129,10 +133,12 @@ router.put('/:id', async (req, res) => {
                 bike_model || null,
                 description || null,
                 sub_category || null,
+                sub_category_type || null,
                 parseFloat(discount_percent) || 0,
                 id
             ]
         );
+
 
         // Optional: Update price history if changed
         await db.query(

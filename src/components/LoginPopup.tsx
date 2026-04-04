@@ -40,15 +40,18 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const data = await response.json();
 
       if (response.ok && data.exists) {
-        // Existing user - send OTP
-        setUserData(data.user);
-        setEmail(data.user.email);
-        await handleSendOTP(data.user.email);
-        setStep('otp');
+        // Direct Login (Bypassing OTP)
+        if (data.token) {
+          completeLogin(data);
+        } else {
+          // Fallback if token not returned for some reason
+          setError('Auth Protocol Sequence Error');
+        }
       } else {
         // New user - go to registration
         setStep('register');
       }
+
     } catch (err: any) {
       console.error('Login error:', err);
       setError('Unable to connect to security server');
@@ -127,9 +130,10 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
       if (!response.ok) throw new Error('Failed to create account');
       
-      // After registration, send OTP to verify email
-      await handleSendOTP(email);
-      setStep('otp');
+      const data = await response.json();
+      // After registration, login immediately (Skip OTP)
+      completeLogin(data);
+
     } catch (err: any) {
       setError(err.message);
     } finally {

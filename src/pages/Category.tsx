@@ -65,25 +65,46 @@ export default function Category({ onNavigate }: CategoryProps) {
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/30 via-zinc-950/80 to-zinc-950"></div>
 
-        <div className="max-w-[1600px] mx-auto relative z-10 px-6 text-center space-y-6">
-          <button
-            onClick={() => window.history.back()}
-            className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-4"
-          >
-            <ArrowLeft size={14} /> Back
-          </button>
-          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full">
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Category Sector</span>
+        <div className="max-w-[1700px] mx-auto px-6 relative z-10">
+          {/* Tactical Navigation Row */}
+          <div className="pt-32 pb-12 flex items-center justify-between">
+            <button
+              onClick={() => window.history.back()}
+              className="group flex items-center gap-3 text-zinc-500 hover:text-white transition-all duration-300"
+            >
+              <div className="w-12 h-12 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] bg-zinc-950">
+                <span className="text-[20px] group-hover:-translate-x-1 transition-transform">←</span>
+              </div>
+              <div className="flex flex-col items-start translate-y-0.5">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] leading-none mb-1">Back To</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-red-500 transition-colors">Previous Section</span>
+              </div>
+            </button>
+            <div className="hidden sm:flex gap-4">
+              <div className="px-5 py-2.5 rounded-xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm">
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">Inventory State</p>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                  <span className="text-white text-[11px] font-black uppercase tracking-widest">Active Hunt</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <h1 className="text-6xl sm:text-8xl font-black text-white tracking-tighter leading-none uppercase">
-            {categoryName || 'ALL'}
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">PRODUCTS</span>
-          </h1>
-          <p className="text-zinc-400 text-sm font-bold uppercase tracking-[0.3em]">
-            {filteredProducts.length} items found
-          </p>
+
+          <div className="text-center pb-24 space-y-6">
+            <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+              <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Category Sector</span>
+            </div>
+            <h1 className="text-6xl sm:text-8xl font-black text-white tracking-tighter leading-none uppercase">
+              {categoryName || 'ALL'}
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">PRODUCTS</span>
+            </h1>
+            <p className="text-zinc-400 text-sm font-bold uppercase tracking-[0.3em]">
+              {filteredProducts.length} items found
+            </p>
+          </div>
         </div>
       </section>
 

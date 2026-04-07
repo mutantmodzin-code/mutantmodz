@@ -51,7 +51,6 @@ export default function Products({ onNavigate }: ProductsProps) {
       else if (cat && !['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals'].includes(decodeURIComponent(cat).toLowerCase())) {
         setSearchQuery(decodeURIComponent(cat));
       } else {
-        // Only clear if we're not filtering by a brand that might already have matching products
         if (!brand) setSearchQuery('');
       }
 
@@ -87,7 +86,6 @@ export default function Products({ onNavigate }: ProductsProps) {
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      // If we're filtering by 'new' or a main category
       const isNewArrivalRequest = selectedCategory.toLowerCase() === 'new' || selectedCategory.toLowerCase() === 'new arrivals';
       const matchesNew = !isNewArrivalRequest || p.isNew;
 
@@ -98,7 +96,6 @@ export default function Products({ onNavigate }: ProductsProps) {
         (selectedCategory.toLowerCase() === 'accessories' && p.sub_category_type?.toLowerCase() === 'motorcycle accessories') ||
         (selectedCategory.toLowerCase() === 'riding gear' && (p.sub_category_type?.toLowerCase() === 'riding gear' || p.category_name?.toLowerCase() === 'gear'));
 
-      // Search query matches name, description, brand, bike info, OR sub_category info
       const matchesSearch = !searchQuery || 
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -118,7 +115,6 @@ export default function Products({ onNavigate }: ProductsProps) {
     });
   }, [products, selectedCategory, searchQuery, selectedBrand]);
 
-
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortBy === 'price-low') {
       return (a.price_num || 0) - (b.price_num || 0);
@@ -127,47 +123,54 @@ export default function Products({ onNavigate }: ProductsProps) {
       return (b.price_num || 0) - (a.price_num || 0);
     }
     if (sortBy === 'newest') {
-      // Use created_at if available, otherwise fallback to ID
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      const dateA = a.date_added ? new Date(a.date_added).getTime() : 0;
+      const dateB = b.date_added ? new Date(b.date_added).getTime() : 0;
       if (dateA && dateB) return dateB - dateA;
       return parseInt(b.id || '0') - parseInt(a.id || '0');
     }
-    return 0; // Default featured
+    return 0;
   });
 
   return (
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
 
-      {/* Editorial Header Section */}
-      <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-black">
-          <img
-            src={
-              selectedCategory.toLowerCase() === 'helmets' 
-                ? "https://images.pexels.com/photos/104842/bmw-motorcycle-motorcycle-helmet-motorcyclist-104842.jpeg"
-                : selectedCategory.toLowerCase() === 'riding gear'
-                ? "https://images.pexels.com/photos/6156553/pexels-photo-6156553.jpeg"
-                : selectedCategory.toLowerCase() === 'accessories'
-                ? "https://images.pexels.com/photos/13501701/pexels-photo-13501701.jpeg"
-                : selectedCategory.toLowerCase() === 'new'
-                ? "https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=1920"
-                : "https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg"
-            }
-            className="w-full h-full object-cover opacity-20 transform scale-105 animate-slow-zoom"
-            alt="Background"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/20 via-zinc-950/80 to-zinc-950"></div>
+      <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-red-600/10 to-transparent pointer-events-none opacity-30"></div>
 
-        <div className="max-w-[1600px] mx-auto relative z-10 px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="max-w-[1700px] mx-auto px-6 relative z-10">
+
+        <div className="pt-32 pb-12 flex items-center justify-between">
+          <button
+            onClick={() => window.history.back()}
+            className="group flex items-center gap-3 text-zinc-500 hover:text-white transition-all duration-300"
+          >
+            <div className="w-12 h-12 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] bg-zinc-950">
+              <span className="text-[20px] group-hover:-translate-x-1 transition-transform">←</span>
+            </div>
+            <div className="flex flex-col items-start translate-y-0.5">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] leading-none mb-1">Back To</span>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-red-500 transition-colors">Previous Section</span>
+            </div>
+          </button>
+          
+          <div className="hidden sm:flex gap-4">
+              <div className="px-5 py-2.5 rounded-xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm">
+                 <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">Inventory State</p>
+                 <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                    <span className="text-white text-[11px] font-black uppercase tracking-widest">Live Updates</span>
+                 </div>
+              </div>
+          </div>
+        </div>
+
+        <div className="text-center pb-24 space-y-8">
+          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-8">
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Official 2026 Collection</span>
+            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Official Mutant Collection</span>
           </div>
           
           {activeFilterName && (activeBrandInfo || activeBikeInfo) ? (
-            <div className="flex flex-col items-center animate-in fade-in zoom-in duration-700">
+            <div className="flex flex-col items-center">
                <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full p-4 sm:p-6 mb-8 shadow-2xl flex items-center justify-center border-4 border-red-600/20">
                   <img 
                     src={activeBrandInfo?.logo || activeBikeInfo?.image} 
@@ -184,13 +187,13 @@ export default function Products({ onNavigate }: ProductsProps) {
             </div>
           ) : (
             <>
-              <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tight leading-none uppercase mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+              <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tight leading-none uppercase mb-6">
                 {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'LATEST' : 'PREMIUM') : selectedCategory} <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">
                   {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'ARRIVALS' : 'MODZ') : 'COLLECTION'}
                 </span>
               </h1>
-              <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+              <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80">
                 {selectedCategory === 'all' 
                   ? 'The definitive archive of high-performance bike hardware.'
                   : selectedCategory === 'new'
@@ -201,7 +204,7 @@ export default function Products({ onNavigate }: ProductsProps) {
           )}
 
           {(selectedBrand || searchQuery) && (
-            <div className="mt-12 inline-flex items-center gap-4 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-2xl animate-in fade-in zoom-in duration-500 hover:bg-red-600/20 transition-colors group">
+            <div className="mt-12 inline-flex items-center gap-4 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-2xl group">
               <span className="text-red-500 font-black uppercase text-[10px] tracking-[0.3em] group-hover:text-white transition-colors">Sector: {selectedBrand || searchQuery}</span>
               <button
                 onClick={() => {
@@ -216,15 +219,8 @@ export default function Products({ onNavigate }: ProductsProps) {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-40 animate-bounce">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white">View Item</span>
-          <div className="w-px h-12 bg-gradient-to-b from-red-600 to-transparent"></div>
-        </div>
-      </section>
-
-      {/* Control Center: Filter Bar */}
       <section className="sticky top-[73px] z-40 border-y border-white/5 bg-zinc-950/70 backdrop-blur-3xl shadow-2xl">
         <div className="max-w-[1700px] mx-auto px-6 py-6 flex flex-row items-center justify-between gap-4">
           
@@ -280,7 +276,6 @@ export default function Products({ onNavigate }: ProductsProps) {
         </div>
       </section>
 
-      {/* Grid Assembly */}
       <section className="py-24 px-6 sm:px-12">
         <div className="max-w-[1700px] mx-auto">
           {sortedProducts.length === 0 ? (
@@ -311,12 +306,11 @@ export default function Products({ onNavigate }: ProductsProps) {
         </div>
       </section>
 
-      {/* Workshop Call-to-Action */}
       <section className="py-40 px-6 sm:px-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-red-600">
           <img
             src="https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg"
-            className="w-full h-full object-cover opacity-20 mix-blend-overlay scale-110 group-hover:scale-125 transition-transform duration-1000"
+            className="w-full h-full object-cover opacity-20 mix-blend-overlay"
             alt="Workshop"
           />
         </div>
@@ -334,13 +328,13 @@ export default function Products({ onNavigate }: ProductsProps) {
 
           <div className="flex flex-col md:flex-row gap-6 justify-center pt-8">
             <a
-              href="tel:+919342637975"
+              href="tel:+919597596755"
               className="bg-white text-black px-12 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4"
             >
-              <Phone size={20} /> +91 93426 37975
+              <Phone size={20} /> +91 95975 96755
             </a>
             <a
-              href="https://wa.me/919342637975"
+              href="https://wa.me/919597596755"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-black text-white px-12 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4"

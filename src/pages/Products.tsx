@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Zap, Phone } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
@@ -34,48 +34,48 @@ export default function Products({ onNavigate }: ProductsProps) {
   }, []);
 
   useEffect(() => {
-    const handleHash = () => {
+    const syncStateWithUrl = () => {
       const hash = window.location.hash;
-      const brandMatch = hash.match(/[?&]brand=([^&]+)/);
-      if (brandMatch) {
-        setSelectedBrand(brandMatch[1].toLowerCase());
-      } else {
-        setSelectedBrand(null);
-      }
-    };
-
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-
-    // Initial check for URL search params
-    const checkUrlParams = () => {
-      const searchParams = new URLSearchParams(window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '');
+      const searchParams = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : '');
+      
       const search = searchParams.get('search');
       const cat = searchParams.get('cat');
       const brand = searchParams.get('brand');
       const bike = searchParams.get('bike');
       const model = searchParams.get('model');
       
+      // Update Search Query
       if (search) setSearchQuery(decodeURIComponent(search));
-      if (brand) setSelectedBrand(decodeURIComponent(brand).toLowerCase());
-      if (bike) setSearchQuery(decodeURIComponent(bike));
-      if (model) setSearchQuery(decodeURIComponent(model));
-      
-      if (cat) {
-        const decodedCat = decodeURIComponent(cat).toLowerCase();
-        // If it's one of our main categories, set category
-        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts'].includes(decodedCat)) {
-          setSelectedCategory(decodedCat);
-        } else {
-          // Otherwise treat it as a specific model/search filter (including subcategories)
-          setSearchQuery(decodeURIComponent(cat));
-        }
+      else if (bike) setSearchQuery(decodeURIComponent(bike));
+      else if (model) setSearchQuery(decodeURIComponent(model));
+      else if (cat && !['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals'].includes(decodeURIComponent(cat).toLowerCase())) {
+        setSearchQuery(decodeURIComponent(cat));
+      } else {
+        // Only clear if we're not filtering by a brand that might already have matching products
+        if (!brand) setSearchQuery('');
       }
 
-    };
-    checkUrlParams();
+      // Update Brand
+      if (brand) {
+        setSelectedBrand(decodeURIComponent(brand).toLowerCase());
+      } else {
+        setSelectedBrand(null);
+      }
 
-    return () => window.removeEventListener('hashchange', handleHash);
+      // Update Category
+      if (cat) {
+        const decodedCat = decodeURIComponent(cat).toLowerCase();
+        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals'].includes(decodedCat)) {
+          setSelectedCategory(decodedCat);
+        }
+      } else {
+        setSelectedCategory('all');
+      }
+    };
+
+    syncStateWithUrl();
+    window.addEventListener('hashchange', syncStateWithUrl);
+    return () => window.removeEventListener('hashchange', syncStateWithUrl);
   }, []);
 
   const sortOptions = [
@@ -85,30 +85,38 @@ export default function Products({ onNavigate }: ProductsProps) {
     { id: 'newest', name: 'Newest Arrivals' },
   ];
 
-  const filteredProducts = products.filter(p => {
-    // If we're filtering by a main category
-    const matchesCategory = selectedCategory === 'all' || 
-        p.category.toLowerCase() === selectedCategory.toLowerCase() ||
-        p.sub_category_type?.toLowerCase() === selectedCategory.toLowerCase();
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      // If we're filtering by 'new' or a main category
+      const isNewArrivalRequest = selectedCategory.toLowerCase() === 'new' || selectedCategory.toLowerCase() === 'new arrivals';
+      const matchesNew = !isNewArrivalRequest || p.isNew;
 
-    // Search query matches name, description, brand, bike info, OR sub_category info
-    const matchesSearch = !searchQuery || 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.bike_brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.bike_model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sub_category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.sub_category_type?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = isNewArrivalRequest || selectedCategory === 'all' || 
+        p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
+        p.category?.toLowerCase() === selectedCategory.toLowerCase() ||
+        p.sub_category_type?.toLowerCase() === selectedCategory.toLowerCase() ||
+        (selectedCategory.toLowerCase() === 'accessories' && p.sub_category_type?.toLowerCase() === 'motorcycle accessories') ||
+        (selectedCategory.toLowerCase() === 'riding gear' && (p.sub_category_type?.toLowerCase() === 'riding gear' || p.category_name?.toLowerCase() === 'gear'));
 
-    const matchesBrand = !selectedBrand ||
-      p.name.toLowerCase().includes(selectedBrand) ||
-      p.description.toLowerCase().includes(selectedBrand) ||
-      p.brand?.toLowerCase() === selectedBrand ||
-      p.bike_brand?.toLowerCase() === selectedBrand;
-      
-    return matchesCategory && matchesSearch && matchesBrand;
-  });
+      // Search query matches name, description, brand, bike info, OR sub_category info
+      const matchesSearch = !searchQuery || 
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.bike_brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.bike_model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.sub_category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.sub_category_type?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesBrand = !selectedBrand ||
+        p.name.toLowerCase().includes(selectedBrand) ||
+        p.description.toLowerCase().includes(selectedBrand) ||
+        p.brand?.toLowerCase() === selectedBrand ||
+        p.bike_brand?.toLowerCase() === selectedBrand;
+        
+      return matchesCategory && matchesSearch && matchesBrand && matchesNew;
+    });
+  }, [products, selectedCategory, searchQuery, selectedBrand]);
 
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -119,7 +127,11 @@ export default function Products({ onNavigate }: ProductsProps) {
       return (b.price_num || 0) - (a.price_num || 0);
     }
     if (sortBy === 'newest') {
-      return parseInt(b.id || '0') - parseInt(a.id || '0'); // Assuming string integer IDs
+      // Use created_at if available, otherwise fallback to ID
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      if (dateA && dateB) return dateB - dateA;
+      return parseInt(b.id || '0') - parseInt(a.id || '0');
     }
     return 0; // Default featured
   });
@@ -131,7 +143,17 @@ export default function Products({ onNavigate }: ProductsProps) {
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black">
           <img
-            src="https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg"
+            src={
+              selectedCategory.toLowerCase() === 'helmets' 
+                ? "https://images.pexels.com/photos/104842/bmw-motorcycle-motorcycle-helmet-motorcyclist-104842.jpeg"
+                : selectedCategory.toLowerCase() === 'riding gear'
+                ? "https://images.pexels.com/photos/6156553/pexels-photo-6156553.jpeg"
+                : selectedCategory.toLowerCase() === 'accessories'
+                ? "https://images.pexels.com/photos/13501701/pexels-photo-13501701.jpeg"
+                : selectedCategory.toLowerCase() === 'new'
+                ? "https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=1920"
+                : "https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg"
+            }
             className="w-full h-full object-cover opacity-20 transform scale-105 animate-slow-zoom"
             alt="Background"
           />
@@ -141,7 +163,7 @@ export default function Products({ onNavigate }: ProductsProps) {
         <div className="max-w-[1600px] mx-auto relative z-10 px-6 text-center">
           <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Operational Manifest 2026</span>
+            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Official 2026 Collection</span>
           </div>
           
           {activeFilterName && (activeBrandInfo || activeBikeInfo) ? (
@@ -162,12 +184,18 @@ export default function Products({ onNavigate }: ProductsProps) {
             </div>
           ) : (
             <>
-              <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-                ELITE <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">HARDWARE</span>
+              <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tight leading-none uppercase mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+                {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'LATEST' : 'PREMIUM') : selectedCategory} <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">
+                  {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'ARRIVALS' : 'MODZ') : 'COLLECTION'}
+                </span>
               </h1>
               <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80 animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
-                High-performance modules engineered for the extreme.
+                {selectedCategory === 'all' 
+                  ? 'The definitive archive of high-performance bike hardware.'
+                  : selectedCategory === 'new'
+                  ? 'The latest performance evolution has arrived. Engineered precisely.'
+                  : `Curated ${selectedCategory} engineered for uncompromising performance.`}
               </p>
             </>
           )}

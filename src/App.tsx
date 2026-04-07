@@ -22,6 +22,7 @@ import { CartProvider } from './context/CartContext';
 import { UserAuthProvider, useUserAuth } from './context/UserAuthContext';
 import CartDrawer from './components/CartDrawer';
 import LoginPopup from './components/LoginPopup';
+import { Toaster } from 'react-hot-toast';
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -42,7 +43,9 @@ function AppContent() {
   }, []);
 
   const navigate = (page: string, params?: string) => {
-    setCurrentPage(page);
+    // Correctly handle query params for page level switching
+    const basePage = page.split('?')[0];
+    setCurrentPage(basePage);
     window.location.hash = params ? `${page}${params}` : page;
   };
 
@@ -109,6 +112,23 @@ function AppContent() {
         onClose={() => setIsMenuDrawerOpen(false)}
         onNavigate={navigate}
         onOpenCart={() => setIsCartOpen(true)}
+      />
+      <Toaster 
+        position="top-center" 
+        toastOptions={{
+          style: {
+            background: '#18181b', // zinc-900
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '1rem',
+            padding: '12px 24px',
+            fontSize: '10px',
+            fontWeight: '900',
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+          },
+        }} 
       />
     </div>
   );

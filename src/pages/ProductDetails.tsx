@@ -17,17 +17,19 @@ import {
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import { useUserAuth } from '../context/UserAuthContext';
+import { useCart } from '../context/CartContext';
+import toast from 'react-hot-toast';
 
 export default function ProductDetails() {
     const [product, setProduct] = useState<Product | null>(null);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [selectedSize, setSelectedSize] = useState('L');
-    const [selectedTexture, setSelectedTexture] = useState('MATTE');
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('description');
     const [mainImage, setMainImage] = useState('');
     const [isLoaded, setIsLoaded] = useState(false);
     const { isLoggedIn, setShowLoginPopup, setPendingAction } = useUserAuth();
+    const { addToCart } = useCart();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -85,7 +87,6 @@ export default function ProductDetails() {
         if (!isLoggedIn) {
             setPendingAction(() => () => {
                 localStorage.setItem('checkout_size', selectedSize);
-                localStorage.setItem('checkout_color', selectedTexture);
                 localStorage.setItem('checkout_quantity', quantity.toString());
                 window.location.hash = `payment?productId=${product.id}`;
             });
@@ -93,9 +94,39 @@ export default function ProductDetails() {
             return;
         }
         localStorage.setItem('checkout_size', selectedSize);
-        localStorage.setItem('checkout_color', selectedTexture);
         localStorage.setItem('checkout_quantity', quantity.toString());
         window.location.hash = `payment?productId=${product.id}`;
+    };
+
+    const handleAddToCart = () => {
+        if (product.stock <= 0) return;
+        if (!isLoggedIn) {
+            setPendingAction(() => () => {
+                addToCart(product, quantity);
+                toast.success('Added to cart!', {
+                    icon: '🔥',
+                    style: { border: '1px solid #dc2626' }
+                });
+            });
+            setShowLoginPopup(true);
+            return;
+        }
+        addToCart(product, quantity);
+        toast.success('Added to cart!', {
+            icon: '🔥',
+            style: { border: '1px solid #dc2626' }
+        });
+    };
+
+    const handleWhatsAppOrder = () => {
+        const message = `Hi Mutant Modz! I'm interested in ordering:
+Product: ${product.name}
+Quantity: ${quantity}
+Size: ${selectedSize || 'N/A'}
+Price: ${product.price}
+Link: ${window.location.href}`;
+        const whatsappUrl = `https://wa.me/919597596755?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
     };
 
     const relatedProducts = allProducts
@@ -138,12 +169,12 @@ export default function ProductDetails() {
                             <img
                                 src={mainImage}
                                 alt={product.name}
-                                className="w-full max-h-[600px] object-contain relative z-10 transition-transform duration-700 group-hover:scale-110 drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                                className="w-full max-h-[600px] object-contain relative z-10 transition-transform duration-700 drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                             />
 
                             {/* Visual Accents */}
                             <div className="absolute top-12 left-12">
-                                <span className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] block mb-2">Technical Core</span>
+                                <span className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] block mb-2">Product Overview</span>
                                 <div className="h-px w-20 bg-gradient-to-r from-red-600 to-transparent"></div>
                             </div>
                         </div>
@@ -168,7 +199,7 @@ export default function ProductDetails() {
                         <div className="space-y-6">
                             <div className="flex flex-wrap items-center gap-4">
                                 <div className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest">
-                                    <ShieldCheck size={12} /> Elite Hardware
+                                    <ShieldCheck size={12} /> Premium Authentic
                                 </div>
                                 {product.stock > 0 && product.stock < 10 && (
                                     <div className="inline-flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl shadow-lg shadow-red-600/50">
@@ -183,7 +214,7 @@ export default function ProductDetails() {
                                     </div>
                                 )}
                             </div>
-                            <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter leading-none uppercase">{product.name}</h1>
+                            <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight uppercase">{product.name}</h1>
 
                             <div className="flex items-center gap-6">
                                 <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
@@ -195,43 +226,49 @@ export default function ProductDetails() {
                         </div>
 
                         <div className="glass-card p-10 rounded-[3rem] border border-white/5 space-y-10">
-                            {/* Customization Options */}
-                            <div className="space-y-8">
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Select Scale</p>
-                                        <span className="text-red-500 text-[10px] font-black">FITMENT GUARANTEED</span>
-                                    </div>
-                                    <div className="flex gap-4">
-                                        {['S', 'M', 'L', 'XL'].map(size => (
-                                            <button
-                                                key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`w-14 h-14 flex items-center justify-center rounded-2xl font-black transition-all border
-                                                    ${selectedSize === size ? 'bg-red-600 border-red-600 text-white shadow-xl scale-110' : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-500'}`}
-                                            >
-                                                {size}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                            {/* Customization Options - Conditional logic */}
+                            {(() => {
+                                const lowerCat = product.category?.toLowerCase() || '';
+                                const lowerName = product.name?.toLowerCase() || '';
+                                const lowerType = (product as any).sub_category_type?.toLowerCase() || '';
 
-                                <div className="space-y-4">
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Surface Finish</p>
-                                    <div className="flex gap-4">
-                                        {['MATTE', 'GLOSSY'].map(texture => (
-                                            <button
-                                                key={texture}
-                                                onClick={() => setSelectedTexture(texture)}
-                                                className={`px-8 py-4 rounded-2xl font-black text-[10px] tracking-widest transition-all border
-                                                    ${selectedTexture === texture ? 'bg-white border-white text-black' : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-500'}`}
-                                            >
-                                                {texture}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
+                                const hasSizes = lowerCat.includes('helmet') || 
+                                               lowerCat.includes('helmets') ||
+                                               lowerName.includes('helmet') ||
+                                               lowerCat.includes('jacket') ||
+                                               lowerName.includes('jacket') ||
+                                               lowerCat.includes('jersey') ||
+                                               lowerName.includes('jersey') ||
+                                               lowerType.includes('riding gear');
+                                
+                                if (hasSizes) {
+                                    return (
+                                        <div className="space-y-8">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Select Size</p>
+                                                    <span className="text-red-500 text-[10px] font-black">FITMENT GUARANTEED</span>
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    {['M', 'L', 'XL'].map(size => (
+                                                        <button
+                                                            key={size}
+                                                            onClick={() => setSelectedSize(size)}
+                                                            className={`w-14 h-14 flex items-center justify-center rounded-2xl font-black transition-all border
+                                                                ${selectedSize === size ? 'bg-red-600 border-red-600 text-white shadow-xl scale-110' : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-500'}`}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                
+                                // Accessories don't want scale and color
+                                return null;
+                            })()}
 
                             {/* Execution Controls */}
                             <div className="flex flex-col gap-6 pt-10 border-t border-zinc-800/50">
@@ -241,7 +278,7 @@ export default function ProductDetails() {
                                             <Minus size={14} />
                                         </button>
                                         <span className="w-12 text-center text-white font-black">{quantity}</span>
-                                        <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-white">
+                                    <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 flex items-center justify-center text-zinc-500 hover:text-white">
                                             <Plus size={14} />
                                         </button>
                                     </div>
@@ -250,13 +287,21 @@ export default function ProductDetails() {
                                         disabled={product.stock <= 0}
                                         className={`flex-1 ${product.stock > 0 ? 'bg-red-600 hover:bg-white hover:text-red-600 text-white text-[10px]' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed text-[10px]'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3`}
                                     >
-                                        {product.stock > 0 ? 'Execute Checkout' : 'Sold Out'} <ArrowRight size={16} />
+                                        {product.stock > 0 ? 'Buy Now' : 'Sold Out'} <ArrowRight size={16} />
                                     </button>
                                 </div>
-                                <button disabled={product.stock <= 0} className={`w-full ${product.stock > 0 ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}>
-                                    <ShoppingCart size={16} /> Stage to basket
+                                <button 
+                                    onClick={handleAddToCart}
+                                    disabled={product.stock <= 0} 
+                                    className={`w-full ${product.stock > 0 ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}
+                                >
+                                    <ShoppingCart size={16} /> Add to Cart
                                 </button>
-                                <button disabled={product.stock <= 0} className={`w-full ${product.stock > 0 ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}>
+                                <button 
+                                    onClick={handleWhatsAppOrder}
+                                    disabled={product.stock <= 0} 
+                                    className={`w-full ${product.stock > 0 ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}
+                                >
                                     <Phone size={16} /> WhatsApp Direct Purchase
                                 </button>
                             </div>
@@ -310,8 +355,8 @@ export default function ProductDetails() {
                     {activeTab === 'description' && (
                         <div className="max-w-4xl space-y-12 animate-on-scroll">
                             <div className="space-y-6">
-                                <h3 className="text-4xl font-black text-white tracking-tighter uppercase">{product.name} Engineering Overview</h3>
-                                <div className="text-zinc-400 text-lg leading-relaxed font-medium whitespace-pre-wrap">
+                                <h3 className="text-2xl font-black text-white tracking-tight uppercase">{product.name} Engineering Overview</h3>
+                                <div className="text-zinc-400 text-base leading-loose font-medium whitespace-pre-wrap">
                                     {product.description || "Technical specifications and engineering details pending for this hardware unit."}
                                 </div>
                             </div>
@@ -332,15 +377,15 @@ export default function ProductDetails() {
                             </button>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
                             {relatedProducts.map((p) => (
                                 <a
                                     key={p.id}
                                     href={`#productDetails?productId=${p.id}`}
-                                    className="group space-y-6"
+                                    className="group space-y-4"
                                 >
-                                    <div className="relative aspect-square bg-zinc-900 rounded-[3rem] border border-zinc-800 overflow-hidden flex items-center justify-center p-12 transition-all duration-500 group-hover:border-red-600/30 group-hover:translate-y-[-10px]">
-                                        <img src={p.image} alt={p.name} className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100" />
+                                    <div className="relative aspect-square bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden flex items-center justify-center p-6 transition-all duration-500 group-hover:border-red-600/30 group-hover:translate-y-[-5px]">
+                                        <img src={p.image} alt={p.name} className="w-full h-full object-contain transition-transform duration-700" />
                                         <button className="absolute top-8 right-8 w-10 h-10 bg-zinc-950 rounded-xl flex items-center justify-center text-zinc-500 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 duration-300">
                                             <Heart size={16} />
                                         </button>
@@ -350,11 +395,11 @@ export default function ProductDetails() {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-2 px-2">
-                                        <h3 className="text-sm font-black text-zinc-500 group-hover:text-white transition-colors uppercase tracking-widest truncate">{p.name}</h3>
+                                    <div className="space-y-1.5 px-1">
+                                        <h3 className="text-[10px] font-black text-zinc-500 group-hover:text-white transition-colors uppercase tracking-widest truncate">{p.name}</h3>
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xl font-black text-white">{p.price}</span>
-                                            <ChevronRight className="text-red-600 group-hover:translate-x-2 transition-transform" size={18} />
+                                            <span className="text-sm font-black text-white">{p.price}</span>
+                                            <ChevronRight className="text-red-600 group-hover:translate-x-1 transition-transform" size={14} />
                                         </div>
                                     </div>
                                 </a>

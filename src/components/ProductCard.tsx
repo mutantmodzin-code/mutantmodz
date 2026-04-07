@@ -3,6 +3,7 @@ import { ShoppingCart, ShoppingBag, ArrowUpRight, CheckCircle, Zap, Flame, Truck
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
+import toast from 'react-hot-toast';
 
 interface ProductCardProps {
   product: Product;
@@ -25,7 +26,7 @@ const ProductImage = ({ images, alt, isHovered }: { images?: string[], alt: stri
       <img
         src={finalList[0]}
         alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${isHovered && finalList.length > 1 ? 'opacity-0 scale-110' : 'opacity-100 scale-100'}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${isHovered && finalList.length > 1 ? 'opacity-0' : 'opacity-100'}`}
       />
       
       {/* Secondary Image for Hover (Dual Image Hover) */}
@@ -33,7 +34,7 @@ const ProductImage = ({ images, alt, isHovered }: { images?: string[], alt: stri
         <img
           src={finalList[1]}
           alt={`${alt} hover`}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out hidden md:block ${isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out hidden md:block ${isHovered ? 'opacity-100' : 'opacity-0'}`}
         />
       )}
 
@@ -51,11 +52,21 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
   const handleAddToCart = () => {
     if (product.stock <= 0) return;
     if (!isLoggedIn) {
-      setPendingAction(() => () => addToCart(product));
+      setPendingAction(() => () => {
+        addToCart(product);
+        toast.success('Added to cart!', {
+          icon: '🔥',
+          style: { border: '1px solid #dc2626' }
+        });
+      });
       setShowLoginPopup(true);
       return;
     }
     addToCart(product);
+    toast.success('Added to cart!', {
+      icon: '🔥',
+      style: { border: '1px solid #dc2626' }
+    });
   };
 
   const isNew = product.date_added ? (new Date().getTime() - new Date(product.date_added).getTime()) < 30 * 24 * 60 * 60 * 1000 : false;
@@ -146,24 +157,29 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
               ₹{originalPrice.toLocaleString()}
             </div>
           )}
-          <div className="bg-white text-zinc-950 px-4 py-2 rounded-xl text-[14px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110">
+          <div className="bg-white text-zinc-950 px-3 py-1.5 rounded-lg text-[12px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-105">
             {product.price}
           </div>
         </div>
       </div>
 
       {/* Data Panel */}
-      <div className="p-4 sm:p-6 flex flex-1 flex-col justify-between">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-red-500 font-black text-[8px] uppercase tracking-widest border-b border-red-500/20 pb-0.5">{product.category}</span>
+      <div className="p-4 sm:p-5 flex flex-1 flex-col justify-between">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className="text-red-500 font-black text-[7px] uppercase tracking-widest border-b border-red-500/20 pb-0.5">{product.category}</span>
             {/* Added Bike Info if available */}
             {(product as any).bike_brand && (
-              <span className="text-zinc-500 font-black text-[8px] uppercase tracking-widest">| {(product as any).bike_brand}</span>
+              <span className="text-zinc-500 font-black text-[7px] uppercase tracking-widest">| {(product as any).bike_brand}</span>
             )}
           </div>
-          <h3 className="text-[15px] font-black text-white group-hover:text-red-500 transition-colors tracking-tight leading-tight uppercase line-clamp-1">{product.name}</h3>
-          <p className="text-zinc-500 text-[11px] font-medium leading-relaxed line-clamp-1">{product.description}</p>
+          <h3 
+            className="text-[13px] font-black text-white group-hover:text-red-500 transition-colors tracking-tight leading-tight uppercase line-clamp-1 cursor-pointer"
+            onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
+          >
+            {product.name}
+          </h3>
+          <p className="text-zinc-500 text-[11px] font-medium leading-relaxed line-clamp-1 cursor-pointer" onClick={() => onNavigate(`productDetails?productId=${product.id}`)}>{product.description}</p>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <div className="flex items-center gap-1 text-[8px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">

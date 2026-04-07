@@ -486,6 +486,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                     <button
                                       key={brand.name}
                                       onMouseEnter={() => setActiveBrand(brand.name)}
+                                      onClick={() => handleNavClick('products', `?brand=${encodeURIComponent(brand.name)}`)}
                                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-black uppercase text-[12px] tracking-widest ${activeBrand === brand.name ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
                                     >
                                       {brand.name} <ChevronRight size={14} className={activeBrand === brand.name ? 'translate-x-1 opacity-100' : 'opacity-0'} />

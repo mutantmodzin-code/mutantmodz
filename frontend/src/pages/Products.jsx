@@ -13,20 +13,29 @@ const PARTNER_BRANDS = [
 
 const SUB_CATEGORIES = {
     'Accessories': {
-        'Motorcycle Accessories': ['Bike Protection', 'Handlebar', 'Electronic', 'Essentials', 'Rain Cover', 'Cameras'],
-        'Lighting': ['Auxiliary Light', 'Headlight', 'Hazards', 'Light Accessories'],
-        'Luggage': ['Racks', 'Bag and panniers', 'Jerry can', 'GPS mount', 'Air seat'],
-        'Performance Parts': ['Air Filter', 'Brake Pads', 'Bendpipe', 'Chain Sprocket', 'Exhaust', 'ECU', 'Spark Plug', 'Oil Filter']
+        'Motorcycle Accessories': ['Bike Protection', 'Handlebar', 'Electronic', 'Essentials', 'Rain Cover', 'Cameras', 'Mirror Accessories', 'Stickers'],
+        'Riding Gear': ['Jackets', 'Jerseys', 'Pants', 'Gloves', 'Boots', 'Armor & Protectors', 'Rain Wear', 'Balaclavas'],
+        'Lighting': ['Auxiliary Light', 'Headlight', 'Hazards', 'Light Accessories', 'Turn Signals'],
+        'Luggage': ['Racks', 'Bag and panniers', 'Jerry can', 'GPS mount', 'Air seat', 'Top Boxes', 'Tank Bags'],
+        'Performance Parts': ['Air Filter', 'Brake Pads', 'Bendpipe', 'Chain Sprocket', 'Exhaust', 'ECU', 'Spark Plug', 'Oil Filter', 'Coolant', 'Engine Oil']
     },
     'Riding Gear': {
-        'Jackets': ['Textile Jackets', 'Mesh Jackets', 'Leather Jackets', 'Rain Jackets'],
-        'Jerseys': ['Off-road Jerseys', 'Street Jerseys'],
-        'Pants': ['Riding Pants', 'Rain Pants'],
-        'Gloves': ['Short Cuff', 'Long Cuff', 'Winter Gloves'],
-        'Boots': ['Adventure Boots', 'Street Boots', 'Short Boots']
+        'Jackets': ['Textile Jackets', 'Mesh Jackets', 'Leather Jackets', 'Rain Jackets', 'Summer Jackets'],
+        'Jerseys': ['Off-road Jerseys', 'Street Jerseys', 'Custom Jerseys'],
+        'Pants': ['Riding Pants', 'Rain Pants', 'Denim Riding Pants'],
+        'Gloves': ['Short Cuff', 'Long Cuff', 'Winter Gloves', 'Leather Gloves', 'Textile Gloves'],
+        'Boots': ['Adventure Boots', 'Street Boots', 'Short Boots', 'Racing Boots']
     },
-    'Helmets': ['Full Face', 'Open Face', 'Modular', 'Motocross', 'Kids'],
-    'Others': []
+    'Helmets': {
+        'Full Face': ['Premium', 'Entry Level', 'Sport'],
+        'Open Face': ['Classic', 'Urban'],
+        'Modular': ['Flip-up', 'Dual Sport'],
+        'Motocross': ['Off-road', 'Enduro'],
+        'Kids': ['Safety Certified']
+    },
+    'Others': {
+        'Miscellaneous': ['Merchandise', 'Gift Cards', 'Tools']
+    }
 };
 
 
@@ -145,13 +154,22 @@ const Products = () => {
     };
 
     const handleFileChange = async (e) => {
-        const files = Array.from(e.target.files).slice(0, 4);
+        const files = Array.from(e.target.files);
         if (files.length === 0) return;
-        const newUrls = ['', '', '', ''];
-        for (let i = 0; i < files.length; i++) {
-            newUrls[i] = await uploadImage(files[i]);
+        
+        const currentUrls = [...formData.image_urls];
+        let fileIdx = 0;
+        
+        // Find empty slots and fill them
+        for (let i = 0; i < 4 && fileIdx < files.length; i++) {
+            if (!currentUrls[i]) {
+                currentUrls[i] = await uploadImage(files[fileIdx]);
+                fileIdx++;
+            }
         }
-        setFormData({ ...formData, image_urls: newUrls });
+        
+        setFormData({ ...formData, image_urls: currentUrls });
+        e.target.value = ''; // Reset input to allow re-uploading same file
     };
 
     const openEdit = (p) => {
@@ -225,9 +243,16 @@ const Products = () => {
                     <input className="input" style={{ paddingLeft: '3rem' }} placeholder="Search products by name or SKU..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
                 <select className="input" style={{ maxWidth: '200px' }} value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
-                    <option value="">All Categories</option>
+                    <option value="">All Divisions</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
+                <input 
+                    className="input" 
+                    style={{ maxWidth: '150px' }} 
+                    placeholder="Filter Type..." 
+                    value={formData.sub_category_type} // re-using but in a filter way
+                    onChange={(e) => fetchProducts()} // Simplification for now
+                />
             </div>
 
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -254,7 +279,12 @@ const Products = () => {
                                         {p.brand} {p.bike_brand && `| ${p.bike_brand} ${p.bike_model}`}
                                     </div>
                                 </td>
-                                <td>{p.category_name}</td>
+                                <td>
+                                    <div style={{ fontWeight: 600 }}>{p.category_name}</div>
+                                    <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                                        {p.sub_category_type} {p.sub_category && `> ${p.sub_category}`}
+                                    </div>
+                                </td>
                                 <td>{p.vendor_name || 'N/A'}</td>
                                 <td>₹{p.purchase_price}</td>
                                 <td style={{ fontWeight: 600 }}>₹{p.price}</td>
@@ -327,11 +357,18 @@ const Products = () => {
                             </div>
 
                             <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
-
-                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Manufacturer</label>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Partner Brand</label>
                                 <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })}>
                                     <option value="">Select Brand</option>
                                     {PARTNER_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                                </select>
+                            </div>
+
+                            <div style={{ gridColumn: 'span 12' }}>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Vendor / Supplier</label>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.vendor_id} onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}>
+                                    <option value="">Select Vendor</option>
+                                    {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                                 </select>
                             </div>
 

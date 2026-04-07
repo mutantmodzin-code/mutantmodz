@@ -1,6 +1,8 @@
 export interface Product {
     id: string;
     category: string;
+    category_id?: number | string;
+    category_name?: string;
     name: string;
     description: string;
     price: string;
@@ -14,8 +16,8 @@ export interface Product {
     bike_model?: string;
     sub_category?: string;
     sub_category_type?: string;
-    isBestSeller?: boolean;
     isNew?: boolean;
+    created_at?: string;
     freeShipping?: boolean;
     discount_percent?: number;
 }

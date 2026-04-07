@@ -9,7 +9,6 @@ import {
     Building2,
     ArrowLeft,
     Check,
-    Truck,
     X
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -40,20 +39,33 @@ export default function Payment() {
     const { user } = useUserAuth();
     const [paymentDone, setPaymentDone] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState('cod');
+    const [paymentMethod, setPaymentMethod] = useState('razorpay');
     const orderProcessed = { current: false };
+
+    // Constant for Razorpay Key (User can replace with their actual key in .env)
+    const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY;
 
     // Customer Detail State
     const [customer, setCustomer] = useState({
         email: user?.email || '',
-        firstName: user?.name?.split(' ')[0] || '',
-        lastName: user?.name?.split(' ').slice(1).join(' ') || '',
+        firstName: user?.displayName?.split(' ')[0] || '',
+        lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
         phone: user?.phone || '',
         address: '',
         city: '',
         state: 'Tamil Nadu',
         zip: ''
     });
+
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
 
     // Redirect if no cart items
     if (cartItems.length === 0 && !paymentDone) {
@@ -73,7 +85,7 @@ export default function Payment() {
         );
     }
 
-    const processOrder = async () => {
+    const processOrder = async (razorpayPaymentId?: string) => {
         // Idempotency guard: if order was already processed, do nothing
         if (orderProcessed.current) return;
         orderProcessed.current = true;
@@ -117,6 +129,7 @@ export default function Payment() {
                     discount: 0,
                     total_amount: totalAmt,
                     payment_method: paymentMethod.toUpperCase(),
+                    payment_id: razorpayPaymentId,
                     gst_percentage: 18,
                     items: items,
                     shipping_address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`
@@ -143,14 +156,62 @@ export default function Payment() {
     const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (isLoading) return;
+        
+        // Basic validation
+        if (!customer.address || !customer.zip || !customer.phone) {
+            alert('Please complete searching the arsenal... I mean, shipping details.');
+            return;
+        }
+
         setIsLoading(true);
 
         try {
-            await processOrder();
+            // Load Razorpay Script
+            const res = await loadRazorpayScript();
+            if (!res) {
+                alert('Razorpay SDK failed to load. Please check your internet connection.');
+                setIsLoading(false);
+                return;
+            }
+
+            const shippingNum = 100;
+            const subtotal = totalPrice;
+            const tax = subtotal * 0.18;
+            const totalAmt = subtotal + tax + shippingNum;
+
+            const options = {
+                key: RAZORPAY_KEY_ID,
+                amount: Math.round(totalAmt * 100), // Amount in paise
+                currency: 'INR',
+                name: 'MUTANT MODZ',
+                description: `Order for ${cartItems.length} modules`,
+                handler: function (response: any) {
+                    processOrder(response.razorpay_payment_id);
+                },
+                prefill: {
+                    name: `${customer.firstName} ${customer.lastName}`,
+                    email: customer.email,
+                    contact: customer.phone,
+                },
+                notes: {
+                    address: customer.address,
+                },
+                theme: {
+                    color: '#dc2626', // Red-600
+                },
+                modal: {
+                    ondismiss: function () {
+                        setIsLoading(false);
+                    }
+                }
+            };
+
+            const rzp = new (window as any).Razorpay(options);
+            rzp.open();
+
         } catch (error: any) {
-            alert(error.message || 'Payment processing failed');
+            alert(error.message || 'Payment initiation failed');
             setIsLoading(false);
-            orderProcessed.current = false;
         }
     };
 
@@ -301,22 +362,27 @@ export default function Payment() {
 
                             <div className="animate-on-scroll">
                                 <SectionHeader title="Payment Method" icon={CreditCard} />
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                     {[
-                                        { id: 'cod', label: 'CASH ON DELIVERY', icon: Truck },
+                                        { id: 'razorpay', label: 'RAZORPAY', icon: Lock },
+                                        { id: 'upi', label: 'UPI / GPAY', icon: Smartphone },
+                                        { id: 'card', label: 'BANK CARD', icon: CreditCard },
                                     ].map((method) => (
                                         <button
                                             key={method.id}
                                             type="button"
                                             onClick={() => setPaymentMethod(method.id)}
-                                            className={`flex items-center gap-4 p-6 rounded-[2rem] border transition-all text-left
-                                                ${paymentMethod === method.id ? 'bg-red-600 border-red-600 shadow-xl' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}
+                                            className={`flex flex-col items-center justify-center gap-4 p-8 rounded-[2rem] border transition-all text-center
+                                                ${paymentMethod === method.id ? 'bg-red-600 border-red-600 shadow-xl scale-105' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}
                                         >
-                                            <method.icon size={20} className={paymentMethod === method.id ? 'text-white' : 'text-zinc-600'} />
-                                            <span className={`text-[10px] font-black tracking-widest uppercase ${paymentMethod === method.id ? 'text-white' : 'text-zinc-500'}`}>{method.label}</span>
+                                            <method.icon size={24} className={paymentMethod === method.id ? 'text-white' : 'text-zinc-600'} />
+                                            <span className={`text-[9px] font-black tracking-widest uppercase ${paymentMethod === method.id ? 'text-white' : 'text-zinc-500'}`}>{method.label}</span>
                                         </button>
                                     ))}
                                 </div>
+                                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] text-center bg-zinc-900/50 py-4 rounded-xl border border-white/5">
+                                    Secure encryption active via Razorpay protocol 2.0
+                                </p>
                             </div>
                         </div>
                     </div>

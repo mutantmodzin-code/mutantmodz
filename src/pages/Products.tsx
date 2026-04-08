@@ -98,8 +98,13 @@ export default function Products({ onNavigate }: ProductsProps) {
 
       const matchesSearch = !searchQuery || (() => {
         const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 0);
-        const searchPool = `${p.name} ${p.description} ${p.brand} ${p.bike_brand} ${p.bike_model} ${p.sub_category} ${p.sub_category_type}`.toLowerCase();
-        return terms.every(term => searchPool.includes(term));
+        const searchPool = `${p.name} ${p.description} ${p.brand} ${p.bike_brand} ${p.bike_model} ${p.sub_category} ${p.sub_category_type} ${p.category_name} ${p.category}`.toLowerCase();
+        
+        return terms.every(term => {
+          // Handle common plural searches like "helmets" -> "helmet"
+          const singularTerm = term.endsWith('s') ? term.slice(0, -1) : term;
+          return searchPool.includes(term) || searchPool.includes(singularTerm);
+        });
       })();
 
       const matchesBrand = !selectedBrand ||
@@ -135,7 +140,7 @@ export default function Products({ onNavigate }: ProductsProps) {
 
       <div className="max-w-[1700px] mx-auto px-6 relative z-10">
 
-        <div className="pt-32 pb-12 flex items-center justify-between">
+        <div className="pt-8 pb-8 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
             className="group flex items-center gap-3 text-zinc-500 hover:text-white transition-all duration-300"

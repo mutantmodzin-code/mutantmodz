@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, ShieldCheck, ArrowLeft, Save, Loader2, KeyRound, CheckCircle, MapPin } from 'lucide-react';
+import { User, Mail, Phone, ShieldCheck, ArrowLeft, Save, Loader2, KeyRound, CheckCircle } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import toast from 'react-hot-toast';
 
@@ -10,7 +10,6 @@ export default function AccountSettings() {
   const [name, setName] = useState(user?.displayName || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
-  const [address, setAddress] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -51,7 +50,7 @@ export default function AccountSettings() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ name, phone, address })
+        body: JSON.stringify({ name, phone })
       });
 
       const data = await response.json();
@@ -182,7 +181,7 @@ export default function AccountSettings() {
             {/* Email */}
             <div className="space-y-3">
                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                 <Mail size={12} className="text-red-500" /> Communications Channel
+                 <Mail size={12} className="text-red-500" /> Email Address
                </label>
                <div className="relative">
                   <input 
@@ -209,20 +208,6 @@ export default function AccountSettings() {
                  onChange={(e) => setPhone(e.target.value)}
                  disabled={!isEditing}
                  className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-4 px-6 text-white font-black focus:border-red-600 outline-none transition-all disabled:opacity-50"
-               />
-            </div>
-
-            {/* Address */}
-            <div className="space-y-3">
-               <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                 <MapPin size={12} className="text-red-500" /> Deployment Address
-               </label>
-               <textarea 
-                 value={address}
-                 onChange={(e) => setAddress(e.target.value)}
-                 disabled={!isEditing}
-                 rows={3}
-                 className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-4 px-6 text-white font-black focus:border-red-600 outline-none transition-all disabled:opacity-50 resize-none"
                />
             </div>
           </div>

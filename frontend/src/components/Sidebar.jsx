@@ -50,7 +50,8 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
             display: 'flex', 
             flexDirection: 'column',
             transition: 'left 0.3s ease-in-out',
-            boxShadow: isMobile && isOpen ? '20px 0 50px rgba(0,0,0,0.2)' : 'none'
+            boxShadow: isMobile && isOpen ? '20px 0 50px rgba(0,0,0,0.2)' : 'none',
+            overflowY: 'auto'
         }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.5rem 2rem 0.5rem', borderBottom: '1px solid #f1f5f9', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

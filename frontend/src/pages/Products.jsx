@@ -314,14 +314,19 @@ const Products = () => {
             </div>
 
             {isModalOpen && (
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, overflowY: 'auto', padding: '20px' }}>
-                    <div className="card shadow-2xl" style={{ width: '800px', maxWidth: '100%', borderRadius: '1.5rem', border: '1px solid #e2e8f0', animation: 'modalSlideUp 0.3s ease-out' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
-                            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>{editingProduct ? '📝 Edit Product' : '✨ Add New Product'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', color: '#64748b' }}>✕</button>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+                    <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(8px)' }} onClick={() => setIsModalOpen(false)}></div>
+                    <div style={{ position: 'relative', width: '100%', maxWidth: '850px', backgroundColor: 'white', borderRadius: '2rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
+                        {/* Modal Header */}
+                        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff' }}>
+                            <div>
+                                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', tracking: '-0.025em' }}>{editingProduct ? 'Update Product' : 'Add New Product'}</h2>
+                                <p style={{ fontSize: '0.8rem', color: '#64748b' }}>Fill in the details to manage your mutant store inventory</p>
+                            </div>
+                            <button style={{ padding: '0.5rem', borderRadius: '0.5rem', border: 'none', background: '#f1f5f9', color: '#64748b', cursor: 'pointer' }} onClick={() => setIsModalOpen(false)}>✕</button>
                         </div>
                         
-                        <form onSubmit={handleSave} style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.25rem' }}>
+                        <form onSubmit={handleSave} style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem', overflowY: 'auto', flex: 1 }}>
                             <div style={{ gridColumn: 'span 8' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Product Name</label>
                                 <input className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} placeholder="e.g. Full Face helmet" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />

@@ -34,7 +34,7 @@ router.post('/check-user', async (req, res) => {
             res.json({ 
                 exists: true, 
                 token: token,
-                user: { id: user.id, name: user.name, email: user.email } 
+                user: { id: user.id, name: user.name, email: user.email, phone: user.phone } 
             });
         } else {
             res.json({ exists: false });
@@ -165,7 +165,16 @@ router.post('/verify-otp', async (req, res) => {
         await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
 
         const token = jwt.sign({ id: user.id, username: user.username || user.name, role: user.role || 'customer' }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.json({ token, user: { id: user.id, name: user.name || user.username, role: user.role || 'customer' } });
+        res.json({ 
+            token, 
+            user: { 
+                id: user.id, 
+                name: user.name || user.username, 
+                email: user.email,
+                phone: user.phone,
+                role: user.role || 'customer' 
+            } 
+        });
     } catch (error) {
         console.error('VERIFY OTP ERROR:', error);
         res.status(500).json({ error: 'Server error' });

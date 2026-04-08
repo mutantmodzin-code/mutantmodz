@@ -40,12 +40,13 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const data = await response.json();
 
       if (response.ok && data.exists) {
-        // Direct Login (Bypassing OTP)
-        if (data.token) {
-          completeLogin(data);
-        } else {
-          // Fallback if token not returned for some reason
-          setError('Auth Protocol Sequence Error');
+        // User exists, initiate OTP verification via email
+        setUserData(data.user);
+        try {
+          await handleSendOTP(data.user.email);
+          setStep('otp');
+        } catch (otpErr) {
+          // Error already set by handleSendOTP
         }
       } else {
         // New user - go to registration
@@ -131,8 +132,15 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       if (!response.ok) throw new Error('Failed to create account');
       
       const data = await response.json();
-      // After registration, login immediately (Skip OTP)
-      completeLogin(data);
+      setUserData(data.user);
+      
+      // After registration, trigger OTP for email verification
+      try {
+        await handleSendOTP(email);
+        setStep('otp');
+      } catch (otpErr) {
+        // Error handling in handleSendOTP
+      }
 
     } catch (err: any) {
       setError(err.message);
@@ -142,15 +150,25 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   };
 
   const completeLogin = (data: any) => {
+    // Determine where the user data is
+    const user = data.user || data;
+    
     // Store JWT token for API authentication
     if (data.token) {
       localStorage.setItem('auth_token', data.token);
     }
+    
+    if (!user || (!user.id && !user.uid)) {
+      console.error('Invalid auth data structure:', data);
+      setError('System Error: Authentication Protocol Mismatch');
+      return;
+    }
+
     login({
-      uid: data.user.id.toString(),
-      phone: phoneNumber,
-      email: data.user.email,
-      displayName: data.user.name
+      uid: (user.id || user.uid).toString(),
+      phone: phoneNumber || user.phone || '',
+      email: user.email || '',
+      displayName: user.name || user.displayName || user.username || 'User'
     });
     setStep('success');
     setTimeout(() => {
@@ -273,6 +291,15 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                     placeholder="000 000"
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-5 pl-16 pr-6 text-white text-2xl font-black focus:border-red-600 outline-none transition-colors tracking-[0.5em]"
                   />
+                </div>
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => handleSendOTP(userData?.email || email)}
+                    disabled={isLoading}
+                    className="text-[10px] font-bold text-zinc-500 hover:text-red-500 uppercase tracking-widest transition-colors mr-2"
+                  >
+                    Resend Code
+                  </button>
                 </div>
               </div>
               <button

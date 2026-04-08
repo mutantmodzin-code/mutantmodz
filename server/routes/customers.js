@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const jwt = require('jsonwebtoken');
 const { authenticateToken } = require('./auth');
 
 // Get all customers with online/offline classification
@@ -46,8 +47,27 @@ router.post('/', async (req, res) => {
             'INSERT INTO customers (name, phone, email, address) VALUES ($1, $2, $3, $4) ON CONFLICT (phone) DO UPDATE SET name = $1, email = $3, address = $4 RETURNING *',
             [name, phone, email, address]
         );
-        res.status(201).json(result.rows[0]);
+        
+        const user = result.rows[0];
+        
+        // Generate token for immediate login after registration
+        const token = jwt.sign(
+            { id: user.id, username: user.name, role: 'customer' },
+            process.env.JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        res.status(201).json({
+            token,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone
+            }
+        });
     } catch (error) {
+        console.error('CUSTOMER REGISTRATION ERROR:', error);
         res.status(500).json({ error: error.message });
     }
 });

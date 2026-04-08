@@ -64,7 +64,8 @@ export const getProducts = async (): Promise<Product[]> => {
                 description: 'All-weather adventure touring jacket with Level 2 armor.',
                 price: '₹12,450', price_num: 12450, stock: 8, brand: 'Rynox',
                 image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=600',
-                images: ['https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=600']
+                images: ['https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=600'],
+                is_garage_sale: true
             },
             {
                 id: 'mock-3', category: 'accessories', name: 'HJG Owl Night Drive LED (Pair)',
@@ -78,7 +79,9 @@ export const getProducts = async (): Promise<Product[]> => {
                 description: '35L universal tail bag with rain cover and bungee mounts.',
                 price: '₹3,850', price_num: 3850, stock: 12, brand: 'Viaterra',
                 image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=600',
-                images: ['https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=600']
+                images: ['https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=600'],
+                is_combo: true,
+                combo_type: 'General Combos'
             },
             {
                 id: 'mock-5', category: 'accessories', name: 'DynaMount Master Phone Holder',

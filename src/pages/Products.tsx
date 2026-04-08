@@ -98,8 +98,8 @@ export default function Products({ onNavigate }: ProductsProps) {
         return new Date(p.created_at) >= tenDaysAgo;
       })();
 
-      const matchesGarageSale = !isGarageSaleRequest || p.is_garage_sale;
-      const matchesCombo = !isComboRequest || p.is_combo;
+      const matchesGarageSale = !isGarageSaleRequest || !!p.is_garage_sale;
+      const matchesCombo = !isComboRequest || !!p.is_combo;
 
       const matchesCategory = isNewArrivalRequest || selectedCategory === 'all' || 
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||

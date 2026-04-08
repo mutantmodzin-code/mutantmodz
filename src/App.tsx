@@ -16,6 +16,7 @@ import Categories from './pages/Categories';
 import Brands from './pages/Brands';
 import MenuDrawer from './components/MenuDrawer';
 import MyOrders from './pages/MyOrders';
+import AccountSettings from './pages/AccountSettings';
 
 import Payment from './pages/Payment';
 import { CartProvider } from './context/CartContext';
@@ -79,6 +80,8 @@ function AppContent() {
         return <Payment />;
       case 'orders':
         return <MyOrders />;
+      case 'settings':
+        return <AccountSettings />;
       default:
         return <Home onNavigate={navigate} />;
     }

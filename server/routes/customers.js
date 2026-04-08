@@ -39,7 +39,7 @@ router.get('/search', async (req, res) => {
     }
 });
 
-// Add customer
+// Add customer (Registration/Initial)
 router.post('/', async (req, res) => {
     const { name, phone, email, address } = req.body;
     try {
@@ -68,6 +68,41 @@ router.post('/', async (req, res) => {
         });
     } catch (error) {
         console.error('CUSTOMER REGISTRATION ERROR:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update profile
+router.put('/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { name, phone, address } = req.body;
+    
+    // Security check: Customer can only update their own profile
+    if (req.user.role !== 'admin' && req.user.id.toString() !== id.toString()) {
+        return res.status(403).json({ error: 'Unauthorized profile update' });
+    }
+
+    try {
+        const result = await db.query(
+            'UPDATE customers SET name = $1, phone = $2, address = $3 WHERE id = $4 RETURNING *',
+            [name, phone, address, id]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Customer not found' });
+        }
+        
+        const user = result.rows[0];
+        res.json({
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                address: user.address
+            }
+        });
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });

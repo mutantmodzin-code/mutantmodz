@@ -232,7 +232,7 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
 
             {/* User Account / Login */}
             <button 
-              onClick={() => { if (!isLoggedIn) setShowLoginPopup(true); else handleNav('payment'); }}
+              onClick={() => { if (!isLoggedIn) setShowLoginPopup(true); else handleNav('settings'); }}
               className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5"
             >
               <User size={20} className="text-zinc-500" /> {isLoggedIn ? 'Account Settings' : 'Login / Register'}

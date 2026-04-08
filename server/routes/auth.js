@@ -219,6 +219,76 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
+// Send OTP for Email Update
+router.post('/send-email-update-otp', async (req, res) => {
+    const { newEmail, userId } = req.body;
+    try {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp_hash = await bcrypt.hash(otp, 10);
+        const otp_expiry = new Date(Date.now() + 10 * 60000);
+
+        await db.query(
+            'UPDATE customers SET otp_hash = $1, otp_expiry = $2, pending_email = $3 WHERE id = $4',
+            [otp_hash, otp_expiry, newEmail, userId]
+        );
+
+        const resendInstance = getResend();
+        if (!resendInstance) {
+            console.log(`[DEV MODE] OTP for Email Update to ${newEmail}: ${otp}`);
+            return res.json({ dev: true, message: 'OTP sent to terminal (Mock Mode)' });
+        }
+
+        try {
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+            await resendInstance.emails.send({
+                from: fromEmail,
+                to: [newEmail],
+                subject: 'MutantModz Email Verification',
+                html: `
+                    <div style="font-family: sans-serif; text-align: center; padding: 20px;">
+                        <h2>Verify Your New Email</h2>
+                        <h1 style="color: #ff0000;">${otp}</h1>
+                        <p>Enter this code to confirm your email address change.</p>
+                    </div>
+                `
+            });
+            res.json({ message: 'Verification code sent to your new email.' });
+        } catch (mailError) {
+            console.error('MAILER ERROR:', mailError);
+            res.status(500).json({ error: 'Failed to send verification email' });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Verify Email Update OTP
+router.post('/verify-email-update-otp', async (req, res) => {
+    const { userId, otp } = req.body;
+    try {
+        const result = await db.query('SELECT * FROM customers WHERE id = $1', [userId]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+
+        const user = result.rows[0];
+        if (!user.otp_hash || new Date() > user.otp_expiry) {
+            return res.status(400).json({ error: 'Verification code expired' });
+        }
+
+        const isMatch = await bcrypt.compare(otp, user.otp_hash);
+        if (!isMatch) return res.status(400).json({ error: 'Invalid verification code' });
+
+        // Update email and clear pending fields
+        await db.query(
+            'UPDATE customers SET email = pending_email, pending_email = NULL, otp_hash = NULL, otp_expiry = NULL WHERE id = $1',
+            [userId]
+        );
+
+        res.json({ message: 'Email updated successfully', newEmail: user.pending_email });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 module.exports = router;
 module.exports.authenticateToken = authenticateToken;

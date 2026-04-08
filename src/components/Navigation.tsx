@@ -567,7 +567,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               </div>
 
               <button
-                onClick={() => handleNavClick('products')}
+                onClick={() => handleNavClick('products', '?cat=garage-sale')}
                 className="group relative inline-flex items-center justify-center shrink-0 ml-4 font-bold hidden xl:flex"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 rounded-md opacity-70 group-hover:opacity-100 blur transition-opacity duration-500"></div>

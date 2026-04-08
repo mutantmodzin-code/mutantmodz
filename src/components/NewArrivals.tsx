@@ -65,7 +65,15 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
   useEffect(() => {
     const fetch = async () => {
       const all = await getProducts();
-      const sorted = [...all].sort((a, b) => b.id.localeCompare(a.id)).slice(0, 8);
+      
+      const tenDaysAgo = new Date();
+      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+      const sorted = [...all]
+        .filter(p => p.isNew || (p.created_at && new Date(p.created_at) >= tenDaysAgo))
+        .sort((a, b) => b.id.localeCompare(a.id))
+        .slice(0, 10);
+      
       setProducts(sorted.map(p => ({ ...p, isNew: true })));
     };
     fetch();

@@ -64,7 +64,7 @@ export default function Products({ onNavigate }: ProductsProps) {
       // Update Category
       if (cat) {
         const decodedCat = decodeURIComponent(cat).toLowerCase();
-        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals'].includes(decodedCat)) {
+        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals', 'garage-sale', 'offer', 'garage sale'].includes(decodedCat)) {
           setSelectedCategory(decodedCat);
         }
       } else {
@@ -87,7 +87,17 @@ export default function Products({ onNavigate }: ProductsProps) {
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const isNewArrivalRequest = selectedCategory.toLowerCase() === 'new' || selectedCategory.toLowerCase() === 'new arrivals';
-      const matchesNew = !isNewArrivalRequest || p.isNew;
+      const isGarageSaleRequest = ['garage-sale', 'offer', 'garage sale'].includes(selectedCategory.toLowerCase());
+      
+      const matchesNew = !isNewArrivalRequest || (() => {
+        if (p.isNew) return true;
+        if (!p.created_at) return false;
+        const tenDaysAgo = new Date();
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+        return new Date(p.created_at) >= tenDaysAgo;
+      })();
+
+      const matchesGarageSale = !isGarageSaleRequest || p.is_garage_sale;
 
       const matchesCategory = isNewArrivalRequest || selectedCategory === 'all' || 
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
@@ -113,7 +123,7 @@ export default function Products({ onNavigate }: ProductsProps) {
         p.brand?.toLowerCase() === selectedBrand ||
         p.bike_brand?.toLowerCase() === selectedBrand;
         
-      return matchesCategory && matchesSearch && matchesBrand && matchesNew;
+      return matchesCategory && matchesSearch && matchesBrand && matchesNew && matchesGarageSale;
     });
   }, [products, selectedCategory, searchQuery, selectedBrand]);
 
@@ -143,14 +153,14 @@ export default function Products({ onNavigate }: ProductsProps) {
         <div className="pt-8 pb-8 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
-            className="group flex items-center gap-3 text-zinc-500 hover:text-white transition-all duration-300"
+            className="group flex items-center gap-4 text-white hover:text-red-500 transition-all duration-300 bg-zinc-900/50 pr-6 pl-2 py-2 rounded-full border border-white/5 hover:border-red-600/50"
           >
-            <div className="w-10 h-10 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] bg-zinc-950">
-              <span className="text-[18px] group-hover:-translate-x-1 transition-transform">←</span>
+            <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center group-hover:bg-white transition-all shadow-[0_0_20px_rgba(220,38,38,0.4)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+              <span className="text-[24px] text-white group-hover:text-red-600 transition-colors font-black">←</span>
             </div>
-            <div className="flex flex-col items-start translate-y-0.5">
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mb-1">Back To</span>
-              <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-red-500 transition-colors">Previous Section</span>
+            <div className="flex flex-col items-start">
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 group-hover:text-white transition-colors">Navigation</span>
+               <span className="text-[12px] font-black uppercase tracking-widest text-white group-hover:text-red-500 transition-colors">Go Back</span>
             </div>
           </button>
           
@@ -190,9 +200,9 @@ export default function Products({ onNavigate }: ProductsProps) {
           ) : (
             <>
               <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none uppercase mb-4">
-                {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'LATEST' : 'PREMIUM') : selectedCategory} <br />
+                {(selectedCategory === 'all' || selectedCategory === 'new' || ['garage-sale', 'offer', 'garage sale'].includes(selectedCategory)) ? (selectedCategory === 'new' ? 'LATEST' : (selectedCategory === 'all' ? 'PREMIUM' : 'GARAGE')) : selectedCategory} <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">
-                  {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'ARRIVALS' : 'MODZ') : 'COLLECTION'}
+                  {(selectedCategory === 'all' || selectedCategory === 'new' || ['garage-sale', 'offer', 'garage sale'].includes(selectedCategory)) ? (selectedCategory === 'new' ? 'ARRIVALS' : (selectedCategory === 'all' ? 'MODZ' : 'SALE')) : 'COLLECTION'}
                 </span>
               </h1>
               <p className="text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[10px] sm:text-[12px] leading-relaxed">

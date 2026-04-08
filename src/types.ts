@@ -20,6 +20,7 @@ export interface Product {
     created_at?: string;
     freeShipping?: boolean;
     discount_percent?: number;
+    is_garage_sale?: boolean;
 }
 
 

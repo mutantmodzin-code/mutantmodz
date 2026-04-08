@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { Plus, Edit, Trash, Search, PackageMinus, PackagePlus, AlertCircle } from 'lucide-react';
+import { Plus, Edit, Trash, Search, PackageMinus, PackagePlus, AlertCircle, Package } from 'lucide-react';
 
 const PARTNER_BRANDS = [
     'FXR', 'Barkbusters', 'SENA', 'SHAD', 'FuelX', 'Maddog', 'PowerTronic', 'Devil Evolution', 

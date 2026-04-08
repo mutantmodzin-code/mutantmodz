@@ -73,7 +73,7 @@ export default function Categories({ onNavigate }: CategoriesProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-32 pb-20 px-6 sm:px-12">
+    <div className="min-h-screen bg-zinc-950 pt-44 pb-20 px-6 sm:px-12">
       <div className="max-w-[1700px] mx-auto">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-16 max-w-2xl">

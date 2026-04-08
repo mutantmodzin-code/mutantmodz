@@ -52,7 +52,7 @@ export default function Category({ onNavigate }: CategoryProps) {
   const uniqueCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
 
   return (
-    <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen bg-zinc-950 pt-44 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
 
       {/* Header */}
       <section className="relative py-32 flex items-center justify-center overflow-hidden">

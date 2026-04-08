@@ -134,7 +134,7 @@ Link: ${window.location.href}`;
         .slice(0, 4);
 
     return (
-        <div className={`min-h-screen bg-zinc-950 pt-32 pb-24 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`min-h-screen bg-zinc-950 pt-44 pb-24 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
             <div className="max-w-[1600px] mx-auto px-4 sm:px-12">
 
                 {/* Navigation Header */}

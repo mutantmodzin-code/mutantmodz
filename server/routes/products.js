@@ -64,16 +64,18 @@ router.get('/categories', async (req, res) => {
 
 // Add Product
 router.post('/', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, sub_category_type, discount_percent, is_garage_sale } = req.body;
-    console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale });
+    const { name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo } = req.body;
+    console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale, is_combo });
 
     try {
         const result = await db.query(
-            'INSERT INTO products (name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, sub_category_type, discount_percent, is_garage_sale) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *',
+            'INSERT INTO products (name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *',
             [
                 name,
-                category_id ? parseInt(category_id) : null,
                 brand,
+                category_id ? parseInt(category_id) : null,
+                sub_category || null,
+                sub_category_type || null,
                 parseFloat(price) || 0,
                 parseInt(stock) || 0,
                 vendor_id ? parseInt(vendor_id) : null,
@@ -83,10 +85,9 @@ router.post('/', async (req, res) => {
                 bike_brand || null,
                 bike_model || null,
                 description || null,
-                sub_category || null,
-                sub_category_type || null,
                 parseFloat(discount_percent) || 0,
-                is_garage_sale || false
+                is_garage_sale || false,
+                is_combo || false
             ]
         );
 
@@ -118,16 +119,17 @@ router.post('/', async (req, res) => {
 
 // Update Product
 router.put('/:id', async (req, res) => {
-    const { name, category_id, brand, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, sub_category, sub_category_type, discount_percent, is_garage_sale } = req.body;
-
+    const { name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo } = req.body;
     const { id } = req.params;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, category_id = $2, brand = $3, price = $4, stock = $5, vendor_id = $6, sku = $7, purchase_price = $8, image_url = $9, bike_brand = $10, bike_model = $11, description = $12, sub_category = $13, sub_category_type = $14, discount_percent = $15, is_garage_sale = $16 WHERE id = $17 RETURNING *',
+            'UPDATE products SET name=$1, brand=$2, category_id=$3, sub_category=$4, sub_category_type=$5, price=$6, stock=$7, vendor_id=$8, sku=$9, purchase_price=$10, image_url=$11, bike_brand=$12, bike_model=$13, description=$14, discount_percent=$15, is_garage_sale=$16, is_combo=$17 WHERE id=$18 RETURNING *',
             [
                 name,
-                category_id ? parseInt(category_id) : null,
                 brand,
+                category_id ? parseInt(category_id) : null,
+                sub_category || null,
+                sub_category_type || null,
                 parseFloat(price) || 0,
                 parseInt(stock) || 0,
                 vendor_id ? parseInt(vendor_id) : null,
@@ -137,14 +139,16 @@ router.put('/:id', async (req, res) => {
                 bike_brand || null,
                 bike_model || null,
                 description || null,
-                sub_category || null,
-                sub_category_type || null,
                 parseFloat(discount_percent) || 0,
                 is_garage_sale || false,
+                is_combo || false,
                 id
             ]
         );
 
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
 
         // Optional: Update price history if changed
         await db.query(
@@ -154,6 +158,7 @@ router.put('/:id', async (req, res) => {
 
         res.json(result.rows[0]);
     } catch (error) {
+        console.error('Error on PUT /api/products/:id:', error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -64,7 +64,7 @@ export default function Products({ onNavigate }: ProductsProps) {
       // Update Category
       if (cat) {
         const decodedCat = decodeURIComponent(cat).toLowerCase();
-        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals', 'garage-sale', 'offer', 'garage sale'].includes(decodedCat)) {
+        if (['helmets', 'accessories', 'gear', 'mods', 'luggage', 'riding gear', 'bike parts', 'lighting', 'performance parts', 'new', 'new arrivals', 'garage-sale', 'offer', 'garage sale', 'combos', 'combo'].includes(decodedCat)) {
           setSelectedCategory(decodedCat);
         }
       } else {
@@ -88,6 +88,7 @@ export default function Products({ onNavigate }: ProductsProps) {
     return products.filter(p => {
       const isNewArrivalRequest = selectedCategory.toLowerCase() === 'new' || selectedCategory.toLowerCase() === 'new arrivals';
       const isGarageSaleRequest = ['garage-sale', 'offer', 'garage sale'].includes(selectedCategory.toLowerCase());
+      const isComboRequest = ['combos', 'combo'].includes(selectedCategory.toLowerCase());
       
       const matchesNew = !isNewArrivalRequest || (() => {
         if (p.isNew) return true;
@@ -98,6 +99,7 @@ export default function Products({ onNavigate }: ProductsProps) {
       })();
 
       const matchesGarageSale = !isGarageSaleRequest || p.is_garage_sale;
+      const matchesCombo = !isComboRequest || p.is_combo;
 
       const matchesCategory = isNewArrivalRequest || selectedCategory === 'all' || 
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
@@ -123,7 +125,7 @@ export default function Products({ onNavigate }: ProductsProps) {
         p.brand?.toLowerCase() === selectedBrand ||
         p.bike_brand?.toLowerCase() === selectedBrand;
         
-      return matchesCategory && matchesSearch && matchesBrand && matchesNew && matchesGarageSale;
+      return matchesCategory && matchesSearch && matchesBrand && matchesNew && matchesGarageSale && matchesCombo;
     });
   }, [products, selectedCategory, searchQuery, selectedBrand]);
 

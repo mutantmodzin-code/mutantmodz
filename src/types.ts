@@ -21,6 +21,7 @@ export interface Product {
     freeShipping?: boolean;
     discount_percent?: number;
     is_garage_sale?: boolean;
+    is_combo?: boolean;
 }
 
 

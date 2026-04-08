@@ -6,6 +6,7 @@ import VideoReels from '../components/VideoReels';
 import TestimonialSlider from '../components/TestimonialSlider';
 import CategoryBanners from '../components/CategoryBanners';
 import BestDeals from '../components/BestDeals';
+import ComboProducts from '../components/ComboProducts';
 import ShopByBike from '../components/ShopByBike';
 import CollectionSquares from '../components/CollectionSquares';
 import { ArrowRight, Zap } from 'lucide-react';
@@ -30,7 +31,10 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 3. Best Deals - NEW Horizontal Scroll */}
       <BestDeals onNavigate={onNavigate} />
 
-      {/* 4. New Arrivals - Updated Horizontal Scroll */}
+      {/* 4. Monster Combos - NEW Specialized Section */}
+      <ComboProducts onNavigate={onNavigate} />
+
+      {/* 5. New Arrivals - Updated Horizontal Scroll */}
       <NewArrivals onNavigate={onNavigate} />
 
       {/* 5. Shop By Brands - Updated Grid Layout */}

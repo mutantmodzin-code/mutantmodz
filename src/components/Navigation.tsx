@@ -531,7 +531,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                   ))}
                                 </ul>
                                 {idx === 0 && (
-                                  <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
+                                  <button onClick={() => handleNavClick('products', cat.id === 'combos' ? '?cat=combos' : '')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
                                     View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
                                   </button>
                                 )}

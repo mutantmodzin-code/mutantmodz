@@ -96,14 +96,11 @@ export default function Products({ onNavigate }: ProductsProps) {
         (selectedCategory.toLowerCase() === 'accessories' && p.sub_category_type?.toLowerCase() === 'motorcycle accessories') ||
         (selectedCategory.toLowerCase() === 'riding gear' && (p.sub_category_type?.toLowerCase() === 'riding gear' || p.category_name?.toLowerCase() === 'gear'));
 
-      const matchesSearch = !searchQuery || 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.bike_brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.bike_model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.sub_category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.sub_category_type?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = !searchQuery || (() => {
+        const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+        const searchPool = `${p.name} ${p.description} ${p.brand} ${p.bike_brand} ${p.bike_model} ${p.sub_category} ${p.sub_category_type}`.toLowerCase();
+        return terms.every(term => searchPool.includes(term));
+      })();
 
       const matchesBrand = !selectedBrand ||
         p.name.toLowerCase().includes(selectedBrand) ||
@@ -143,12 +140,12 @@ export default function Products({ onNavigate }: ProductsProps) {
             onClick={() => window.history.back()}
             className="group flex items-center gap-3 text-zinc-500 hover:text-white transition-all duration-300"
           >
-            <div className="w-12 h-12 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] bg-zinc-950">
-              <span className="text-[20px] group-hover:-translate-x-1 transition-transform">←</span>
+            <div className="w-10 h-10 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-all shadow-[0_0_15px_rgba(0,0,0,0.5)] bg-zinc-950">
+              <span className="text-[18px] group-hover:-translate-x-1 transition-transform">←</span>
             </div>
             <div className="flex flex-col items-start translate-y-0.5">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] leading-none mb-1">Back To</span>
-              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-red-500 transition-colors">Previous Section</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mb-1">Back To</span>
+              <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-600 group-hover:text-red-500 transition-colors">Previous Section</span>
             </div>
           </button>
           
@@ -171,48 +168,48 @@ export default function Products({ onNavigate }: ProductsProps) {
           
           {activeFilterName && (activeBrandInfo || activeBikeInfo) ? (
             <div className="flex flex-col items-center">
-               <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-full p-4 sm:p-6 mb-8 shadow-2xl flex items-center justify-center border-4 border-red-600/20">
+               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-full p-3 sm:p-4 mb-4 shadow-2xl flex items-center justify-center border-2 border-red-600/20">
                   <img 
                     src={activeBrandInfo?.logo || activeBikeInfo?.image} 
                     alt={activeFilterName} 
                     className="w-full h-full object-contain"
                   />
                </div>
-               <h1 className="text-5xl sm:text-8xl font-black text-white tracking-tighter leading-none uppercase mb-2">
+               <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tighter leading-none uppercase mb-2">
                  {activeFilterName}
                </h1>
-                <p className="text-red-500 font-black uppercase tracking-[0.6em] text-[10px] sm:text-[12px] opacity-80">
+                <p className="text-red-500 font-black uppercase tracking-[0.6em] text-[9px] sm:text-[10px] opacity-80">
                   {activeBrandInfo ? 'Certified Hardware Partner' : 'Precision Components'}
                 </p>
             </div>
           ) : (
             <>
-              <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tight leading-none uppercase mb-6">
+              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none uppercase mb-4">
                 {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'LATEST' : 'PREMIUM') : selectedCategory} <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">
                   {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'ARRIVALS' : 'MODZ') : 'COLLECTION'}
                 </span>
               </h1>
-              <p className="text-lg text-zinc-400 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[13px] opacity-80">
+              <p className="text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[10px] sm:text-[12px] leading-relaxed">
                 {selectedCategory === 'all' 
-                  ? 'The definitive archive of high-performance bike hardware.'
+                  ? 'THE DEFINITIVE ARCHIVE OF HIGH-PERFORMANCE BIKE HARDWARE.'
                   : selectedCategory === 'new'
-                  ? 'The latest performance evolution has arrived. Engineered precisely.'
-                  : `Curated ${selectedCategory} engineered for uncompromising performance.`}
+                  ? 'THE LATEST PERFORMANCE EVOLUTION HAS ARRIVED. ENGINEERED PRECISELY.'
+                  : `CURATED ${selectedCategory.toUpperCase()} ENGINEERED FOR PERFORMANCE.`}
               </p>
             </>
           )}
 
           {(selectedBrand || searchQuery) && (
-            <div className="mt-12 inline-flex items-center gap-4 bg-red-600/10 border border-red-600/20 px-6 py-3 rounded-2xl group">
-              <span className="text-red-500 font-black uppercase text-[10px] tracking-[0.3em] group-hover:text-white transition-colors">Sector: {selectedBrand || searchQuery}</span>
+            <div className="mt-8 inline-flex items-center gap-4 bg-red-600/5 border border-red-600/10 px-5 py-2.5 rounded-xl group">
+              <span className="text-red-500 font-black uppercase text-[9px] tracking-[0.3em] group-hover:text-white transition-colors">Sector: {selectedBrand || searchQuery}</span>
               <button
                 onClick={() => {
                   window.location.hash = 'products';
                   setSearchQuery('');
                   setSelectedBrand(null);
                 }}
-                className="text-zinc-500 hover:text-red-600 transition-colors p-1"
+                className="text-zinc-600 hover:text-red-600 transition-colors"
               >
                 ✕
               </button>
@@ -276,7 +273,7 @@ export default function Products({ onNavigate }: ProductsProps) {
         </div>
       </section>
 
-      <section className="py-24 px-6 sm:px-12">
+      <section className="py-12 px-6 sm:px-12">
         <div className="max-w-[1700px] mx-auto">
           {sortedProducts.length === 0 ? (
             <div className="text-center py-48 glass-card rounded-[3rem] border border-white/5">

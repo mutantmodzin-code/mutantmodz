@@ -31,8 +31,12 @@ router.get('/', async (req, res) => {
         values.push(bike_model);
     }
     if (search) {
-        conditions.push('(p.name ILIKE $' + (values.length + 1) + ' OR p.sku ILIKE $' + (values.length + 1) + ')');
-        values.push(`%${search}%`);
+        const searchTerms = search.split(/\s+/).filter(t => t.length > 0);
+        searchTerms.forEach(term => {
+            const placeholder = '$' + (values.length + 1);
+            conditions.push(`(p.name ILIKE ${placeholder} OR p.sku ILIKE ${placeholder} OR p.description ILIKE ${placeholder} OR p.brand ILIKE ${placeholder} OR p.bike_brand ILIKE ${placeholder} OR p.bike_model ILIKE ${placeholder} OR p.sub_category ILIKE ${placeholder} OR c.name ILIKE ${placeholder})`);
+            values.push(`%${term}%`);
+        });
     }
 
     if (conditions.length > 0) {

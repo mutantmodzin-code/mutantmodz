@@ -72,7 +72,7 @@ const Products = () => {
         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
         image_urls: ['', '', '', ''],
         bike_brand: '', bike_model: '',
-        description: '', discount_percent: 0, is_garage_sale: false, is_combo: false
+        description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: ''
     });
 
 
@@ -115,7 +115,7 @@ const Products = () => {
                 price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                 image_urls: ['', '', '', ''],
                 bike_brand: '', bike_model: '',
-                description: '', discount_percent: 0, is_garage_sale: false, is_combo: false
+                description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: ''
             });
 
         } catch (error) {
@@ -202,7 +202,8 @@ const Products = () => {
             description: p.description || '',
             discount_percent: p.discount_percent || 0,
             is_garage_sale: p.is_garage_sale || false,
-            is_combo: p.is_combo || false
+            is_combo: p.is_combo || false,
+            combo_type: p.combo_type || ''
         });
 
         setIsModalOpen(true);
@@ -230,7 +231,7 @@ const Products = () => {
                         name: '', brand: '', category_id: '', sub_category: '', sub_category_type: '',
                         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                         image_urls: ['', '', '', ''],
-                        bike_brand: '', bike_model: '', description: '', discount_percent: 0, is_garage_sale: false, is_combo: false
+                        bike_brand: '', bike_model: '', description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: ''
                     });
 
                     setIsModalOpen(true);
@@ -444,20 +445,39 @@ const Products = () => {
                                 </label>
                             </div>
 
-                            <div style={{ gridColumn: 'span 12', backgroundColor: formData.is_combo ? '#f0f9ff' : '#f8fafc', padding: '1rem', borderRadius: '1rem', border: `1px solid ${formData.is_combo ? '#0ea5e9' : '#e2e8f0'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.3s' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                    <div style={{ width: '40px', height: '40px', backgroundColor: formData.is_combo ? '#0ea5e9' : '#94a3b8', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                                        <Package size={20} />
+                            <div style={{ gridColumn: 'span 12', backgroundColor: formData.is_combo ? '#f0f9ff' : '#f8fafc', padding: '1.25rem', borderRadius: '1.25rem', border: `1px solid ${formData.is_combo ? '#0ea5e9' : '#e2e8f0'}`, transition: 'all 0.3s' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: formData.is_combo ? '1rem' : 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                        <div style={{ width: '40px', height: '40px', backgroundColor: formData.is_combo ? '#0ea5e9' : '#94a3b8', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                                            <Package size={20} />
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 800, color: formData.is_combo ? '#0369a1' : '#475569', fontSize: '0.9rem' }}>Combo Product / Bundle</div>
+                                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Tag this as a specialized combo product package</div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div style={{ fontWeight: 800, color: formData.is_combo ? '#0369a1' : '#475569', fontSize: '0.9rem' }}>Combo Product / Bundle</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Tag this as a specialized combo product package</div>
-                                    </div>
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" className="sr-only peer" checked={formData.is_combo} onChange={(e) => setFormData({ ...formData, is_combo: e.target.checked })} />
+                                        <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                                    </label>
                                 </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" className="sr-only peer" checked={formData.is_combo} onChange={(e) => setFormData({ ...formData, is_combo: e.target.checked })} />
-                                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
-                                </label>
+                                
+                                {formData.is_combo && (
+                                    <div style={{ paddingLeft: '3.5rem', animation: 'fadeIn 0.3s ease-out' }}>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Select Combo Category</label>
+                                        <select 
+                                            className="input" 
+                                            style={{ borderRadius: '0.75rem', borderColor: '#bae6fd', backgroundColor: '#f0f9ff' }}
+                                            value={formData.combo_type}
+                                            onChange={(e) => setFormData({ ...formData, combo_type: e.target.value })}
+                                        >
+                                            <option value="">Choose Combo Type...</option>
+                                            <option value="General Combos">General Combos</option>
+                                            <option value="Riding Combo Kit">Riding Combo Kit</option>
+                                            <option value="Monsoon Combo">Monsoon Combo</option>
+                                        </select>
+                                    </div>
+                                )}
                             </div>
 
                             <div style={{ gridColumn: 'span 12' }}>

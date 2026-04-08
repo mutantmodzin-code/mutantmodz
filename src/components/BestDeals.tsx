@@ -6,10 +6,10 @@ import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
 
 interface BestDealsProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: string) => void;
 }
 
-function MobileProductCard({ product, onNavigate }: { product: Product; onNavigate: (page: string) => void }) {
+function MobileProductCard({ product, onNavigate }: { product: Product; onNavigate: (page: string, params?: string) => void }) {
   const { addToCart } = useCart();
   const { isLoggedIn, setShowLoginPopup, setPendingAction } = useUserAuth();
 
@@ -148,7 +148,14 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
               </p>
             </div>
           </div>
-          <div className="hidden sm:flex gap-3">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => onNavigate('products', '?cat=garage-sale')}
+              className="text-zinc-500 hover:text-white transition-colors uppercase text-[10px] font-black tracking-[0.3em] mr-4 hidden sm:block"
+            >
+              View All
+            </button>
+            <div className="flex gap-3">
             <button 
               onClick={() => scroll('left')}
               className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
@@ -161,6 +168,7 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
             >
               <ChevronRight size={24} />
             </button>
+            </div>
           </div>
         </div>
 

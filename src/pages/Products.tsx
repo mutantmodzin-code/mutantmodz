@@ -105,6 +105,7 @@ export default function Products({ onNavigate }: ProductsProps) {
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.category?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.sub_category_type?.toLowerCase() === selectedCategory.toLowerCase() ||
+        p.combo_type?.toLowerCase() === selectedCategory.toLowerCase() ||
         (selectedCategory.toLowerCase() === 'accessories' && p.sub_category_type?.toLowerCase() === 'motorcycle accessories') ||
         (selectedCategory.toLowerCase() === 'riding gear' && (p.sub_category_type?.toLowerCase() === 'riding gear' || p.category_name?.toLowerCase() === 'gear'));
 

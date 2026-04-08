@@ -40,7 +40,10 @@ export const getProducts = async (): Promise<Product[]> => {
                 bike_model: p.bike_model || '',
                 sub_category: p.sub_category || '',
                 sub_category_type: p.sub_category_type || '',
-                date_added: p.created_at || null
+                date_added: p.created_at || null,
+                is_garage_sale: p.is_garage_sale || false,
+                is_combo: p.is_combo || false,
+                combo_type: p.combo_type || ''
             };
 
         });

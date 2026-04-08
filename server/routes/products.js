@@ -64,12 +64,12 @@ router.get('/categories', async (req, res) => {
 
 // Add Product
 router.post('/', async (req, res) => {
-    const { name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo } = req.body;
-    console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale, is_combo });
+    const { name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo, combo_type } = req.body;
+    console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale, is_combo, combo_type });
 
     try {
         const result = await db.query(
-            'INSERT INTO products (name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *',
+            'INSERT INTO products (name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo, combo_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *',
             [
                 name,
                 brand,
@@ -87,7 +87,8 @@ router.post('/', async (req, res) => {
                 description || null,
                 parseFloat(discount_percent) || 0,
                 is_garage_sale || false,
-                is_combo || false
+                is_combo || false,
+                combo_type || null
             ]
         );
 
@@ -119,11 +120,11 @@ router.post('/', async (req, res) => {
 
 // Update Product
 router.put('/:id', async (req, res) => {
-    const { name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo } = req.body;
+    const { name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo, combo_type } = req.body;
     const { id } = req.params;
     try {
         const result = await db.query(
-            'UPDATE products SET name=$1, brand=$2, category_id=$3, sub_category=$4, sub_category_type=$5, price=$6, stock=$7, vendor_id=$8, sku=$9, purchase_price=$10, image_url=$11, bike_brand=$12, bike_model=$13, description=$14, discount_percent=$15, is_garage_sale=$16, is_combo=$17 WHERE id=$18 RETURNING *',
+            'UPDATE products SET name=$1, brand=$2, category_id=$3, sub_category=$4, sub_category_type=$5, price=$6, stock=$7, vendor_id=$8, sku=$9, purchase_price=$10, image_url=$11, bike_brand=$12, bike_model=$13, description=$14, discount_percent=$15, is_garage_sale=$16, is_combo=$17, combo_type=$18 WHERE id=$19 RETURNING *',
             [
                 name,
                 brand,
@@ -142,6 +143,7 @@ router.put('/:id', async (req, res) => {
                 parseFloat(discount_percent) || 0,
                 is_garage_sale || false,
                 is_combo || false,
+                combo_type || null,
                 id
             ]
         );

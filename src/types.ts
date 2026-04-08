@@ -22,6 +22,7 @@ export interface Product {
     discount_percent?: number;
     is_garage_sale?: boolean;
     is_combo?: boolean;
+    combo_type?: string;
 }
 
 

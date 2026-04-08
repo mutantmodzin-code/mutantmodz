@@ -147,18 +147,13 @@ router.post('/verify-otp', async (req, res) => {
 
         const user = result.rows[0];
 
-        // Master OTP for Dev Mode
-        if (otp === '000000') {
-             console.log(`🛡️ Dev Mode Bypass for ${user.email}`);
-        } else {
-            if (!user.otp_hash || new Date() > user.otp_expiry) {
-                return res.status(400).json({ error: 'OTP expired or not found' });
-            }
+        if (!user.otp_hash || new Date() > user.otp_expiry) {
+            return res.status(400).json({ error: 'OTP expired or not found' });
+        }
 
-            const isMatch = await bcrypt.compare(otp, user.otp_hash);
-            if (!isMatch) {
-                return res.status(400).json({ error: 'Invalid code' });
-            }
+        const isMatch = await bcrypt.compare(otp, user.otp_hash);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Invalid code' });
         }
 
         // Clear OTP on success

@@ -455,7 +455,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
           <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'h-0 opacity-0 overflow-hidden' : 'h-[52px] opacity-100'}`}>
 
-              <div className="flex items-center space-x-2 flex-1 justify-center xl:justify-start">
+              <div className="flex items-center space-x-2 flex-1 justify-center xl:justify-start overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap px-4">
                 {categoriesData.map((cat) => (
                   <div
                     key={cat.id}

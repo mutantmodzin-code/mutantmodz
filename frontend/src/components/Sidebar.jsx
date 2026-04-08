@@ -35,17 +35,38 @@ const SidebarLink = ({ to, icon: Icon, children }) => (
     </NavLink>
 );
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose, isMobile }) => {
     return (
-        <aside style={{ width: '250px', height: '100vh', backgroundColor: 'white', borderRight: '1px solid #e2e8f0', padding: '1.5rem', position: 'fixed', left: 0, top: 0, zIndex: 110, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.5rem 2rem 0.5rem', borderBottom: '1px solid #f1f5f9', marginBottom: '2rem' }}>
-                <div style={{ backgroundColor: '#2563eb', padding: '0.5rem', borderRadius: '0.75rem', color: 'white' }}>
-                    <Bike size={24} />
+        <aside style={{ 
+            width: '250px', 
+            height: '100vh', 
+            backgroundColor: 'white', 
+            borderRight: '1px solid #e2e8f0', 
+            padding: '1.5rem', 
+            position: 'fixed', 
+            left: isMobile ? (isOpen ? 0 : '-250px') : 0, 
+            top: 0, 
+            zIndex: 110, 
+            display: 'flex', 
+            flexDirection: 'column',
+            transition: 'left 0.3s ease-in-out',
+            boxShadow: isMobile && isOpen ? '20px 0 50px rgba(0,0,0,0.2)' : 'none'
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.5rem 2rem 0.5rem', borderBottom: '1px solid #f1f5f9', marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ backgroundColor: '#2563eb', padding: '0.5rem', borderRadius: '0.75rem', color: 'white' }}>
+                        <Bike size={24} />
+                    </div>
+                    <div>
+                        <h1 style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a' }}>MUTANT MODZ</h1>
+                        <p style={{ fontSize: '0.625rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>Pitshop Inventory</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a' }}>MUTANT MODZ ADMIN</h1>
-                    <p style={{ fontSize: '0.625rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase' }}>Pitshop Inventory</p>
-                </div>
+                {isMobile && (
+                    <button onClick={onClose} style={{ padding: '0.5rem', color: '#64748b', border: 'none', background: 'none', cursor: 'pointer' }}>
+                        <X size={20} />
+                    </button>
+                )}
             </div>
 
             <nav style={{ flex: 1 }}>

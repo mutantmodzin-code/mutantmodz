@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Bell, Search, User, LogOut, ShoppingBag, X } from 'lucide-react';
+import { Bell, Search, User, LogOut, ShoppingBag, X, Menu } from 'lucide-react';
 
 // ── Loud notification ding via Web Audio API ──────────────────────────────────
 const playNotificationSound = () => {
@@ -55,7 +55,7 @@ const showBrowserNotification = (notif) => {
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
-const Navbar = () => {
+const Navbar = ({ onToggleSidebar, isMobile }) => {
     const { user, logout } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -209,10 +209,17 @@ const Navbar = () => {
     };
 
     return (
-        <nav style={{ height: '70px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', position: 'sticky', top: 0, zIndex: 100 }}>
-            <div style={{ position: 'relative', width: '400px' }}>
-                <Search style={{ position: 'absolute', top: '10px', left: '12px', color: '#94a3b8' }} size={18} />
-                <input className="input" style={{ backgroundColor: '#f8fafc', border: 'none', paddingLeft: '3rem' }} placeholder="Search commands or data..." />
+        <nav style={{ height: '70px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '0 1rem' : '0 2rem', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {isMobile && (
+                    <button onClick={onToggleSidebar} style={{ padding: '0.5rem', color: '#64748b', border: 'none', background: '#f1f5f9', borderRadius: '0.5rem', cursor: 'pointer' }}>
+                        <Menu size={20} />
+                    </button>
+                )}
+                <div style={{ position: 'relative', width: isMobile ? '180px' : '400px' }}>
+                    <Search style={{ position: 'absolute', top: '10px', left: '12px', color: '#94a3b8' }} size={18} />
+                    <input className="input" style={{ backgroundColor: '#f8fafc', border: 'none', paddingLeft: '3rem' }} placeholder="Search..." />
+                </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

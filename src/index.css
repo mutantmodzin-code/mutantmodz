@@ -61,6 +61,28 @@
   animation: pulse-glow 2s infinite;
 }
 
+/* Apple-style scroll reveal animation */
+@keyframes scrollFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  will-change: transform, opacity;
+}
+
+.scroll-fade-up.animate-in {
+  animation: scrollFadeUp 0.8s ease-out forwards;
+}
+
 /* Hide scrollbar for horizontal swipe sections */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

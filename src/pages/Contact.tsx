@@ -29,31 +29,31 @@ export default function Contact() {
   const contactMethods = [
     {
       icon: MapPin,
-      label: 'Operational Base',
+      label: 'Address',
       value: 'Opposite Vibgyor School, Uppilipalayam, Coimbatore',
       link: 'https://maps.google.com',
-      sub: 'Base Coordinates'
+      sub: 'Our Location'
     },
     {
       icon: Phone,
-      label: 'Voice Channel',
+      label: 'Call Us',
       value: '+91 93426 37975',
       link: 'tel:+919342637975',
-      sub: 'Direct Line'
+      sub: 'Phone Number'
     },
     {
       icon: Mail,
-      label: 'Digital Encryption',
+      label: 'Email Us',
       value: 'info@mutantmodz.com',
       link: 'mailto:info@mutantmodz.com',
-      sub: 'Secure Message'
+      sub: 'Email Address'
     },
     {
       icon: MessageSquare,
-      label: 'Instant Comms',
+      label: 'WhatsApp Us',
       value: '+91 93426 37975',
       link: 'https://wa.me/919342637975',
-      sub: 'WhatsApp Protocol'
+      sub: 'Message Us'
     }
   ];
 
@@ -77,8 +77,8 @@ export default function Contact() {
             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Ready to Contact</span>
           </div>
           <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6">
-            COMMS <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">CENTER</span>
+            GET IN <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">TOUCH</span>
           </h1>
           <p className="text-lg text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[12px] opacity-80">
             Get in touch with the Mutant Modz support team.
@@ -87,132 +87,132 @@ export default function Contact() {
       </section>
 
       {/* Interface Section */}
-      <section className="py-24 px-6 sm:px-12 bg-zinc-950">
-        <div className="max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20">
+      <section className="py-12 sm:py-24 px-4 sm:px-12 bg-zinc-950">
+        <div className="max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-20">
 
           {/* Methods Array (Left Side) */}
-          <div className="lg:col-span-5 space-y-10">
-            <div className="space-y-4 mb-16">
-              <h2 className="text-4xl font-black text-white uppercase tracking-tighter">DIRECT <span className="text-red-600">LINKS</span></h2>
+          <div className="lg:col-span-5 space-y-8 sm:space-y-10">
+            <div className="space-y-4 mb-8 sm:mb-16">
+              <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">CONTACT <span className="text-red-600">OPTIONS</span></h2>
               <div className="w-16 h-1 bg-red-600"></div>
-              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px]">Choose your preferred communication protocol.</p>
+              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Choose how you want to contact us</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
               {contactMethods.map((method, idx) => (
                 <a
                   key={idx}
                   href={method.link}
-                  className="group flex items-center gap-6 p-8 bg-zinc-900/40 rounded-[2.5rem] border border-white/5 hover:border-red-600/40 transition-all duration-500 hover:shadow-[0_20px_40px_-10px_rgba(220,38,38,0.2)]"
+                  className="group flex items-center gap-4 sm:gap-6 p-5 sm:p-8 bg-zinc-900/40 rounded-2xl sm:rounded-[2.5rem] border border-white/5 hover:border-red-600/40 transition-all duration-500 hover:shadow-[0_20px_40px_-10px_rgba(220,38,38,0.2)] min-h-[72px]"
                 >
-                  <div className="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center text-zinc-400 group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110 group-hover:rotate-6 shadow-inner">
-                    <method.icon size={28} />
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-zinc-800 rounded-xl sm:rounded-2xl flex items-center justify-center text-zinc-400 group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-110 group-hover:rotate-6 shadow-inner flex-shrink-0">
+                    <method.icon size={24} />
                   </div>
-                  <div className="space-y-1">
-                    <div className="text-[10px] font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
-                    <div className="text-white font-black text-lg uppercase tracking-tight group-hover:text-red-600 transition-colors line-clamp-1">{method.label}</div>
-                    <div className="text-zinc-500 text-[13px] font-medium uppercase truncate max-w-xs">{method.value}</div>
+                  <div className="space-y-0.5 sm:space-y-1 min-w-0">
+                    <div className="text-[10px] sm:text-[10px] font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
+                    <div className="text-white font-black text-base sm:text-lg uppercase tracking-tight group-hover:text-red-600 transition-colors line-clamp-1">{method.label}</div>
+                    <div className="text-zinc-500 text-[12px] sm:text-[13px] font-medium uppercase truncate max-w-xs">{method.value}</div>
                   </div>
                 </a>
               ))}
             </div>
 
-            <div className="pt-12 p-10 bg-red-600 rounded-[3rem] text-white relative overflow-hidden group">
+            <div className="pt-6 sm:pt-12 p-6 sm:p-10 bg-red-600 rounded-2xl sm:rounded-[3rem] text-white relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-10 opacity-10 transform scale-150 rotate-12 group-hover:rotate-45 transition-transform duration-1000">
                 <Clock size={120} />
               </div>
-              <div className="relative z-10 space-y-6">
+              <div className="relative z-10 space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-3">
                   <Clock size={24} className="animate-pulse" />
-                  <h4 className="font-black uppercase tracking-widest text-sm">OPERATIONAL WINDOW</h4>
+                  <h4 className="font-black uppercase tracking-widest text-sm">WORKING HOURS</h4>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between border-b border-white/20 pb-2">
                     <span className="font-black uppercase text-xs">MON - SAT</span>
-                    <span className="font-bold text-xs uppercase">10:00 - 20:00 HRS</span>
+                    <span className="font-bold text-xs uppercase">10:00 AM - 8:00 PM</span>
                   </div>
                   <div className="flex justify-between border-b border-white/20 pb-2">
                     <span className="font-black uppercase text-xs">SUNDAY</span>
-                    <span className="font-bold text-xs uppercase">10:00 - 18:00 HRS</span>
+                    <span className="font-bold text-xs uppercase">10:00 AM - 6:00 PM</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Comms Form (Right Side) */}
+          {/* Contact Form (Right Side) */}
           <div className="lg:col-span-7">
-            <div className="bg-zinc-900/40 backdrop-blur-3xl p-10 sm:p-20 rounded-[4rem] border border-white/5 shadow-2xl relative overflow-hidden">
+            <div className="bg-zinc-900/40 backdrop-blur-3xl p-6 sm:p-20 rounded-2xl sm:rounded-[4rem] border border-white/5 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent"></div>
 
-              <div className="relative z-10 space-y-12">
-                <div className="space-y-4">
-                  <h3 className="text-4xl sm:text-5xl font-black text-white leading-none uppercase tracking-tighter">ENCRYPTED <br /><span className="text-red-600">MESSAGE</span></h3>
-                  <p className="text-zinc-500 font-medium uppercase tracking-[0.3em] text-[11px]">Submit your hardware requirements below.</p>
+              <div className="relative z-10 space-y-8 sm:space-y-12">
+                <div className="space-y-3 sm:space-y-4">
+                  <h3 className="text-3xl sm:text-5xl font-black text-white leading-none uppercase tracking-tighter">CONTACT <br /><span className="text-red-600">US</span></h3>
+                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[11px] sm:text-[12px]">Fill the form below and we will contact you</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-10">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-3">
-                      <label className="text-zinc-400 font-black uppercase text-[10px] tracking-widest ml-4">Full Name</label>
+                <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
+                    <div className="space-y-2 sm:space-y-3">
+                      <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Your Name</label>
                       <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
                         required
-                        placeholder="INPUT IDENTITY..."
-                        className="w-full bg-black/40 border border-white/5 rounded-2xl py-5 px-8 text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all uppercase tracking-widest"
+                        placeholder="Enter your name"
+                        className="w-full bg-black/40 border border-white/5 rounded-xl sm:rounded-2xl py-4 sm:py-5 px-5 sm:px-8 text-[14px] sm:text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all tracking-wide sm:uppercase sm:tracking-widest placeholder:normal-case placeholder:tracking-normal placeholder:text-zinc-600 min-h-[52px]"
                       />
                     </div>
-                    <div className="space-y-3">
-                      <label className="text-zinc-400 font-black uppercase text-[10px] tracking-widest ml-4">Email Channel</label>
+                    <div className="space-y-2 sm:space-y-3">
+                      <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Email</label>
                       <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
                         required
-                        placeholder="INPUT ENCRYPTION..."
-                        className="w-full bg-black/40 border border-white/5 rounded-2xl py-5 px-8 text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all uppercase tracking-widest"
+                        placeholder="Enter your email"
+                        className="w-full bg-black/40 border border-white/5 rounded-xl sm:rounded-2xl py-4 sm:py-5 px-5 sm:px-8 text-[14px] sm:text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all tracking-wide sm:uppercase sm:tracking-widest placeholder:normal-case placeholder:tracking-normal placeholder:text-zinc-600 min-h-[52px]"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="text-zinc-400 font-black uppercase text-[10px] tracking-widest ml-4">Phone Protocol</label>
+                  <div className="space-y-2 sm:space-y-3">
+                    <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Phone Number</label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
                       required
-                      placeholder="INPUT DIRECT LINE..."
-                      className="w-full bg-black/40 border border-white/5 rounded-2xl py-5 px-8 text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all uppercase tracking-widest"
+                      placeholder="Enter your phone number"
+                      className="w-full bg-black/40 border border-white/5 rounded-xl sm:rounded-2xl py-4 sm:py-5 px-5 sm:px-8 text-[14px] sm:text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all tracking-wide sm:uppercase sm:tracking-widest placeholder:normal-case placeholder:tracking-normal placeholder:text-zinc-600 min-h-[52px]"
                     />
                   </div>
 
-                  <div className="space-y-3">
-                    <label className="text-zinc-400 font-black uppercase text-[10px] tracking-widest ml-4">Message Parameters</label>
+                  <div className="space-y-2 sm:space-y-3">
+                    <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Your Message</label>
                     <textarea
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
                       required
                       rows={6}
-                      placeholder="STATE YOUR OBJECTIVE..."
-                      className="w-full bg-black/40 border border-white/5 rounded-3xl py-6 px-8 text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all uppercase tracking-widest resize-none"
+                      placeholder="Type your message"
+                      className="w-full bg-black/40 border border-white/5 rounded-xl sm:rounded-3xl py-4 sm:py-6 px-5 sm:px-8 text-[14px] sm:text-[13px] font-bold text-white focus:outline-none focus:border-red-600/50 transition-all tracking-wide sm:uppercase sm:tracking-widest resize-none placeholder:normal-case placeholder:tracking-normal placeholder:text-zinc-600"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className={`w-full h-20 rounded-2xl font-black uppercase tracking-[0.4em] text-xs transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden ${submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
+                    className={`w-full h-16 sm:h-20 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-xs transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden ${submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
                       }`}
                   >
                     <div className={`flex items-center gap-4 transition-all duration-500 ${submitted ? '-translate-y-20' : 'translate-y-0'}`}>
                       <Send size={20} className="group-hover:rotate-12 transition-transform" />
-                      Transmit Command
+                      Send Message
                     </div>
                     <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${submitted ? 'translate-y-0' : 'translate-y-20'}`}>
                       <Zap size={20} />
@@ -226,16 +226,16 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Strategic Mapping */}
-      <section className="py-24 px-6 sm:px-12 bg-black border-t border-white/5">
-        <div className="max-w-[1700px] mx-auto text-center space-y-12">
+      {/* Map Section */}
+      <section className="py-12 sm:py-24 px-4 sm:px-12 bg-black border-t border-white/5">
+        <div className="max-w-[1700px] mx-auto text-center space-y-8 sm:space-y-12">
           <div className="space-y-4">
             <Target size={40} className="text-red-600 mx-auto" />
-            <h2 className="text-4xl font-black text-white uppercase tracking-tighter">BASE <span className="text-red-600">RECON</span></h2>
-            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px]">Locate the headquarters in Coimbatore.</p>
+            <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
+            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Find us in Coimbatore</p>
           </div>
 
-          <div className="w-full h-[600px] bg-zinc-900 rounded-[4rem] overflow-hidden border border-white/5 grayscale contrast-125 brightness-75 hover:grayscale-0 transition-all duration-1000 shadow-2xl">
+          <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 grayscale contrast-125 brightness-75 hover:grayscale-0 transition-all duration-1000 shadow-2xl">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.3947444885!2d76.999000!3d11.016800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDAxJzAwLjUiTiA3NsKwNTknNTYuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
               width="100%"

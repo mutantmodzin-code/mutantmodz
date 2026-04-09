@@ -5,11 +5,15 @@ const { authenticateToken } = require('./auth');
 
 // Get all products (with optional filtering)
 router.get('/', async (req, res) => {
-    const { category, brand, search, sku, bike_brand, bike_model } = req.query;
+    const { category, brand, search, sku, bike_brand, bike_model, new: isNew } = req.query;
     let query = 'SELECT p.*, c.name as category_name, v.name as vendor_name FROM products p LEFT JOIN categories c ON p.category_id = c.id LEFT JOIN vendors v ON p.vendor_id = v.id';
     let values = [];
     let conditions = [];
 
+    // New arrivals: products added in last 10 days
+    if (isNew === 'true') {
+        conditions.push(`p.created_at >= NOW() - INTERVAL '10 days'`);
+    }
     if (category) {
         conditions.push('c.id = $' + (values.length + 1));
         values.push(category);
@@ -43,6 +47,10 @@ router.get('/', async (req, res) => {
         query += ' WHERE ' + conditions.join(' AND ');
     }
 
+    if (isNew === 'true') {
+        query += ' ORDER BY p.created_at DESC';
+    }
+
     try {
         const result = await db.query(query, values);
         res.json(result.rows);
@@ -50,6 +58,24 @@ router.get('/', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// Dedicated New Arrivals endpoint (last 10 days)
+router.get('/new-arrivals', async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT p.*, c.name as category_name, v.name as vendor_name 
+            FROM products p 
+            LEFT JOIN categories c ON p.category_id = c.id 
+            LEFT JOIN vendors v ON p.vendor_id = v.id
+            WHERE p.created_at >= NOW() - INTERVAL '10 days'
+            ORDER BY p.created_at DESC
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 // Get Categories
 router.get('/categories', async (req, res) => {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Zap, Phone } from 'lucide-react';
-import { getProducts, getCombos, getGarageSale } from '../utils/storage';
+import { getProducts, getCombos, getGarageSale, getNewArrivals } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 import { brands } from '../data/brands';
@@ -42,6 +42,15 @@ export default function Products({ onNavigate }: ProductsProps) {
     fetchAllData();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // When "New Arrivals" is selected, load fresh data directly from DB
+  useEffect(() => {
+    const isNewCat = selectedCategory === 'new' || selectedCategory === 'new arrivals';
+    if (!isNewCat) return;
+    getNewArrivals().then(data => {
+      if (data.length > 0) setProducts(data);
+    });
+  }, [selectedCategory]);
 
   useEffect(() => {
     const syncStateWithUrl = () => {
@@ -105,10 +114,11 @@ export default function Products({ onNavigate }: ProductsProps) {
       
       const matchesNew = !isNewArrivalRequest || (() => {
         if (p.isNew) return true;
-        if (!p.created_at) return false;
+        const dateField = p.date_added || p.created_at;
+        if (!dateField) return false;
         const tenDaysAgo = new Date();
         tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-        return new Date(p.created_at) >= tenDaysAgo;
+        return new Date(dateField) >= tenDaysAgo;
       })();
 
       const matchesGarageSale = !isGarageSaleRequest || !!p.is_garage_sale;

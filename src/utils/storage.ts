@@ -41,9 +41,11 @@ export const getProducts = async (): Promise<Product[]> => {
                 sub_category: p.sub_category || '',
                 sub_category_type: p.sub_category_type || '',
                 date_added: p.created_at || null,
+                created_at: p.created_at || null,
                 is_garage_sale: p.is_garage_sale || false,
                 is_combo: p.is_combo || false,
-                combo_type: p.combo_type || ''
+                combo_type: p.combo_type || '',
+                category_name: p.category_name || ''
             };
 
         });
@@ -109,6 +111,55 @@ export const saveProduct = async (_product: Product) => {
 export const deleteProduct = async (_id: string) => {
     // Managed via Administrative Interface in /frontend
     console.warn('Direct delete from main interface is deprecated. Use Management Portal.');
+};
+
+export const getNewArrivals = async (): Promise<Product[]> => {
+    try {
+        const url = API_URL ? `${API_URL}/products/new-arrivals` : '/api/products/new-arrivals';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch new arrivals');
+
+        const data = await response.json();
+        if (!Array.isArray(data)) return [];
+
+        return data.map((p: any) => {
+            let images: string[] = [];
+            try {
+                if (p.image_url && p.image_url.startsWith('[')) {
+                    images = JSON.parse(p.image_url).filter((url: string) => url !== '');
+                } else if (p.image_url) {
+                    images = [p.image_url];
+                }
+            } catch {
+                images = p.image_url ? [p.image_url] : [];
+            }
+            return {
+                id: p.id.toString(),
+                category: p.category_name?.toLowerCase() || 'accessories',
+                category_name: p.category_name || '',
+                name: p.name,
+                description: p.description || '',
+                price: `₹${parseFloat(p.price).toLocaleString('en-IN')}`,
+                price_num: parseFloat(p.price) || 0,
+                stock: parseInt(p.stock) || 0,
+                image: images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
+                images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+                brand: p.brand || '',
+                bike_brand: p.bike_brand || '',
+                bike_model: p.bike_model || '',
+                sub_category: p.sub_category || '',
+                sub_category_type: p.sub_category_type || '',
+                date_added: p.created_at || null,
+                created_at: p.created_at || null,
+                is_garage_sale: p.is_garage_sale || false,
+                is_combo: p.is_combo || false,
+                combo_type: p.combo_type || ''
+            };
+        });
+    } catch (error) {
+        console.error('Failed to fetch new arrivals:', error);
+        return [];
+    }
 };
 
 export const createInvoice = async (invoiceData: any) => {

@@ -143,3 +143,57 @@ export const createCustomer = async (customerData: any) => {
         throw error;
     }
 };
+
+export const getCombos = async (): Promise<Product[]> => {
+    try {
+        const url = API_URL ? `${API_URL}/combos` : '/api/combos';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch combos');
+        
+        const data = await response.json();
+        return data.map((c: any) => ({
+            id: c.id.toString(),
+            category: 'combos',
+            name: c.name,
+            description: c.description || '',
+            price: `₹${parseFloat(c.price).toLocaleString('en-IN')}`,
+            price_num: parseFloat(c.price) || 0,
+            stock: parseInt(c.stock) || 0,
+            image: c.image_url || c.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
+            images: c.images || [c.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+            brand: c.brand || '',
+            is_combo: true,
+            combo_type: c.combo_type || 'General Combos'
+        }));
+    } catch (error) {
+        console.error('Failed to fetch combos:', error);
+        return [];
+    }
+};
+
+export const getGarageSale = async (): Promise<Product[]> => {
+    try {
+        const url = API_URL ? `${API_URL}/garage-sale` : '/api/garage-sale';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch garage sale items');
+        
+        const data = await response.json();
+        return data.map((g: any) => ({
+            id: g.id.toString(),
+            category: 'garage-sale',
+            name: g.name,
+            description: g.description || '',
+            price: `₹${parseFloat(g.price).toLocaleString('en-IN')}`,
+            price_num: parseFloat(g.price) || 0,
+            stock: parseInt(g.stock) || 0,
+            image: g.image_url || g.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
+            images: g.images || [g.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+            brand: g.brand || '',
+            is_garage_sale: true,
+            garage_sale_type: g.garage_sale_type || 'Clearance'
+        }));
+    } catch (error) {
+        console.error('Failed to fetch garage sale items:', error);
+        return [];
+    }
+};

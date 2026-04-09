@@ -113,12 +113,12 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       icon: Package,
       columns: [
         {
-          title: 'Specialty Combos',
-          links: ['General Combos', 'Riding Combo Kit', 'Monsoon Combo']
+          title: 'Combo Collections',
+          links: ['General Combos', 'Riding Combo Kit', 'Monsoon Combo', 'Service Combo', 'Touring Combo']
         }
       ],
       featured: [
-        { title: 'Monsoon Sale: Up to 30% Off', image: 'https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Offer' }
+        { title: 'Best Value Bundles', image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Popular' }
       ]
     },
     {
@@ -521,7 +521,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                   {col.links.map((link, lIdx) => (
                                     <li key={link} className={`transition-all duration-500 transform ${activeDropdown === cat.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} style={{ transitionDelay: `${(idx * 50) + (lIdx * 30)}ms` }}>
                                       <button
-                                        onClick={() => handleNavClick('products', `?cat=${encodeURIComponent(link)}`)}
+                                        onClick={() => handleNavClick('products', cat.id === 'combos' ? `?cat=combos&comboType=${encodeURIComponent(link)}` : `?cat=${encodeURIComponent(link)}`)}
                                         className="text-zinc-400 hover:text-white text-[15px] font-bold transition-all duration-300 hover:translate-x-3 flex items-center gap-3 group/link"
                                       >
                                         <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/link:opacity-100 transition-all duration-300 shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
@@ -577,7 +577,6 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                   <span className="text-xs uppercase tracking-widest text-white z-10">Garage Sale</span>
                 </div>
               </button>
-
             </div>
           </div>
         </div>

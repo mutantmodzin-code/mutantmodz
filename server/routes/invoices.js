@@ -28,12 +28,43 @@ router.post('/', async (req, res) => {
         try {
             await client.query('BEGIN');
 
-            // 1. Safety Check: Verify all products have enough stock
+            // 1. Safety Check: Verify all products/combos have enough stock
             for (const item of items) {
-                const prodRes = await client.query('SELECT stock, name FROM products WHERE id = $1', [item.product_id]);
-                const currentStock = prodRes.rows[0]?.stock || 0;
-                if (currentStock < item.quantity) {
-                    throw new Error(`Insufficient stock for ${prodRes.rows[0]?.name || 'Product'}. Available: ${currentStock}, Requested: ${item.quantity}`);
+                if (item.product_id) {
+                    const prodRes = await client.query('SELECT stock, name FROM products WHERE id = $1', [item.product_id]);
+                    const currentStock = prodRes.rows[0]?.stock || 0;
+                    if (currentStock < item.quantity) {
+                        throw new Error(`Insufficient stock for ${prodRes.rows[0]?.name || 'Product'}. Available: ${currentStock}, Requested: ${item.quantity}`);
+                    }
+                } else if (item.combo_id) {
+                    // Check component stock for combos
+                    const comboRes = await client.query('SELECT name, linked_items FROM combos WHERE id = $1', [item.combo_id]);
+                    const combo = comboRes.rows[0];
+                    if (combo && Array.isArray(combo.linked_items)) {
+                        for (const linked of combo.linked_items) {
+                            const prodRes = await client.query('SELECT stock, name FROM products WHERE sku = $1', [linked.sku]);
+                            const prod = prodRes.rows[0];
+                            const available = prod?.stock || 0;
+                            const totalReq = linked.quantity * item.quantity;
+                            if (available < totalReq) {
+                                throw new Error(`Insufficient component stock for combo "${combo.name}". ${prod?.name || linked.sku} needs ${totalReq} units, but only ${available} available.`);
+                            }
+                        }
+                    }
+                } else if (item.garage_sale_id) {
+                    const res = await client.query('SELECT name, linked_items FROM garage_sale WHERE id = $1', [item.garage_sale_id]);
+                    const gsItem = res.rows[0];
+                    if (gsItem && gsItem.linked_items && Array.isArray(gsItem.linked_items)) {
+                        for (const linked of gsItem.linked_items) {
+                            const totalReq = (linked.quantity || 1) * item.quantity;
+                            const prodRes = await client.query('SELECT id, name, stock FROM products WHERE sku = $1', [linked.sku]);
+                            const prod = prodRes.rows[0];
+                            const available = prod ? prod.stock : 0;
+                            if (available < totalReq) {
+                                throw new Error(`Insufficient inventory for garage sale item "${gsItem.name}". ${prod?.name || linked.sku} needs ${totalReq} units, but only ${available} available.`);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -54,19 +85,19 @@ router.post('/', async (req, res) => {
 
             for (const item of items) {
                 let purchase_price = item.purchase_price;
-                if (purchase_price === undefined) {
+                if (purchase_price === undefined && item.product_id) {
                     const prodRes = await client.query('SELECT purchase_price FROM products WHERE id = $1', [item.product_id]);
                     purchase_price = prodRes.rows[0]?.purchase_price || 0;
                 }
 
                 await client.query(
                     `INSERT INTO invoice_items (
-                        invoice_id, product_id, quantity, unit_price, line_total, purchase_price,
+                        invoice_id, product_id, combo_id, garage_sale_id, quantity, unit_price, line_total, purchase_price,
                         gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_amount,
                         selected_size, selected_color
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
                     [
-                        invoiceId, item.product_id, item.quantity, item.unit_price, item.line_total, purchase_price,
+                        invoiceId, item.product_id || null, item.combo_id || null, item.garage_sale_id || null, item.quantity, item.unit_price, item.line_total, purchase_price || 0,
                         item.gst_percentage || 0, item.cgst_amount || 0, item.sgst_amount || 0,
                         item.igst_amount || 0, item.taxable_amount || item.line_total,
                         item.selected_size || null, item.selected_color || null
@@ -74,16 +105,70 @@ router.post('/', async (req, res) => {
                 );
 
                 // 3. Deduct Stock
-                await client.query(
-                    'UPDATE products SET stock = stock - $1 WHERE id = $2',
-                    [item.quantity, item.product_id]
-                );
-
-                // 4. Log Inventory
-                await client.query(
-                    'INSERT INTO inventory (product_id, change_amount, type, reason) VALUES ($1, $2, $3, $4)',
-                    [item.product_id, item.quantity, 'sale', `${order_type || 'Offline Order'} #${invoiceId}`]
-                );
+                if (item.product_id) {
+                    // Standard product deduction
+                    await client.query(
+                        'UPDATE products SET stock = stock - $1 WHERE id = $2',
+                        [item.quantity, item.product_id]
+                    );
+                    
+                    await client.query(
+                        'INSERT INTO inventory (product_id, change_amount, type, reason) VALUES ($1, $2, $3, $4)',
+                        [item.product_id, item.quantity, 'sale', `${order_type || 'Offline Order'} #${invoiceId}`]
+                    );
+                } else if (item.combo_id) {
+                    // Combo bundle deduction: Reduce component items stock
+                    const comboRes = await client.query('SELECT linked_items FROM combos WHERE id = $1', [item.combo_id]);
+                    const linkedItems = comboRes.rows[0]?.linked_items || [];
+                    
+                    if (Array.isArray(linkedItems)) {
+                        for (const linked of linkedItems) {
+                            const qtyToReduce = (linked.quantity || 1) * item.quantity;
+                            
+                            // Deduct from products by SKU
+                            const updateRes = await client.query(
+                                'UPDATE products SET stock = stock - $1 WHERE sku = $2 RETURNING id',
+                                [qtyToReduce, linked.sku]
+                            );
+                            
+                            // Log inventory for each component if product was found
+                            if (updateRes.rows.length > 0) {
+                                await client.query(
+                                    'INSERT INTO inventory (product_id, change_amount, type, reason) VALUES ($1, $2, $3, $4)',
+                                    [updateRes.rows[0].id, qtyToReduce, 'sale', `Combo Order #${invoiceId} (Bundle: ${item.combo_id})`]
+                                );
+                            }
+                        }
+                    }
+                    
+                    await client.query(
+                        'UPDATE combos SET stock = stock - $1 WHERE id = $2',
+                        [item.quantity, item.combo_id]
+                    );
+                } else if (item.garage_sale_id) {
+                    const gsRes = await client.query('SELECT linked_items FROM garage_sale WHERE id = $1', [item.garage_sale_id]);
+                    const linkedItems = gsRes.rows[0]?.linked_items || [];
+                    
+                    if (Array.isArray(linkedItems)) {
+                        for (const linked of linkedItems) {
+                            const qtyToReduce = (linked.quantity || 1) * item.quantity;
+                            const updateRes = await client.query(
+                                'UPDATE products SET stock = stock - $1 WHERE sku = $2 RETURNING id',
+                                [qtyToReduce, linked.sku]
+                            );
+                            if (updateRes.rows.length > 0) {
+                                await client.query(
+                                    'INSERT INTO inventory (product_id, change_amount, type, reason) VALUES ($1, $2, $3, $4)',
+                                    [updateRes.rows[0].id, qtyToReduce, 'sale', `Garage Sale Order #${invoiceId} (Item: ${item.garage_sale_id})`]
+                                );
+                            }
+                        }
+                    }
+                    await client.query(
+                        'UPDATE garage_sale SET stock = stock - $1 WHERE id = $2',
+                        [item.quantity, item.garage_sale_id]
+                    );
+                }
             }
 
             await client.query('COMMIT');

@@ -40,6 +40,8 @@ const vendorRoutes = require('./routes/vendors');
 const gstRoutes = require('./routes/gst');
 const notificationRoutes = require('./routes/notifications');
 const testOrderRoutes = require('./routes/test-orders');
+const comboRoutes = require('./routes/combos');
+const garageSaleRoutes = require('./routes/garage_sale');
 
 // Apply Routes
 app.use('/api/auth', authRoutes);
@@ -51,6 +53,8 @@ app.use('/api/vendors', vendorRoutes);
 app.use('/api/gst', gstRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/test-orders', testOrderRoutes);
+app.use('/api/combos', comboRoutes);
+app.use('/api/garage-sale', garageSaleRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star, ShoppingBag } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star, ShoppingBag, Zap } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -92,6 +92,17 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
 
   const categories = [
     {
+      id: 'combos', label: 'Combos', icon: Package,
+      subs: [
+        { label: 'View All Combos', params: '?cat=combos' },
+        { label: 'General Combos', params: '?cat=combos&comboType=General%20Combos' },
+        { label: 'Riding Combo Kit', params: '?cat=combos&comboType=Riding%20Combo%20Kit' },
+        { label: 'Monsoon Combo', params: '?cat=combos&comboType=Monsoon%20Combo' },
+        { label: 'Service Combo', params: '?cat=combos&comboType=Service%20Combo' },
+        { label: 'Touring Combo', params: '?cat=combos&comboType=Touring%20Combo' },
+      ]
+    },
+    {
       id: 'bike', label: 'Shop By Bike', icon: Bike,
       brands: [
         { name: 'KTM', models: ['390/250 Adventure X', 'Gen 3 Duke 390', 'Duke 125', 'RC 125', 'RC 200', 'Duke 200', 'Duke 250', 'ADV 250', 'RC 390', 'Adv 390', 'Duke 390', 'Duke 790'] },
@@ -111,14 +122,6 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
         { name: 'Yezdi', models: ['Adventure', 'Scrambler'] },
         { name: 'Jawa', models: ['Jawa 42', 'Jawa Peark', 'Jawa Standard'] },
         { name: 'Scooters', models: ['Ola Scooter', 'Ather Scooter'] }
-      ]
-    },
-    {
-      id: 'combos', label: 'Combos', icon: Package,
-      subs: [
-        { label: 'General Combos', params: '?cat=General' },
-        { label: 'Riding Combo Kit', params: '?cat=Riding%20Combo%20Kit' },
-        { label: 'Monsoon Combo', params: '?cat=Monsoon%20Combo' },
       ]
     },
     {
@@ -212,9 +215,15 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
               <Flame size={20} /> New Arrivals!!
             </button>
 
+            <button onClick={() => handleNav('products', '?cat=garage-sale')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-white hover:text-orange-500 transition-colors border-b border-white/5 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-xl mt-2 mb-2">
+              <Zap size={20} className="text-orange-500" /> Garage Sale
+            </button>
+
             <button onClick={() => handleNav('products', '?brands=all')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
               <Star size={20} className="text-zinc-500" /> Shop By Brands
             </button>
+
+
 
             {/* Accordion Categories */}
             {categories.map((cat) => (

@@ -6,7 +6,9 @@ import VideoReels from '../components/VideoReels';
 import TestimonialSlider from '../components/TestimonialSlider';
 import CategoryBanners from '../components/CategoryBanners';
 import BestDeals from '../components/BestDeals';
+import GarageSaleSection from '../components/GarageSaleSection';
 import ComboProducts from '../components/ComboProducts';
+import FeaturedGrid from '../components/FeaturedGrid';
 import ShopByBike from '../components/ShopByBike';
 import CollectionSquares from '../components/CollectionSquares';
 import { ArrowRight, Zap } from 'lucide-react';
@@ -28,11 +30,17 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 2. Category Banners - NEW Stacked */}
       <CategoryBanners onNavigate={onNavigate} />
 
-      {/* 3. Best Deals - NEW Horizontal Scroll */}
+      {/* 3. TODAY SALES (Garage Sale) - High Priority Clearance */}
+      <GarageSaleSection onNavigate={onNavigate} />
+
+      {/* 4. Best Deals - NEW Horizontal Scroll */}
       <BestDeals onNavigate={onNavigate} />
 
-      {/* 4. Monster Combos - NEW Specialized Section */}
+      {/* 5. Monster Combos - NEW Specialized Section */}
       <ComboProducts onNavigate={onNavigate} />
+
+      {/* 6. Featured Grid - NEW Direct Access */}
+      <FeaturedGrid onNavigate={onNavigate} />
 
       {/* 5. New Arrivals - Updated Horizontal Scroll */}
       <NewArrivals onNavigate={onNavigate} />

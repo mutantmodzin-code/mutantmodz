@@ -10,7 +10,9 @@ import {
     Settings,
     Bike,
     TrendingUp,
-    ShoppingCart
+    ShoppingCart,
+    Zap,
+    X
 } from 'lucide-react';
 
 const SidebarLink = ({ to, icon: Icon, children }) => (
@@ -74,6 +76,8 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                 <SidebarLink to="/" icon={LayoutDashboard}>Dashboard</SidebarLink>
                 <div style={{ margin: '1.5rem 0 0.5rem 0', padding: '0 0.5rem', fontSize: '0.625rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Management</div>
                 <SidebarLink to="/products" icon={Package}>Inventory</SidebarLink>
+                <SidebarLink to="/combos" icon={Package}>Combos</SidebarLink>
+                <SidebarLink to="/garage-sale" icon={Zap}>Garage Sale</SidebarLink>
                 <SidebarLink to="/vendors" icon={Users}>Vendors</SidebarLink>
                 <SidebarLink to="/customers" icon={Users}>Customers</SidebarLink>
 

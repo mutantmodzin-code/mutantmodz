@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Zap, Phone } from 'lucide-react';
-import { getProducts } from '../utils/storage';
+import { getProducts, getCombos, getGarageSale } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
 import { brands } from '../data/brands';
@@ -18,18 +18,28 @@ export default function Products({ onNavigate }: ProductsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const [selectedComboType, setSelectedComboType] = useState<string | null>(null);
 
   const activeFilterName = selectedBrand || searchQuery;
   const activeBrandInfo = brands.find(b => b.name.toLowerCase() === activeFilterName?.toLowerCase());
   const activeBikeInfo = !activeBrandInfo ? bikes.find(b => b.name.toLowerCase() === activeFilterName?.toLowerCase()) : null;
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const data = await getProducts();
-      setProducts(data);
-      setIsLoaded(true);
+    const fetchAllData = async () => {
+      try {
+        const [regularData, comboData, garageData] = await Promise.all([
+          getProducts(),
+          getCombos(),
+          getGarageSale()
+        ]);
+        setProducts([...regularData, ...comboData, ...garageData]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoaded(true);
+      }
     };
-    fetchProducts();
+    fetchAllData();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
@@ -43,7 +53,10 @@ export default function Products({ onNavigate }: ProductsProps) {
       const brand = searchParams.get('brand');
       const bike = searchParams.get('bike');
       const model = searchParams.get('model');
-      
+      const comboType = searchParams.get('comboType');
+      // Update Combo Type
+      setSelectedComboType(comboType ? decodeURIComponent(comboType) : null);
+
       // Update Search Query
       if (search) setSearchQuery(decodeURIComponent(search));
       else if (bike) setSearchQuery(decodeURIComponent(bike));
@@ -100,14 +113,17 @@ export default function Products({ onNavigate }: ProductsProps) {
 
       const matchesGarageSale = !isGarageSaleRequest || !!p.is_garage_sale;
       const matchesCombo = !isComboRequest || !!p.is_combo;
+      const matchesComboType = !selectedComboType || p.combo_type === selectedComboType;
 
       const matchesCategory = isNewArrivalRequest || selectedCategory === 'all' || 
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.category?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.sub_category_type?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.combo_type?.toLowerCase() === selectedCategory.toLowerCase() ||
-        (selectedCategory.toLowerCase() === 'accessories' && p.sub_category_type?.toLowerCase() === 'motorcycle accessories') ||
-        (selectedCategory.toLowerCase() === 'riding gear' && (p.sub_category_type?.toLowerCase() === 'riding gear' || p.category_name?.toLowerCase() === 'gear'));
+        (selectedCategory.toLowerCase() === 'accessories' && (p.sub_category_type?.toLowerCase() === 'motorcycle accessories' || p.category?.toLowerCase() === 'motorcycle accessories')) ||
+        (selectedCategory.toLowerCase() === 'riding gear' && (p.sub_category_type?.toLowerCase() === 'riding gear' || p.category_name?.toLowerCase() === 'gear' || p.category?.toLowerCase() === 'riding gear')) ||
+        (selectedCategory.toLowerCase() === 'performance parts' && (p.category?.toLowerCase() === 'performance parts' || p.category?.toLowerCase() === 'mods')) ||
+        (selectedCategory.toLowerCase() === 'luggage' && (p.category?.toLowerCase() === 'luggage' || p.category?.toLowerCase() === 'touring'));
 
       const matchesSearch = !searchQuery || (() => {
         const terms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 0);
@@ -126,9 +142,9 @@ export default function Products({ onNavigate }: ProductsProps) {
         p.brand?.toLowerCase() === selectedBrand ||
         p.bike_brand?.toLowerCase() === selectedBrand;
         
-      return matchesCategory && matchesSearch && matchesBrand && matchesNew && matchesGarageSale && matchesCombo;
+      return matchesCategory && matchesSearch && matchesBrand && matchesNew && matchesGarageSale && matchesCombo && matchesComboType;
     });
-  }, [products, selectedCategory, searchQuery, selectedBrand]);
+  }, [products, selectedCategory, searchQuery, selectedBrand, selectedComboType]);
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortBy === 'price-low') {
@@ -147,13 +163,13 @@ export default function Products({ onNavigate }: ProductsProps) {
   });
 
   return (
-    <div className={`min-h-screen bg-zinc-950 pt-44 pb-20 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen bg-zinc-950 pt-24 pb-20 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
 
-      <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-red-600/10 to-transparent pointer-events-none opacity-30"></div>
+      <div className="absolute top-0 inset-x-0 h-96 bg-gradient-to-b from-red-600/20 to-transparent pointer-events-none opacity-40"></div>
 
       <div className="max-w-[1700px] mx-auto px-6 relative z-10">
 
-        <div className="pt-8 pb-8 flex items-center justify-between">
+        <div className="pt-2 pb-4 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
             className="group flex items-center gap-4 text-white hover:text-red-500 transition-all duration-300 bg-zinc-900/50 pr-6 pl-2 py-2 rounded-full border border-white/5 hover:border-red-600/50"
@@ -178,7 +194,7 @@ export default function Products({ onNavigate }: ProductsProps) {
           </div>
         </div>
 
-        <div className="text-center pb-24 space-y-8">
+        <div className="text-center pb-2 space-y-8">
           <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-6 py-2 rounded-full mb-8">
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Official Mutant Collection</span>

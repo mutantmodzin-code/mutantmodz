@@ -16,14 +16,29 @@ const Billing = () => {
     const [orderType, setOrderType] = useState('Offline Order');
     const [paymentMethod, setPaymentMethod] = useState('Cash');
 
+    const [combos, setCombos] = useState([]);
+    const [garageSaleItems, setGarageSaleItems] = useState([]);
+
     useEffect(() => {
         fetchProducts();
+        fetchCombos();
+        fetchGarageSale();
         fetchCustomers();
     }, []);
 
     const fetchProducts = async () => {
         const res = await api.get('/products');
         setProducts(res.data);
+    };
+
+    const fetchCombos = async () => {
+        const res = await api.get('/combos');
+        setCombos(res.data);
+    };
+
+    const fetchGarageSale = async () => {
+        const res = await api.get('/garage-sale');
+        setGarageSaleItems(res.data);
     };
 
     const handleSkuSearch = async (e) => {
@@ -38,20 +53,27 @@ const Billing = () => {
         }
     };
 
-    const addItemToBillDirect = (prod, qty = 1) => {
-        const existingItem = billItems.find(item => item.product_id === prod.id);
+    const addItemToBillDirect = (item, qty = 1, type = 'product') => {
+        let itemKey = `prod_${item.id}`;
+        if (type === 'combo') itemKey = `combo_${item.id}`;
+        if (type === 'garage_sale') itemKey = `gs_${item.id}`;
+        const existingItem = billItems.find(bi => bi.key === itemKey);
+        
         if (existingItem) {
-            setBillItems(billItems.map(item =>
-                item.product_id === prod.id ? { ...item, quantity: item.quantity + qty, line_total: (item.quantity + qty) * item.unit_price } : item
+            setBillItems(billItems.map(bi =>
+                bi.key === itemKey ? { ...bi, quantity: bi.quantity + qty, line_total: (bi.quantity + qty) * bi.unit_price } : bi
             ));
         } else {
             setBillItems([...billItems, {
-                product_id: prod.id,
-                name: prod.name,
+                key: itemKey,
+                product_id: type === 'product' ? item.id : null,
+                combo_id: type === 'combo' ? item.id : null,
+                garage_sale_id: type === 'garage_sale' ? item.id : null,
+                name: (type === 'combo' ? '[COMBO] ' : type === 'garage_sale' ? '[SALE] ' : '') + item.name,
                 quantity: qty,
-                unit_price: prod.price,
-                purchase_price: prod.purchase_price,
-                line_total: prod.price * qty
+                unit_price: parseFloat(item.price),
+                purchase_price: item.purchase_price || 0,
+                line_total: parseFloat(item.price) * qty
             }]);
         }
     };
@@ -63,18 +85,26 @@ const Billing = () => {
 
     const addItemToBill = () => {
         if (!selectedProduct) return;
-        const prod = products.find(p => p.id === parseInt(selectedProduct));
-        if (!prod) return;
+        
+        const isCombo = selectedProduct.startsWith('combo_');
+        const isGarageSale = selectedProduct.startsWith('gs_');
+        const id = parseInt(selectedProduct.replace('prod_', '').replace('combo_', '').replace('gs_', ''));
+        
+        let item;
+        let type = 'product';
+        if (isCombo) {
+            item = combos.find(c => c.id === id);
+            type = 'combo';
+        } else if (isGarageSale) {
+            item = garageSaleItems.find(g => g.id === id);
+            type = 'garage_sale';
+        } else {
+            item = products.find(p => p.id === id);
+        }
+        if (!item) return;
 
         const qty = parseInt(selectedQty);
-        const existing = billItems.find(item => item.product_id === prod.id);
-        const totalRequested = (existing ? existing.quantity : 0) + qty;
-
-        if (totalRequested > prod.stock) {
-            return alert(`Not enough stock available for ${prod.name}. Max available: ${prod.stock}`);
-        }
-
-        addItemToBillDirect(prod, qty);
+        addItemToBillDirect(item, qty, type);
         setSelectedProduct('');
         setSelectedQty(1);
     };
@@ -174,12 +204,28 @@ const Billing = () => {
                         <div>
                             <label style={{ fontSize: '0.75rem', marginBottom: '0.25rem', display: 'block', fontWeight: 600 }}>Manual Product Search</label>
                             <select className="input" value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)}>
-                                <option value="">Choose Product</option>
-                                {products.filter(p => p.stock > 0).map(p => (
-                                    <option key={p.id} value={p.id} style={{ color: p.stock < 10 ? '#ef4444' : 'inherit' }}>
-                                        {p.name} - {p.sku || 'N/A'} (Stock: {p.stock}) (₹{p.price})
-                                    </option>
-                                ))}
+                                <option value="">Choose Item</option>
+                                <optgroup label="Stand-alone Products">
+                                    {products.filter(p => p.stock > 0).map(p => (
+                                        <option key={`prod_${p.id}`} value={`prod_${p.id}`} style={{ color: p.stock < 10 ? '#ef4444' : 'inherit' }}>
+                                            {p.name} - {p.sku || 'N/A'} (Stock: {p.stock}) (₹{p.price})
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Curated Combos">
+                                    {combos.map(c => (
+                                        <option key={`combo_${c.id}`} value={`combo_${c.id}`}>
+                                            {c.name} (₹{c.price})
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Garage Sale Items">
+                                    {garageSaleItems.map(g => (
+                                        <option key={`gs_${g.id}`} value={`gs_${g.id}`}>
+                                            {g.name} (₹{g.price})
+                                        </option>
+                                    ))}
+                                </optgroup>
                             </select>
                         </div>
                         <div>

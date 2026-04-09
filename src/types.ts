@@ -23,6 +23,7 @@ export interface Product {
     is_garage_sale?: boolean;
     is_combo?: boolean;
     combo_type?: string;
+    garage_sale_type?: string;
 }
 
 

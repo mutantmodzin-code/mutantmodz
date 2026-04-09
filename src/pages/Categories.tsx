@@ -73,7 +73,7 @@ export default function Categories({ onNavigate }: CategoriesProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-44 pb-20 px-6 sm:px-12">
+    <div className="min-h-screen bg-zinc-950 pt-8 pb-20 px-6 sm:px-12">
       <div className="max-w-[1700px] mx-auto">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-16 max-w-2xl">
@@ -94,7 +94,7 @@ export default function Categories({ onNavigate }: CategoriesProps) {
           {categories.map((cat, i) => (
             <div 
               key={cat.id}
-              onClick={() => onNavigate('category', `?type=${cat.id}`)}
+              onClick={() => onNavigate(cat.id === 'combos' ? 'products' : 'category', cat.id === 'combos' ? '?cat=combos' : `?type=${cat.id}`)}
               className="group relative bg-zinc-900/30 border border-white/5 rounded-[2.5rem] p-10 cursor-pointer overflow-hidden transition-all duration-700 hover:bg-zinc-900 hover:border-red-500/20 hover:-translate-y-2 shadow-2xl"
               style={{ animationDelay: `${i * 50}ms` }}
             >

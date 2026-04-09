@@ -99,20 +99,11 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
     const fetchProducts = async () => {
       const all = await getProducts();
       
-      // 1. Separate garage sale products
-      const garageSale = all.filter(p => p.is_garage_sale);
-      
-      // 2. If we have enough garage sale products, just show them. 
-      // Otherwise, supplement with high-stock products.
-      let deals = [];
-      if (garageSale.length >= 10) {
-        deals = garageSale.slice(0, 10);
-      } else {
-        const otherProducts = all
-          .filter(p => !p.is_garage_sale)
-          .sort((a, b) => b.stock - a.stock);
-        deals = [...garageSale, ...otherProducts].slice(0, 10);
-      }
+      // Show high-stock regular products as "Best Deals"
+      const deals = all
+        .filter(p => !p.is_garage_sale && !p.is_combo)
+        .sort((a, b) => b.stock - a.stock)
+        .slice(0, 10);
       
       setProducts(deals.map(p => ({ ...p, isBestSeller: true })));
     };

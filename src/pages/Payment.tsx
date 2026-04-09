@@ -104,7 +104,8 @@ export default function Payment() {
 
             // Build items array from cart
             const items = cartItems.map(cartItem => ({
-                product_id: cartItem.product.id,
+                product_id: cartItem.product.is_combo ? null : cartItem.product.id,
+                combo_id: cartItem.product.is_combo ? cartItem.product.id : null,
                 quantity: cartItem.quantity,
                 unit_price: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')),
                 line_total: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity,

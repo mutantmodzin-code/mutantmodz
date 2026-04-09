@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, Package, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { getProducts } from '../utils/storage';
+import { getCombos } from '../utils/storage';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
@@ -30,41 +30,40 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
 
   return (
     <div
-      className="flex-shrink-0 w-[240px] sm:w-[280px] snap-start bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
+      className="flex-shrink-0 w-[220px] sm:w-[260px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
       onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
     >
-      <div className="relative h-[200px] sm:h-[240px] overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent z-10"></div>
+      <div className="relative h-[180px] sm:h-[220px] bg-white/5 p-4">
         <img
           src={imageUrl}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute top-4 left-4 z-20 bg-sky-600 text-white text-[10px] font-black px-3 py-1.5 rounded-full shadow-lg uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md">
-          <Package size={12} /> Special Combo
+        <div className="absolute top-3 left-3 z-20 bg-sky-600 text-white text-[9px] font-black px-2.5 py-1.5 rounded-lg shadow-lg uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md border border-sky-400/30">
+          <Package size={10} /> Special Combo
         </div>
       </div>
 
-      <div className="p-5 flex flex-col flex-1 relative z-20 -mt-10">
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 shadow-2xl">
+      <div className="p-4 flex flex-col flex-1 relative z-20 bg-zinc-900/80 backdrop-blur-sm border-t border-white/5">
+        <div className="flex flex-col h-full">
           {product.brand && (
-            <span className="text-sky-500 text-[10px] font-black uppercase tracking-[0.2em] mb-2 block">
+            <span className="text-sky-500 text-[9px] font-black uppercase tracking-[0.2em] mb-1.5 block">
               {product.brand}
             </span>
           )}
 
-          <h4 className="text-white text-[15px] font-black tracking-tight leading-tight line-clamp-2 mb-3 min-h-[40px]">
+          <h4 className="text-white text-[14px] font-black tracking-tight leading-tight line-clamp-2 mb-3 min-h-[36px] group-hover:text-sky-400 transition-colors">
             {product.name}
           </h4>
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mt-auto mb-4">
             <div className="flex flex-col">
-              <span className="text-white text-xl font-black">{product.price}</span>
-              <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Bundle Price</span>
+              <span className="text-white text-lg font-black">{product.price}</span>
+              <span className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Bundle Price</span>
             </div>
             {product.stock > 0 && (
-              <div className="bg-green-500/10 text-green-500 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-widest">
+              <div className="bg-green-500/10 text-green-500 text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border border-green-500/20">
                 In Stock
               </div>
             )}
@@ -73,13 +72,13 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
           <button
             onClick={handleAddToCart}
             disabled={product.stock <= 0}
-            className={`w-full flex items-center justify-center gap-2 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all active:scale-95 ${
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${
               product.stock > 0
                 ? 'bg-white text-black hover:bg-sky-500 hover:text-white shadow-xl hover:shadow-sky-500/20'
                 : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
             }`}
           >
-            <ShoppingCart size={16} />
+            <ShoppingCart size={14} />
             {product.stock > 0 ? 'Claim Offer' : 'Sold Out'}
           </button>
         </div>
@@ -94,8 +93,7 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
 
   useEffect(() => {
     const fetchProducts = async () => {
-      const all = await getProducts();
-      const combos = all.filter(p => p.is_combo);
+      const combos = await getCombos();
       setProducts(combos);
     };
     fetchProducts();

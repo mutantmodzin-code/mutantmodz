@@ -18,14 +18,14 @@ const banners = [
     subtitle: 'Jackets, gloves & protection',
     image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=800',
     link: 'products',
-    params: '?cat=Gear',
+    params: '?cat=Riding Gear',
   },
   {
     title: 'Performance Parts',
     subtitle: 'Exhausts, sliders & racing parts',
     image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=800',
     link: 'products',
-    params: '?cat=Mods',
+    params: '?cat=Performance Parts',
   },
   {
     title: 'Luggage & Touring',

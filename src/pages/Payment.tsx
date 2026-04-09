@@ -117,8 +117,7 @@ export default function Payment() {
 
             const shippingNum = deliveryCharge;
             const subtotal = totalPrice;
-            const tax = subtotal * 0.18;
-            const totalAmt = subtotal + tax + shippingNum;
+            const totalAmt = subtotal + shippingNum;
 
             // Build items array from cart
             const items = cartItems.map(cartItem => ({
@@ -127,7 +126,7 @@ export default function Payment() {
                 quantity: cartItem.quantity,
                 unit_price: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')),
                 line_total: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity,
-                gst_percentage: 18,
+                gst_percentage: 0,
                 taxable_amount: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity
             }));
 
@@ -144,12 +143,12 @@ export default function Payment() {
                     customer_id: user.uid,
                     order_type: 'Online Order',
                     subtotal: subtotal,
-                    tax: tax,
+                    tax: 0,
                     discount: 0,
                     total_amount: totalAmt,
                     payment_method: paymentMethod.toUpperCase(),
                     payment_id: razorpayPaymentId,
-                    gst_percentage: 18,
+                    gst_percentage: 0,
                     items: items,
                     shipping_address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`,
                     delivery_charge: deliveryCharge
@@ -196,8 +195,7 @@ export default function Payment() {
 
             const shippingNum = deliveryCharge;
             const subtotal = totalPrice;
-            const tax = subtotal * 0.18;
-            const totalAmt = subtotal + tax + shippingNum;
+            const totalAmt = subtotal + shippingNum;
 
             const options = {
                 key: RAZORPAY_KEY_ID,
@@ -259,8 +257,7 @@ export default function Payment() {
 
     const shippingNum = deliveryCharge;
     const subtotal = totalPrice;
-    const tax = subtotal * 0.18;
-    const total = subtotal + tax + shippingNum;
+    const total = subtotal + shippingNum;
     const currencyFormat = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
 
 
@@ -459,10 +456,6 @@ export default function Payment() {
                                     <span className="text-sm font-black text-white uppercase">{currencyFormat.format(subtotal)}</span>
                                 </div>
                                 <div className="flex justify-between items-center px-4">
-                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">GST (18%)</span>
-                                    <span className="text-sm font-black text-white uppercase">{currencyFormat.format(tax)}</span>
-                                </div>
-                                <div className="flex justify-between items-center px-4">
                                     <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Delivery</span>
                                     <span className="text-sm font-black uppercase flex items-center gap-2">
                                         {isFetchingCharge
@@ -474,7 +467,7 @@ export default function Payment() {
                                 <div className="flex justify-between items-center p-8 bg-zinc-950 rounded-[2rem] border border-zinc-900 mt-6">
                                     <div className="space-y-1">
                                         <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em]">Total Amount</span>
-                                        <p className="text-[9px] text-zinc-600 font-black uppercase">Incl. GST & Shipping</p>
+                                        <p className="text-[9px] text-zinc-600 font-black uppercase">Incl. Shipping</p>
                                     </div>
                                     <span className="text-4xl font-black text-white tracking-tighter">{currencyFormat.format(total)}</span>
                                 </div>

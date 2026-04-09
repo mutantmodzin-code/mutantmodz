@@ -68,6 +68,9 @@ router.post('/', async (req, res) => {
     console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale, is_combo, combo_type });
 
     try {
+        // Auto-generate unique SKU if not provided
+        const finalSku = sku || `SKU-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+
         const result = await db.query(
             'INSERT INTO products (name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo, combo_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *',
             [
@@ -79,7 +82,7 @@ router.post('/', async (req, res) => {
                 parseFloat(price) || 0,
                 parseInt(stock) || 0,
                 vendor_id ? parseInt(vendor_id) : null,
-                sku || null,
+                finalSku,
                 parseFloat(purchase_price) || 0,
                 image_url || null,
                 bike_brand || null,

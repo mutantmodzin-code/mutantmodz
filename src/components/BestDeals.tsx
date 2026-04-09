@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ShoppingCart, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
@@ -130,10 +130,44 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
     }
   };
 
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  const initScrollAnimation = useCallback(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const items = entry.target.querySelectorAll('.deal-card');
+            items.forEach((item, index) => {
+              setTimeout(() => {
+                (item as HTMLElement).classList.add('animate-in');
+              }, index * 100);
+            });
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const cleanup = initScrollAnimation();
+      return cleanup;
+    }
+  }, [products, initScrollAnimation]);
+
   if (products.length === 0) return null;
 
   return (
-    <section className="py-8 sm:py-16 bg-zinc-950">
+    <section className="py-8 sm:py-16 bg-zinc-950" ref={sectionRef}>
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto">
         {/* Section Header */}
         <div className="flex justify-between items-end mb-6 sm:mb-10">
@@ -178,7 +212,9 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
           className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory pb-4 -mx-1 px-1"
         >
           {products.map((p) => (
-            <MobileProductCard key={p.id} product={p} onNavigate={onNavigate} />
+            <div key={p.id} className="deal-card scroll-fade-up flex-shrink-0">
+              <MobileProductCard product={p} onNavigate={onNavigate} />
+            </div>
           ))}
         </div>
       </div>

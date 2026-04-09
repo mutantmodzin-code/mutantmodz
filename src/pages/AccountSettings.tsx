@@ -78,7 +78,7 @@ export default function AccountSettings() {
       const response = await fetch(`${API_URL}/auth/send-email-update-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newEmail: email, userId: user?.uid })
+        body: JSON.stringify({ newEmail: email, userId: user?.uid, phone: user?.phone })
       });
 
       const data = await response.json();
@@ -103,7 +103,7 @@ export default function AccountSettings() {
       const response = await fetch(`${API_URL}/auth/verify-email-update-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.uid, otp })
+        body: JSON.stringify({ userId: user?.uid, phone: user?.phone, otp })
       });
 
       const data = await response.json();

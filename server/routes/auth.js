@@ -223,18 +223,26 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
-// Send OTP for Email Update
-router.post('/send-email-update-otp', async (req, res) => {
-    const { newEmail, userId } = req.body;
+// Send OTP for Email Update (Both formats for compatibility)
+const handleSendEmailOTP = async (req, res) => {
+    const { newEmail, userId, phone } = req.body;
     try {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otp_hash = await bcrypt.hash(otp, 10);
         const otp_expiry = new Date(Date.now() + 10 * 60000);
 
-        await db.query(
-            'UPDATE customers SET otp_hash = $1, otp_expiry = $2, pending_email = $3 WHERE id = $4',
-            [otp_hash, otp_expiry, newEmail, userId]
-        );
+        // Allow identification by phone OR userId
+        if (phone) {
+            await db.query(
+                'UPDATE customers SET otp_hash = $1, otp_expiry = $2, pending_email = $3 WHERE phone = $4',
+                [otp_hash, otp_expiry, newEmail, phone]
+            );
+        } else {
+            await db.query(
+                'UPDATE customers SET otp_hash = $1, otp_expiry = $2, pending_email = $3 WHERE id = $4',
+                [otp_hash, otp_expiry, newEmail, userId]
+            );
+        }
 
         const resendInstance = getResend();
         if (!resendInstance) {
@@ -264,13 +272,22 @@ router.post('/send-email-update-otp', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
+};
 
-// Verify Email Update OTP
-router.post('/verify-email-update-otp', async (req, res) => {
-    const { userId, otp } = req.body;
+router.post('/send-email-update-otp', handleSendEmailOTP);
+router.post('/send_email_update_otp', handleSendEmailOTP);
+
+// Verify Email Update OTP (Both formats)
+const handleVerifyEmailOTP = async (req, res) => {
+    const { userId, phone, otp } = req.body;
     try {
-        const result = await db.query('SELECT * FROM customers WHERE id = $1', [userId]);
+        let result;
+        if (phone) {
+            result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
+        } else {
+            result = await db.query('SELECT * FROM customers WHERE id = $1', [userId]);
+        }
+        
         if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
 
         const user = result.rows[0];
@@ -284,14 +301,17 @@ router.post('/verify-email-update-otp', async (req, res) => {
         // Update email and clear pending fields
         await db.query(
             'UPDATE customers SET email = pending_email, pending_email = NULL, otp_hash = NULL, otp_expiry = NULL WHERE id = $1',
-            [userId]
+            [user.id]
         );
 
         res.json({ message: 'Email updated successfully', newEmail: user.pending_email });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-});
+};
+
+router.post('/verify-email-update-otp', handleVerifyEmailOTP);
+router.post('/verify_email_update_otp', handleVerifyEmailOTP);
 
 
 module.exports = router;

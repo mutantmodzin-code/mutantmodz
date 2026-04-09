@@ -42,6 +42,7 @@ const notificationRoutes = require('./routes/notifications');
 const testOrderRoutes = require('./routes/test-orders');
 const comboRoutes = require('./routes/combos');
 const garageSaleRoutes = require('./routes/garage_sale');
+const deliveryChargeRoutes = require('./routes/delivery_charge');
 
 // Apply Routes
 app.use('/api/auth', authRoutes);
@@ -55,6 +56,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/test-orders', testOrderRoutes);
 app.use('/api/combos', comboRoutes);
 app.use('/api/garage-sale', garageSaleRoutes);
+app.use('/api/delivery-charge', deliveryChargeRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

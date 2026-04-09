@@ -40,7 +40,25 @@ export default function Payment() {
     const [paymentDone, setPaymentDone] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('razorpay');
+    const [deliveryCharge, setDeliveryCharge] = useState(100);
+    const [isFetchingCharge, setIsFetchingCharge] = useState(false);
     const orderProcessed = { current: false };
+
+    const fetchDeliveryCharge = async (state: string, city: string) => {
+        if (!state) return;
+        setIsFetchingCharge(true);
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+            const params = new URLSearchParams({ state, city: city || '' });
+            const res = await fetch(`${apiUrl}/delivery-charge?${params}`);
+            const data = await res.json();
+            setDeliveryCharge(data.charge || 300);
+        } catch {
+            setDeliveryCharge(300);
+        } finally {
+            setIsFetchingCharge(false);
+        }
+    };
 
     // Constant for Razorpay Key (User can replace with their actual key in .env)
     const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY;
@@ -97,7 +115,7 @@ export default function Payment() {
                 return;
             }
 
-            const shippingNum = 100;
+            const shippingNum = deliveryCharge;
             const subtotal = totalPrice;
             const tax = subtotal * 0.18;
             const totalAmt = subtotal + tax + shippingNum;
@@ -133,7 +151,8 @@ export default function Payment() {
                     payment_id: razorpayPaymentId,
                     gst_percentage: 18,
                     items: items,
-                    shipping_address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`
+                    shipping_address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`,
+                    delivery_charge: deliveryCharge
                 })
             });
 
@@ -175,7 +194,7 @@ export default function Payment() {
                 return;
             }
 
-            const shippingNum = 100;
+            const shippingNum = deliveryCharge;
             const subtotal = totalPrice;
             const tax = subtotal * 0.18;
             const totalAmt = subtotal + tax + shippingNum;
@@ -238,7 +257,7 @@ export default function Payment() {
         );
     }
 
-    const shippingNum = 100;
+    const shippingNum = deliveryCharge;
     const subtotal = totalPrice;
     const tax = subtotal * 0.18;
     const total = subtotal + tax + shippingNum;
@@ -328,21 +347,43 @@ export default function Payment() {
                                                 placeholder="HUB"
                                                 value={customer.city}
                                                 onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
+                                                onBlur={(e) => fetchDeliveryCharge(customer.state, e.target.value)}
                                             />
                                         </div>
                                         <div>
                                             <Label required>State</Label>
                                             <div className="relative">
                                                 <select
-                                                    required
+                                                     required
                                                     className="w-full bg-zinc-950 border border-zinc-900 rounded-2xl py-4 px-6 text-white text-xs font-bold appearance-none cursor-pointer focus:border-red-600 outline-none uppercase tracking-widest"
                                                     value={customer.state}
-                                                    onChange={(e) => setCustomer({ ...customer, state: e.target.value })}
+                                                    onChange={(e) => {
+                                                        setCustomer({ ...customer, state: e.target.value });
+                                                        fetchDeliveryCharge(e.target.value, customer.city);
+                                                    }}
                                                 >
                                                     <option>Tamil Nadu</option>
                                                     <option>Karnataka</option>
                                                     <option>Kerala</option>
                                                     <option>Maharashtra</option>
+                                                    <option>Andhra Pradesh</option>
+                                                    <option>Telangana</option>
+                                                    <option>Delhi</option>
+                                                    <option>Gujarat</option>
+                                                    <option>Rajasthan</option>
+                                                    <option>Uttar Pradesh</option>
+                                                    <option>West Bengal</option>
+                                                    <option>Madhya Pradesh</option>
+                                                    <option>Punjab</option>
+                                                    <option>Haryana</option>
+                                                    <option>Bihar</option>
+                                                    <option>Odisha</option>
+                                                    <option>Assam</option>
+                                                    <option>Jharkhand</option>
+                                                    <option>Uttarakhand</option>
+                                                    <option>Himachal Pradesh</option>
+                                                    <option>Goa</option>
+                                                    <option>Chhattisgarh</option>
                                                 </select>
                                                 <ChevronDown size={14} className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-500" />
                                             </div>
@@ -422,8 +463,13 @@ export default function Payment() {
                                     <span className="text-sm font-black text-white uppercase">{currencyFormat.format(tax)}</span>
                                 </div>
                                 <div className="flex justify-between items-center px-4">
-                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Shipping</span>
-                                    <span className="text-sm font-black text-white uppercase">{currencyFormat.format(shippingNum)}</span>
+                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Delivery</span>
+                                    <span className="text-sm font-black uppercase flex items-center gap-2">
+                                        {isFetchingCharge
+                                            ? <span className="text-zinc-600 text-[9px] animate-pulse">Calculating...</span>
+                                            : <span className={deliveryCharge === 100 ? 'text-green-500' : deliveryCharge === 200 ? 'text-yellow-500' : 'text-red-500'}>{currencyFormat.format(deliveryCharge)}</span>
+                                        }
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center p-8 bg-zinc-950 rounded-[2rem] border border-zinc-900 mt-6">
                                     <div className="space-y-1">

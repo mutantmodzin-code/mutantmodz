@@ -20,10 +20,18 @@ router.post('/', async (req, res) => {
         sgst_amount,
         igst_amount,
         taxable_value,
-        total_gst
+        total_gst,
+        shipping_address,
+        delivery_charge: clientDeliveryCharge
     } = req.body;
 
     try {
+        // Server-side delivery charge verification (prevent tampering)
+        let verifiedDeliveryCharge = 300; // default
+        if (clientDeliveryCharge && [100, 200, 300].includes(Number(clientDeliveryCharge))) {
+            verifiedDeliveryCharge = Number(clientDeliveryCharge);
+        }
+
         const client = await db.pool.connect();
         try {
             await client.query('BEGIN');

@@ -14,6 +14,7 @@ router.get('/', authenticateToken, async (req, res) => {
                 COALESCE(SUM(i.total_amount), 0) AS total_spent,
                 MAX(i.created_at) AS last_order_at,
                 CASE
+                    WHEN c.is_verified = true THEN 'online'
                     WHEN COUNT(CASE WHEN i.order_type = 'Online Order' THEN 1 END) > 0 THEN 'online'
                     ELSE 'offline'
                 END AS customer_type
@@ -41,11 +42,11 @@ router.get('/search', async (req, res) => {
 
 // Add customer (Registration/Initial)
 router.post('/', async (req, res) => {
-    const { name, phone, email, address } = req.body;
+    const { name, phone, email, address, is_verified } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO customers (name, phone, email, address) VALUES ($1, $2, $3, $4) ON CONFLICT (phone) DO UPDATE SET name = $1, email = $3, address = $4 RETURNING *',
-            [name, phone, email, address]
+            'INSERT INTO customers (name, phone, email, address, is_verified) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (phone) DO UPDATE SET name = $1, email = $3, address = $4, is_verified = EXCLUDED.is_verified RETURNING *',
+            [name, phone, email, address, is_verified || false]
         );
         
         const user = result.rows[0];

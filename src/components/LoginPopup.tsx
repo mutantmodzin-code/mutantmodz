@@ -125,7 +125,8 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         body: JSON.stringify({
           name: displayName,
           phone: phoneNumber,
-          email: email
+          email: email,
+          is_verified: true
         })
       });
 

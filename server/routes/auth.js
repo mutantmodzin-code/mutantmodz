@@ -156,8 +156,12 @@ router.post('/verify-otp', async (req, res) => {
             return res.status(400).json({ error: 'Invalid code' });
         }
 
-        // Clear OTP on success
-        await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
+        // Clear OTP on success and mark customer as verified if applicable
+        if (!user.role || user.role === 'customer') {
+            await db.query('UPDATE customers SET otp_hash = NULL, otp_expiry = NULL, is_verified = TRUE WHERE id = $1', [user.id]);
+        } else {
+            await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
+        }
 
         const token = jwt.sign({ id: user.id, username: user.username || user.name, role: user.role || 'customer' }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.json({ 

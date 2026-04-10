@@ -273,18 +273,29 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
           <div className="space-y-4">
             <h4 className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em]">Contact Us</h4>
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin size={16} className="text-zinc-500 mt-0.5" />
-                <p className="text-zinc-400 text-[11px] font-bold leading-relaxed">Uppilipalayam, Coimbatore, TN</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone size={16} className="text-zinc-500" />
-                <p className="text-zinc-400 text-[11px] font-bold">+91 98765 43210</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail size={16} className="text-zinc-500" />
-                <p className="text-zinc-400 text-[11px] font-bold">info@mutantmodz.com</p>
-              </div>
+              <a
+                href="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-3 group touch-manipulation active:opacity-70"
+              >
+                <MapPin size={16} className="text-zinc-500 mt-0.5 group-hover:text-red-500 transition-colors flex-shrink-0" />
+                <p className="text-zinc-400 text-[11px] font-bold leading-relaxed group-hover:text-white transition-colors">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
+              </a>
+              <a
+                href="tel:+919597596755"
+                className="flex items-center gap-3 group touch-manipulation active:opacity-70"
+              >
+                <Phone size={16} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
+                <p className="text-zinc-400 text-[11px] font-bold group-hover:text-white transition-colors">+91 95975 96755</p>
+              </a>
+              <a
+                href="mailto:info@mutantmodz.com"
+                className="flex items-center gap-3 group touch-manipulation active:opacity-70"
+              >
+                <Mail size={16} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
+                <p className="text-zinc-400 text-[11px] font-bold group-hover:text-white transition-colors">info@mutantmodz.com</p>
+              </a>
             </div>
           </div>
 

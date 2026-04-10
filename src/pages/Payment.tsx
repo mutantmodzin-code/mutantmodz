@@ -268,7 +268,7 @@ export default function Payment() {
                     <button onClick={() => window.history.back()} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-6">
                         <ArrowLeft size={14} /> Back to Gear
                     </button>
-                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase leading-none">CHECKOUT <span className="text-zinc-800">PROTOCOL</span></h1>
+                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase leading-none">CHECKOUT <span className="text-zinc-800">ORDER</span></h1>
                 </div>
 
                 <form onSubmit={handlePayment} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -276,7 +276,7 @@ export default function Payment() {
                         <div className="glass-card p-10 sm:p-16 rounded-[4rem] border border-white/5 space-y-16">
 
                             <div className="animate-on-scroll">
-                                <SectionHeader title="Authentication" icon={Lock} />
+                                <SectionHeader title="Contact Info" icon={Lock} />
                                 <div className="space-y-8">
                                     <div>
                                         <Label required>Email Address</Label>
@@ -295,7 +295,7 @@ export default function Payment() {
                                 <SectionHeader title="Shipping Details" icon={Smartphone} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-3">
-                                        <Label required>Designation</Label>
+                                        <Label required>Full Name</Label>
                                         <div className="grid grid-cols-2 gap-4">
                                             <Input
                                                 type="text"
@@ -314,7 +314,7 @@ export default function Payment() {
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <Label required>Contact Frequency</Label>
+                                        <Label required>Phone Number</Label>
                                         <Input
                                             type="tel"
                                             required
@@ -326,7 +326,7 @@ export default function Payment() {
                                 </div>
                                 <div className="mt-8 space-y-8">
                                     <div>
-                                        <Label required>Sector Address</Label>
+                                        <Label required>Address</Label>
                                         <Input
                                             type="text"
                                             placeholder="Street, Building, Apartment"
@@ -341,7 +341,7 @@ export default function Payment() {
                                             <Input
                                                 type="text"
                                                 required
-                                                placeholder="HUB"
+                                                placeholder="City Name"
                                                 value={customer.city}
                                                 onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
                                                 onBlur={(e) => fetchDeliveryCharge(customer.state, e.target.value)}
@@ -386,11 +386,11 @@ export default function Payment() {
                                             </div>
                                         </div>
                                         <div>
-                                            <Label required>Access Code</Label>
+                                            <Label required>Pincode</Label>
                                             <Input
                                                 type="text"
                                                 required
-                                                placeholder="PIN"
+                                                placeholder="6-digit Pincode"
                                                 value={customer.zip}
                                                 onChange={(e) => setCustomer({ ...customer, zip: e.target.value })}
                                             />

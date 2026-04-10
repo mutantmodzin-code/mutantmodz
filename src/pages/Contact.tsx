@@ -9,14 +9,32 @@ export default function Contact() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    }, 3000);
+    setIsLoading(true);
+    setError('');
+    try {
+      const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send message');
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      }, 4000);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -30,15 +48,15 @@ export default function Contact() {
     {
       icon: MapPin,
       label: 'Address',
-      value: 'Opposite Vibgyor School, Uppilipalayam, Coimbatore',
-      link: 'https://maps.google.com',
+      value: 'Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015',
+      link: 'https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7',
       sub: 'Our Location'
     },
     {
       icon: Phone,
       label: 'Call Us',
-      value: '+91 93426 37975',
-      link: 'tel:+919342637975',
+      value: '+91 95975 96755',
+      link: 'tel:+919597596755',
       sub: 'Phone Number'
     },
     {
@@ -51,8 +69,8 @@ export default function Contact() {
     {
       icon: MessageSquare,
       label: 'WhatsApp Us',
-      value: '+91 93426 37975',
-      link: 'https://wa.me/919342637975',
+      value: '+91 95975 96755',
+      link: 'https://wa.me/919597596755',
       sub: 'Message Us'
     }
   ];
@@ -111,7 +129,7 @@ export default function Contact() {
                   <div className="space-y-0.5 sm:space-y-1 min-w-0">
                     <div className="text-[10px] sm:text-[10px] font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
                     <div className="text-white font-black text-base sm:text-lg uppercase tracking-tight group-hover:text-red-600 transition-colors line-clamp-1">{method.label}</div>
-                    <div className="text-zinc-500 text-[12px] sm:text-[13px] font-medium uppercase truncate max-w-xs">{method.value}</div>
+                    <div className="text-zinc-500 text-[12px] sm:text-[13px] font-medium uppercase break-words leading-snug">{method.value}</div>
                   </div>
                 </a>
               ))}
@@ -205,18 +223,27 @@ export default function Contact() {
                     />
                   </div>
 
+                  {error && (
+                    <p className="text-red-500 text-[11px] font-bold text-center uppercase tracking-wider">{error}</p>
+                  )}
                   <button
                     type="submit"
-                    className={`w-full h-16 sm:h-20 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-xs transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden ${submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
-                      }`}
+                    disabled={isLoading || submitted}
+                    className={`relative w-full h-16 sm:h-20 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-xs transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden disabled:opacity-80 ${
+                      submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
+                    }`}
                   >
-                    <div className={`flex items-center gap-4 transition-all duration-500 ${submitted ? '-translate-y-20' : 'translate-y-0'}`}>
+                    <div className={`flex items-center gap-4 transition-all duration-500 ${submitted || isLoading ? '-translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
                       <Send size={20} className="group-hover:rotate-12 transition-transform" />
                       Send Message
                     </div>
-                    <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${submitted ? 'translate-y-0' : 'translate-y-20'}`}>
+                    <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${submitted ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
                       <Zap size={20} />
-                      Message Sent
+                      Message Sent!
+                    </div>
+                    <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${isLoading && !submitted ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+                      <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Sending...
                     </div>
                   </button>
                 </form>
@@ -237,7 +264,7 @@ export default function Contact() {
 
           <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 grayscale contrast-125 brightness-75 hover:grayscale-0 transition-all duration-1000 shadow-2xl">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.3947444885!2d76.999000!3d11.016800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDAxJzAwLjUiTiA3NsKwNTknNTYuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.264985484765!2d76.99594187454975!3d11.02421499089483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8588f59af2d03%3A0x6ef3a80d0ef8ecbc!2sVibgyor%20High%20School!5e0!3m2!1sen!2sin!4v1712700000000!5m2!1sen!2sin"
               width="100%"
               height="100%"
               style={{ border: 0 }}

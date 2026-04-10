@@ -9,6 +9,7 @@ interface GarageSaleSectionProps {
   onNavigate: (page: string, params?: string) => void;
 }
 
+
 function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (page: string, params?: string) => void }) {
   const { addToCart } = useCart();
   const { isLoggedIn, setShowLoginPopup, setPendingAction } = useUserAuth();
@@ -22,6 +23,18 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
       return;
     }
     addToCart(product);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (product.stock <= 0) return;
+    if (!isLoggedIn) {
+      setPendingAction(() => () => { addToCart(product); onNavigate('cart'); });
+      setShowLoginPopup(true);
+      return;
+    }
+    addToCart(product);
+    onNavigate('cart');
   };
 
   const imageUrl = product.images && product.images.length > 0 && product.images[0].trim()
@@ -73,18 +86,31 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
             </div>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock <= 0}
-            className={`w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 ${
-              product.stock > 0
-                ? 'bg-white text-black hover:bg-orange-600 hover:text-white shadow-xl hover:shadow-orange-500/20'
-                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-            }`}
-          >
-            <ShoppingCart size={16} />
-            {product.stock > 0 ? 'Initialize Procurement' : 'Depleted'}
-          </button>
+          {product.stock > 0 ? (
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 bg-zinc-800 border border-white/10 text-white hover:bg-orange-600 hover:border-orange-600 hover:shadow-lg hover:shadow-orange-500/20"
+              >
+                <ShoppingCart size={14} />
+                Add to Cart
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 bg-orange-600 text-white hover:bg-orange-500 shadow-lg shadow-orange-600/30"
+              >
+                <Zap size={14} className="fill-current" />
+                Buy Now
+              </button>
+            </div>
+          ) : (
+            <button
+              disabled
+              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-zinc-800 text-zinc-500 cursor-not-allowed"
+            >
+              <ShoppingCart size={16} /> Out of Stock
+            </button>
+          )}
         </div>
       </div>
     </div>

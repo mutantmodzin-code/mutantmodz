@@ -210,7 +210,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
             </div>
             <div>
               <h2 className="text-white font-black uppercase tracking-widest text-sm">Auth Access</h2>
-              <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest">Protocol secure</p>
+              <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">Protocol secure</p>
             </div>
           </div>
           <button
@@ -238,7 +238,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                 <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Input your primary mobile number</p>
               </div>
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
+                <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
                 <div className="flex items-center gap-3">
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm font-bold shrink-0">+91</div>
                   <input
@@ -281,7 +281,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               </div>
               
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">6-Digit Code</label>
+                <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">6-Digit Code</label>
                 <div className="relative">
                   <KeyRound className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
                   <input
@@ -321,7 +321,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               </div>
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Full Name</label>
+                  <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Full Name</label>
                   <input
                     type="text"
                     value={displayName}
@@ -330,7 +330,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                   />
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Email Address</label>
+                  <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Email Address</label>
                   <input
                     type="email"
                     value={email}
@@ -356,7 +356,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               </div>
               <div className="text-center space-y-2">
                 <h3 className="text-3xl font-black text-white uppercase tracking-tight">Access Granted</h3>
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">Redirecting to Interface...</p>
+                <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.2em]">Redirecting to Interface...</p>
               </div>
             </div>
           )}
@@ -366,7 +366,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         <div className="p-8 border-t border-white/5 bg-black/50">
           <div className="flex items-center gap-4 opacity-50">
             <ShieldCheck size={16} className="text-red-500" />
-            <p className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.1em]">
+            <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.1em]">
               Encrypted session. 256-bit AES protection active.
             </p>
           </div>
@@ -375,4 +375,3 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     </>
   );
 }
-

@@ -1,5 +1,5 @@
 const express = require('express');
-// Triggering restart
+// Triggering restart v2
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -18,10 +18,14 @@ console.log('--------------------');
 
 // Middleware
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+}));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use('/uploads', express.static('uploads'));
 
 
 // Main Route Check
@@ -44,6 +48,8 @@ const comboRoutes = require('./routes/combos');
 const garageSaleRoutes = require('./routes/garage_sale');
 const deliveryChargeRoutes = require('./routes/delivery_charge');
 const contactRoutes = require('./routes/contact');
+const reelRoutes = require('./routes/reels');
+const heroRoutes = require('./routes/hero');
 
 // Apply Routes
 app.use('/api/auth', authRoutes);
@@ -59,6 +65,8 @@ app.use('/api/combos', comboRoutes);
 app.use('/api/garage-sale', garageSaleRoutes);
 app.use('/api/delivery-charge', deliveryChargeRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/reels', reelRoutes);
+app.use('/api/hero', heroRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

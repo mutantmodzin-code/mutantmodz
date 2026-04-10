@@ -16,6 +16,8 @@ import GstReports from './pages/GstReports';
 import OnlineOrders from './pages/OnlineOrders';
 import Combos from './pages/Combos';
 import GarageSale from './pages/GarageSale';
+import ManageReels from './pages/ManageReels';
+import ManageHero from './pages/ManageHero';
 
 const Layout = ({ children }) => {
   const { user, loading } = useAuth();
@@ -77,6 +79,8 @@ const App = () => {
           <Route path="/profit" element={<Layout><ProfitDashboard /></Layout>} />
           <Route path="/vendors" element={<Layout><Vendors /></Layout>} />
           <Route path="/gst-reports" element={<Layout><GstReports /></Layout>} />
+          <Route path="/reels" element={<Layout><ManageReels /></Layout>} />
+          <Route path="/hero" element={<Layout><ManageHero /></Layout>} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -43,10 +43,10 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
 
   return (
     <div
-      className="flex-shrink-0 w-[240px] sm:w-[280px] snap-start bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-orange-500/30 hover:shadow-[0_20px_40px_rgba(249,115,22,0.1)]"
+      className="flex-shrink-0 w-[280px] sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-orange-500/30 hover:shadow-[0_20px_40px_rgba(249,115,22,0.1)]"
       onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
     >
-      <div className="relative h-[200px] sm:h-[240px] overflow-hidden bg-white/5 p-4 flex items-center justify-center">
+      <div className="relative h-[280px] sm:h-[250px] overflow-hidden bg-white/5 p-4 flex items-center justify-center">
         <img
           src={imageUrl}
           alt={product.name}
@@ -143,12 +143,12 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
   if (products.length === 0) return null;
 
   return (
-    <section className="py-12 sm:py-24 bg-zinc-950 relative overflow-hidden">
+    <section className="py-8 sm:py-16 bg-zinc-950 overflow-hidden border-b border-white/5">
       {/* Background decoration */}
-      <div className="absolute top-1/2 left-0 w-[600px] h-[600px] bg-orange-600/5 rounded-full blur-[120px] -ml-64 -translate-y-1/2"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-orange-600/5 rounded-full blur-[120px] -translate-y-1/2"></div>
       
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16 border-l-4 border-orange-600 pl-6">
+        <div className="flex flex-col items-center text-center gap-6 mb-12 sm:mb-16">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">
               <Zap size={14} className="text-orange-500 fill-current" />
@@ -157,13 +157,13 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
             <h2 className="text-4xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-[0.8]">
               TODAY <span className="text-orange-600">SALES!!</span>
             </h2>
-            <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-xl">
+            <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-xl mx-auto">
               Extreme clearout event. High-performance mods at factory outlet rates. 
               <span className="text-orange-500/60 ml-2">Hardware refresh in progress.</span>
             </p>
           </div>
           
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => onNavigate('products', '?cat=garage-sale')}
               className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors uppercase text-[10px] font-black tracking-[0.3em]"
@@ -173,15 +173,15 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
             <div className="flex gap-2">
               <button 
                 onClick={() => scroll('left')}
-                className="w-12 h-12 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-orange-600 hover:border-orange-600 transition-all active:scale-90 shadow-lg"
+                className="w-10 h-10 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-orange-600 transition-all active:scale-90"
               >
-                <ChevronLeft size={24} />
+                <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={() => scroll('right')}
-                className="w-12 h-12 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-orange-600 hover:border-orange-600 transition-all active:scale-90 shadow-lg"
+                className="w-10 h-10 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-orange-600 transition-all active:scale-90"
               >
-                <ChevronRight size={24} />
+                <ChevronRight size={20} />
               </button>
             </div>
           </div>
@@ -189,7 +189,7 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
 
         <div
           ref={scrollRef}
-          className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8"
+          className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 justify-start md:justify-center lg:justify-center"
         >
           {products.map((p) => (
             <ProductCard key={p.id} product={p} onNavigate={onNavigate} />
@@ -198,7 +198,7 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
           {/* Final card */}
           <div 
             onClick={() => onNavigate('products', '?cat=garage-sale')}
-            className="flex-shrink-0 w-[240px] snap-end bg-orange-600/5 border border-orange-500/20 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 cursor-pointer group hover:bg-orange-600/10 transition-all active:scale-95"
+            className="flex-shrink-0 w-[260px] sm:w-[300px] snap-end bg-orange-600/5 border border-orange-500/20 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 cursor-pointer group hover:bg-orange-600/10 transition-all active:scale-95"
           >
             <div className="w-20 h-20 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/40 group-hover:scale-110 transition-transform">
               <ArrowRight size={36} />
@@ -208,5 +208,6 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
         </div>
       </div>
     </section>
+
   );
 }

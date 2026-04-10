@@ -30,10 +30,10 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
 
   return (
     <div
-      className="flex-shrink-0 w-[220px] sm:w-[260px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
+      className="flex-shrink-0 w-[260px] sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
       onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
     >
-      <div className="relative h-[180px] sm:h-[220px] bg-white/5 p-4">
+      <div className="relative h-[220px] sm:h-[260px] overflow-hidden bg-white/5 p-4 flex items-center justify-center">
         <img
           src={imageUrl}
           alt={product.name}
@@ -115,10 +115,10 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
   return (
     <section className="py-12 sm:py-24 bg-zinc-950 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-sky-600/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-sky-600/5 rounded-full blur-[120px] -translate-y-1/2"></div>
       
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 sm:mb-16">
+        <div className="flex flex-col items-center text-center gap-6 mb-12 sm:mb-16">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-sky-500/10 border border-sky-500/20">
               <Package size={14} className="text-sky-500" />
@@ -127,12 +127,12 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
             <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-[0.8]">
               MONSTER <span className="text-sky-500">COMBOS!!</span>
             </h2>
-            <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-xl">
+            <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-2xl mx-auto">
               Professional upgrade kits designed for peak performance and style. Save big when you mutation in bulk.
             </p>
           </div>
           
-          <div className="flex items-center gap-4 mt-4 md:mt-0">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => onNavigate('products', '?cat=combos')}
               className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors uppercase text-[10px] font-black tracking-[0.3em]"
@@ -142,13 +142,13 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
             <div className="flex gap-2">
               <button 
                 onClick={() => scroll('left')}
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-sky-600 hover:border-sky-600 transition-all active:scale-90"
+                className="w-10 h-10 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-sky-600 transition-all active:scale-90"
               >
                 <ChevronLeft size={20} />
               </button>
               <button 
                 onClick={() => scroll('right')}
-                className="w-10 h-10 sm:w-12 sm:h-12 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-sky-600 hover:border-sky-600 transition-all active:scale-90"
+                className="w-10 h-10 bg-zinc-900 border border-white/5 rounded-full flex items-center justify-center text-white hover:bg-sky-600 transition-all active:scale-90"
               >
                 <ChevronRight size={20} />
               </button>
@@ -158,7 +158,7 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
 
         <div
           ref={scrollRef}
-          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8"
+          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 justify-start md:justify-center"
         >
           {products.map((p) => (
             <ComboProductCard key={p.id} product={p} onNavigate={onNavigate} />
@@ -167,7 +167,7 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
           {/* Last View All card */}
           <div 
             onClick={() => onNavigate('products', '?cat=combos')}
-            className="flex-shrink-0 w-[200px] snap-end bg-sky-600/5 border border-sky-500/20 rounded-3xl flex flex-col items-center justify-center gap-4 cursor-pointer group hover:bg-sky-600/10 transition-all active:scale-95"
+            className="flex-shrink-0 w-[260px] sm:w-[300px] snap-end bg-sky-600/5 border border-sky-500/20 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 cursor-pointer group hover:bg-sky-600/10 transition-all active:scale-95"
           >
             <div className="w-16 h-16 rounded-full bg-sky-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/40 group-hover:scale-110 transition-transform">
               <ArrowRight size={30} />
@@ -177,5 +177,6 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
         </div>
       </div>
     </section>
+
   );
 }

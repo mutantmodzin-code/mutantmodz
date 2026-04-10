@@ -25,7 +25,7 @@ export default function Home({ onNavigate }: HomeProps) {
   }, []);
 
   return (
-    <div className="bg-zinc-950 text-white min-h-screen">
+    <div className="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
       {/* 1. Hero Slideshow - Touch Swipeable */}
       <HeroSlideshow onNavigate={onNavigate} />
 
@@ -68,7 +68,7 @@ export default function Home({ onNavigate }: HomeProps) {
         <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
           <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-red-600/20 bg-red-600/5 backdrop-blur-sm mb-4">
             <Zap size={14} className="text-red-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">Premium Mods Only</span>
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-red-500">Premium Mods Only</span>
           </div>
           <h2 className="text-4xl sm:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
             READY TO <span className="text-red-600">MUTATE?</span>
@@ -94,19 +94,19 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="pt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
              <div className="space-y-2">
                <div className="text-2xl font-black text-white">10K+</div>
-               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Happy Riders</div>
+               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Happy Riders</div>
              </div>
              <div className="space-y-2">
                <div className="text-2xl font-black text-white">50+</div>
-               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Elite Brands</div>
+               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Elite Brands</div>
              </div>
              <div className="space-y-2">
                <div className="text-2xl font-black text-white">100%</div>
-               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Genuine parts</div>
+               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Genuine parts</div>
              </div>
              <div className="space-y-2">
                <div className="text-2xl font-black text-white">4.9/5</div>
-               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Store Rating</div>
+               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Store Rating</div>
              </div>
           </div>
         </div>

@@ -12,6 +12,7 @@ import {
     TrendingUp,
     ShoppingCart,
     Zap,
+    Video,
     X
 } from 'lucide-react';
 
@@ -80,6 +81,8 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                 <SidebarLink to="/garage-sale" icon={Zap}>Garage Sale</SidebarLink>
                 <SidebarLink to="/vendors" icon={Users}>Vendors</SidebarLink>
                 <SidebarLink to="/customers" icon={Users}>Customers</SidebarLink>
+                <SidebarLink to="/reels" icon={Video}>Homepage Reels</SidebarLink>
+                <SidebarLink to="/hero" icon={LayoutDashboard}>Homepage Banner</SidebarLink>
 
                 <div style={{ margin: '1.5rem 0 0.5rem 0', padding: '0 0.5rem', fontSize: '0.625rem', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sales & Billing</div>
                 <SidebarLink to="/billing" icon={Receipt}>New Invoice</SidebarLink>

@@ -300,7 +300,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                 aria-label="Account"
               >
                 {isLoggedIn ? (
-                  <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
+                  <div className="w-8 h-8 sm:w-6 sm:h-6 bg-red-600 rounded-full flex items-center justify-center text-[12px] font-black text-white">
                     {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                 ) : (
@@ -314,7 +314,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               >
                 <ShoppingCart size={20} />
                 {totalCount > 0 && (
-                  <span className="absolute top-1 right-0.5 bg-red-600 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
+                  <span className="absolute top-1 right-1 bg-red-600 text-white text-[11px] font-bold w-[20px] h-[20px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
                     {totalCount}
                   </span>
                 )}

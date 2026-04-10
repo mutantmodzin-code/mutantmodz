@@ -31,12 +31,12 @@ function CompactMobileCard({ product, onNavigate }: { product: Product; onNaviga
     >
       <div className="relative h-[160px] sm:h-[180px] bg-zinc-800/50 overflow-hidden">
         <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" loading="lazy" />
-        <div className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[9px] font-black px-2 py-1 rounded-lg shadow-lg uppercase tracking-wide">
+        <div className="absolute top-2.5 right-2.5 bg-blue-600 text-white text-[11px] font-black px-2 py-1 rounded-lg shadow-lg uppercase tracking-wide">
           New
         </div>
       </div>
       <div className="p-3 flex flex-col flex-1">
-        {product.brand && <span className="text-red-500 text-[9px] font-black uppercase tracking-widest mb-1">{product.brand}</span>}
+        {product.brand && <span className="text-red-500 text-[11px] font-black uppercase tracking-widest mb-1">{product.brand}</span>}
         <h4 className="text-white text-[13px] font-bold leading-tight line-clamp-2 mb-2 min-h-[36px]">{product.name}</h4>
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-white text-base font-black">{product.price}</span>
@@ -44,7 +44,7 @@ function CompactMobileCard({ product, onNavigate }: { product: Product; onNaviga
         <button
           onClick={handleAddToCart}
           disabled={product.stock <= 0}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all active:scale-95 touch-manipulation mt-auto min-h-[44px] ${
+          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 touch-manipulation mt-auto min-h-[44px] ${
             product.stock > 0
               ? 'bg-zinc-800 text-white hover:bg-red-600 shadow-lg'
               : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
@@ -100,7 +100,7 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-none">
               NEW <span className="text-red-600">ARRIVALS!!</span>
             </h2>
-            <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px] sm:text-xs">
+            <p className="text-zinc-500 font-black uppercase tracking-widest text-[11px] sm:text-xs">
               Explore the latest helmets, riding gear, and bike modifications in Coimbatore.
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
         <div className="flex justify-center mt-4">
           <button 
             onClick={() => onNavigate('products', '?filter=new')}
-            className="group flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[11px] hover:bg-red-600 hover:text-white transition-all transform active:scale-95 shadow-xl"
+            className="group flex items-center gap-3 px-8 py-4 bg-white/5 border border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-xs hover:bg-red-600 hover:text-white transition-all transform active:scale-95 shadow-xl"
           >
             See All New <ArrowUpRight size={14} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
           </button>

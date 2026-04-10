@@ -97,7 +97,7 @@ export default function Contact() {
         <div className="max-w-5xl mx-auto relative z-10 px-6 text-center pt-20">
           <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-4 py-2 rounded-full mb-8">
             <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Ready to Contact</span>
+            <span className="text-red-500 text-xs font-black uppercase tracking-[0.4em]">Ready to Contact</span>
           </div>
           <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6">
             GET IN <br />
@@ -118,7 +118,7 @@ export default function Contact() {
             <div className="space-y-4 mb-8 sm:mb-16">
               <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">CONTACT <span className="text-red-600">OPTIONS</span></h2>
               <div className="w-16 h-1 bg-red-600"></div>
-              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Choose how you want to contact us</p>
+              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-xs">Choose how you want to contact us</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
@@ -132,7 +132,7 @@ export default function Contact() {
                     <method.icon size={24} />
                   </div>
                   <div className="space-y-0.5 sm:space-y-1 min-w-0">
-                    <div className="text-[10px] sm:text-[10px] font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
+                    <div className="text-xs font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
                     <div className="text-white font-black text-base sm:text-lg uppercase tracking-tight group-hover:text-red-600 transition-colors line-clamp-1">{method.label}</div>
                     <div className="text-zinc-500 text-[12px] sm:text-[13px] font-medium uppercase break-words leading-snug">{method.value}</div>
                   </div>
@@ -147,7 +147,7 @@ export default function Contact() {
               <div className="relative z-10 space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-3">
                   <Clock size={24} className="animate-pulse" />
-                  <h4 className="font-black uppercase tracking-widest text-sm">WORKING HOURS</h4>
+                  <h4 className="font-black uppercase tracking-widest text-base">WORKING HOURS</h4>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between border-b border-white/20 pb-2">
@@ -171,13 +171,13 @@ export default function Contact() {
               <div className="relative z-10 space-y-8 sm:space-y-12">
                 <div className="space-y-3 sm:space-y-4">
                   <h3 className="text-3xl sm:text-5xl font-black text-white leading-none uppercase tracking-tighter">CONTACT <br /><span className="text-red-600">US</span></h3>
-                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[11px] sm:text-[12px]">Fill the form below and we will contact you</p>
+                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-xs">Fill the form below and we will contact you</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
                     <div className="space-y-2 sm:space-y-3">
-                      <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Your Name</label>
+                      <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Your Name</label>
                       <input
                         type="text"
                         name="name"
@@ -189,7 +189,7 @@ export default function Contact() {
                       />
                     </div>
                     <div className="space-y-2 sm:space-y-3">
-                      <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Email</label>
+                      <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Email</label>
                       <input
                         type="email"
                         name="email"
@@ -203,7 +203,7 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Phone Number</label>
+                    <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Phone Number</label>
                     <input
                       type="tel"
                       name="phone"
@@ -216,7 +216,7 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Your Message</label>
+                    <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Your Message</label>
                     <textarea
                       name="message"
                       value={formData.message}
@@ -229,7 +229,7 @@ export default function Contact() {
                   </div>
 
                   {error && (
-                    <p className="text-red-500 text-[11px] font-bold text-center uppercase tracking-wider">{error}</p>
+                    <p className="text-red-500 text-xs font-bold text-center uppercase tracking-wider">{error}</p>
                   )}
                   <button
                     type="submit"
@@ -264,7 +264,7 @@ export default function Contact() {
           <div className="space-y-4">
             <Target size={40} className="text-red-600 mx-auto" />
             <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
-            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
+            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-xs">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
           </div>
 
           <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl relative group">
@@ -284,7 +284,7 @@ export default function Contact() {
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
               <div className="flex items-center gap-2 bg-zinc-950/90 backdrop-blur-md border border-red-600/30 px-4 py-2 rounded-full shadow-xl">
                 <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse flex-shrink-0"></span>
-                <span className="text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Mutant Modz — Coimbatore</span>
+                <span className="text-white text-xs font-black uppercase tracking-widest whitespace-nowrap">Mutant Modz — Coimbatore</span>
               </div>
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function Contact() {
             href="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-10 py-5 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl transition-all active:scale-95 shadow-xl shadow-red-600/30"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.3em] text-base rounded-2xl transition-all active:scale-95 shadow-xl shadow-red-600/30"
           >
             <Target size={18} />
             Get Directions

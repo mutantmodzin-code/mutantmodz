@@ -153,7 +153,7 @@ Link: ${window.location.href}`;
                         <div className="w-10 h-10 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-colors">
                             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Back to Hardware</span>
+                        <span className="text-xs font-black uppercase tracking-[0.3em]">Back to Hardware</span>
                     </button>
 
                     <div className="flex gap-4">
@@ -181,7 +181,7 @@ Link: ${window.location.href}`;
 
                             {/* Visual Accents */}
                             <div className="absolute top-12 left-12">
-                                <span className="text-red-600 text-[10px] font-black uppercase tracking-[0.5em] block mb-2">Product Overview</span>
+                                <span className="text-xs font-black uppercase tracking-[0.5em] block mb-2">Product Overview</span>
                                 <div className="h-px w-20 bg-gradient-to-r from-red-600 to-transparent"></div>
                             </div>
                         </div>
@@ -205,19 +205,19 @@ Link: ${window.location.href}`;
                     <div className="lg:col-span-12 xl:col-span-5 space-y-12 animate-on-scroll">
                         <div className="space-y-6">
                             <div className="flex flex-wrap items-center gap-4">
-                                <div className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest">
-                                    <ShieldCheck size={12} /> Premium Authentic
+                                <div className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-black uppercase tracking-widest">
+                                    <ShieldCheck size={14} /> Premium Authentic
                                 </div>
                                 {product.stock > 0 && product.stock < 10 && (
                                     <div className="inline-flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl shadow-lg shadow-red-600/50">
                                         <AlertTriangle size={14} className="text-white" />
-                                        <span className="text-white text-[11px] font-black uppercase tracking-widest">Only {product.stock} items left in stock</span>
+                                        <span className="text-white text-xs font-black uppercase tracking-widest">Only {product.stock} items left in stock</span>
                                     </div>
                                 )}
                                 {product.stock <= 0 && (
                                     <div className="inline-flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl shadow-lg shadow-red-600/50">
                                         <AlertTriangle size={14} className="text-white" />
-                                        <span className="text-white text-[11px] font-black uppercase tracking-widest">OUT OF STOCK</span>
+                                        <span className="text-white text-xs font-black uppercase tracking-widest">OUT OF STOCK</span>
                                     </div>
                                 )}
                             </div>
@@ -227,7 +227,7 @@ Link: ${window.location.href}`;
                                 <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
                                 <div className="flex items-center gap-1">
                                     {[1, 2, 3, 4, 5].map(s => <Star key={s} size={14} className="text-red-600 fill-red-600" />)}
-                                    <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-2">12 VERIFIED REVIEWS</span>
+                                    <span className="text-zinc-600 text-xs font-black uppercase tracking-widest ml-2">12 VERIFIED REVIEWS</span>
                                 </div>
                             </div>
                         </div>
@@ -253,8 +253,8 @@ Link: ${window.location.href}`;
                                         <div className="space-y-8">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center">
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Select Size</p>
-                                                    <span className="text-red-500 text-[10px] font-black">FITMENT GUARANTEED</span>
+                                                    <p className="text-xs font-black uppercase tracking-widest text-zinc-400">Select Size</p>
+                                                    <span className="text-red-500 text-xs font-black">FITMENT GUARANTEED</span>
                                                 </div>
                                                 <div className="flex gap-4">
                                                     {['M', 'L', 'XL'].map(size => (
@@ -292,7 +292,7 @@ Link: ${window.location.href}`;
                                     <button
                                         onClick={handleBuyNow}
                                         disabled={product.stock <= 0}
-                                        className={`flex-1 ${product.stock > 0 ? 'bg-red-600 hover:bg-white hover:text-red-600 text-white text-[10px]' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed text-[10px]'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3`}
+                                        className={`flex-1 ${product.stock > 0 ? 'bg-red-600 hover:bg-white hover:text-red-600 text-white text-xs' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed text-xs'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3`}
                                     >
                                         {product.stock > 0 ? 'Buy Now' : 'Sold Out'} <ArrowRight size={16} />
                                     </button>
@@ -300,14 +300,14 @@ Link: ${window.location.href}`;
                                 <button 
                                     onClick={handleAddToCart}
                                     disabled={product.stock <= 0} 
-                                    className={`w-full ${product.stock > 0 ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}
+                                    className={`w-full ${product.stock > 0 ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 border`}
                                 >
                                     <ShoppingCart size={16} /> Add to Cart
                                 </button>
                                 <button 
                                     onClick={handleWhatsAppOrder}
                                     disabled={product.stock <= 0} 
-                                    className={`w-full ${product.stock > 0 ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all flex items-center justify-center gap-3 border`}
+                                    className={`w-full ${product.stock > 0 ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 border`}
                                 >
                                     <Phone size={16} /> WhatsApp Direct Purchase
                                 </button>
@@ -321,8 +321,8 @@ Link: ${window.location.href}`;
                                     <Truck size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Fast Shipping</p>
-                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">India Wide Delivery</p>
+                                    <p className="text-xs font-black text-white uppercase tracking-widest">Fast Shipping</p>
+                                    <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">India Wide Delivery</p>
                                 </div>
                             </div>
                             <div className="flex gap-4 items-center">
@@ -330,8 +330,8 @@ Link: ${window.location.href}`;
                                     <RotateCcw size={20} />
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-black text-white uppercase tracking-widest">Support Portal</p>
-                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">30-Day Protocol</p>
+                                    <p className="text-xs font-black text-white uppercase tracking-widest">Support Portal</p>
+                                    <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">30-Day Protocol</p>
                                 </div>
                             </div>
                         </div>
@@ -345,7 +345,7 @@ Link: ${window.location.href}`;
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`pb-8 font-black uppercase tracking-[0.4em] text-[10px] transition-all relative
+                                className={`pb-8 font-black uppercase tracking-[0.4em] text-xs transition-all relative
                                     ${activeTab === tab ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'}`}
                             >
                                 {tab}
@@ -379,7 +379,7 @@ Link: ${window.location.href}`;
                                 <span className="text-red-600 text-xs font-black uppercase tracking-[0.3em]">Compatible Tech</span>
                                 <h2 className="text-5xl font-black text-white tracking-tighter uppercase">RELATED <span className="text-zinc-800">HARDWARE</span></h2>
                             </div>
-                            <button className="text-white border-b border-red-600 pb-2 text-[10px] font-black uppercase tracking-widest hover:text-red-600 transition-colors">
+                            <button className="text-white border-b border-red-600 pb-2 text-xs font-black uppercase tracking-widest hover:text-red-600 transition-colors">
                                 EXPLORE MATRIX
                             </button>
                         </div>
@@ -397,13 +397,13 @@ Link: ${window.location.href}`;
                                             <Heart size={16} />
                                         </button>
                                         <div className="absolute bottom-8 left-8">
-                                            <div className="bg-red-600 px-3 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="bg-red-600 px-3 py-1.5 rounded text-[10px] font-black text-white uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
                                                 VIEW TECH
                                             </div>
                                         </div>
                                     </div>
                                     <div className="space-y-1.5 px-1">
-                                        <h3 className="text-[10px] font-black text-zinc-500 group-hover:text-white transition-colors uppercase tracking-widest truncate">{p.name}</h3>
+                                        <h3 className="text-xs font-black text-zinc-500 group-hover:text-white transition-colors uppercase tracking-widest truncate">{p.name}</h3>
                                         <div className="flex items-center justify-between">
                                             <span className="text-sm font-black text-white">{p.price}</span>
                                             <ChevronRight className="text-red-600 group-hover:translate-x-1 transition-transform" size={14} />

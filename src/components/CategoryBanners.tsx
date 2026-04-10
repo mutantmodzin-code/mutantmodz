@@ -9,14 +9,14 @@ const banners = [
   {
     title: 'Motorcycle Accessories',
     subtitle: 'Mounts, guards & LED upgrades',
-    image: 'https://images.pexels.com/photos/1413412/pexels-photo-1413412.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=800',
     link: 'products',
     params: '?cat=Accessories',
   },
   {
     title: 'Riding Gear',
     subtitle: 'Jackets, gloves & protection',
-    image: 'https://images.pexels.com/photos/3215594/pexels-photo-3215594.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: 'https://images.pexels.com/photos/104842/bmw-vehicle-ride-bike-104842.jpeg?auto=compress&cs=tinysrgb&w=800',
     link: 'products',
     params: '?cat=Riding Gear',
   },
@@ -30,7 +30,7 @@ const banners = [
   {
     title: 'Luggage & Touring',
     subtitle: 'Saddle bags, top boxes & kits',
-    image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: 'https://images.pexels.com/photos/5956934/pexels-photo-5956934.jpeg?auto=compress&cs=tinysrgb&w=800',
     link: 'products',
     params: '?cat=Luggage',
   },

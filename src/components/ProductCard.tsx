@@ -105,19 +105,19 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
         {/* Status Badges (Top Left) */}
         <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-20">
           {status && (
-            <div className={`border ${status.color} px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg`}>
-              {status.icon && <status.icon size={10} className="text-white" />}
+            <div className={`border ${status.color} px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg`}>
+              {status.icon && <status.icon size={12} className="text-white" />}
               {status.label}
             </div>
           )}
           {hasFreeShipping && (
-            <div className="bg-emerald-600 border border-emerald-400 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-              <Truck size={10} />
+            <div className="bg-emerald-600 border border-emerald-400 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+              <Truck size={12} />
               Free Shipping
             </div>
           )}
           {discount > 0 && (
-            <div className="bg-red-600 border border-red-400 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+            <div className={`bg-red-600 border border-red-400 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg`}>
               SAVE {Math.round(discount)}%
             </div>
           )}
@@ -126,13 +126,13 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
         {/* Marketing Badges (Top Right) */}
         <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-20">
           {isBestSeller && (
-            <div className="bg-zinc-950/80 backdrop-blur-md border border-red-600/50 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-              <Flame size={10} className="text-orange-500" />
+            <div className="bg-zinc-950/80 backdrop-blur-md border border-red-600/50 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+              <Flame size={12} className="text-orange-500" />
               Best Seller
             </div>
           )}
           {showNewBadge && (
-            <div className="bg-blue-600 border border-blue-400 text-white px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+            <div className="bg-blue-600 border border-blue-400 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
               New
             </div>
           )}
@@ -153,11 +153,11 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
         {/* Price Element */}
         <div className="absolute bottom-4 left-4 z-20 flex flex-col items-start gap-1">
           {originalPrice && (
-            <div className="bg-zinc-950/60 backdrop-blur-md text-zinc-400 px-2 py-0.5 rounded-lg text-[10px] font-bold line-through">
+            <div className="bg-zinc-950/60 backdrop-blur-md text-zinc-400 px-2 py-1 rounded-lg text-xs font-bold line-through">
               ₹{originalPrice.toLocaleString()}
             </div>
           )}
-          <div className="bg-white text-zinc-950 px-3 py-1.5 rounded-lg text-[12px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-105">
+          <div className="bg-white text-zinc-950 px-3 py-1.5 rounded-lg text-[13px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-105">
             {product.price}
           </div>
         </div>
@@ -167,10 +167,10 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
       <div className="p-4 sm:p-5 flex flex-1 flex-col justify-between">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-red-500 font-black text-[7px] uppercase tracking-widest border-b border-red-500/20 pb-0.5">{product.category}</span>
+            <span className="text-red-500 font-black text-xs uppercase tracking-widest border-b border-red-500/20 pb-0.5">{product.category}</span>
             {/* Added Bike Info if available */}
             {(product as any).bike_brand && (
-              <span className="text-zinc-500 font-black text-[7px] uppercase tracking-widest">| {(product as any).bike_brand}</span>
+              <span className="text-zinc-500 font-black text-xs uppercase tracking-widest">| {(product as any).bike_brand}</span>
             )}
           </div>
           <h3 
@@ -182,12 +182,12 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
           <p className="text-zinc-500 text-[11px] font-medium leading-relaxed line-clamp-1 cursor-pointer" onClick={() => onNavigate(`productDetails?productId=${product.id}`)}>{product.description}</p>
 
           <div className="flex flex-wrap gap-2 pt-2">
-            <div className="flex items-center gap-1 text-[8px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">
-              <CheckCircle size={10} className="text-red-600" />
+            <div className="flex items-center gap-1 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">
+              <CheckCircle size={12} className="text-red-600" />
               Certified
             </div>
-            <div className="flex items-center gap-1 text-[8px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">
-              <Zap size={10} className="text-red-600" />
+            <div className="flex items-center gap-1 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">
+              <Zap size={12} className="text-red-600" />
               Express
             </div>
           </div>
@@ -202,13 +202,13 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
             disabled={product.stock <= 0}
             className={`w-full relative h-[44px] group/btn overflow-hidden rounded-xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-red-600' : 'bg-zinc-900/50 cursor-not-allowed opacity-50'}`}
           >
-            <div className={`absolute inset-0 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[9px] transition-all duration-500 ${product.stock > 0 ? 'sm:group-hover/btn:-translate-y-full' : ''}`}>
-              <ShoppingCart size={14} className="text-white" />
+            <div className={`absolute inset-0 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'sm:group-hover/btn:-translate-y-full' : ''}`}>
+              <ShoppingCart size={16} className="text-white" />
               {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
             </div>
             {product.stock > 0 && (
-              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[9px] -translate-y-full sm:group-hover/btn:translate-y-0 transition-all duration-500">
-                Add to Cart <ArrowUpRight size={14} />
+              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[11px] -translate-y-full sm:group-hover/btn:translate-y-0 transition-all duration-500">
+                Add to Cart <ArrowUpRight size={16} />
               </div>
             )}
           </button>

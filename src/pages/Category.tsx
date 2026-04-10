@@ -3,6 +3,7 @@ import { Search, Filter, ArrowLeft } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 interface CategoryProps {
   onNavigate: (page: string, params?: string) => void;
@@ -25,8 +26,20 @@ export default function Category({ onNavigate }: CategoryProps) {
     const parseCategoryFromHash = () => {
       const hash = window.location.hash;
       const catMatch = hash.match(/[?&]cat=([^&]+)/);
-      if (catMatch) {
-        setCategoryName(decodeURIComponent(catMatch[1]));
+      const typeMatch = hash.match(/[?&]type=([^&]+)/);
+      const catValue = catMatch ? decodeURIComponent(catMatch[1]) : (typeMatch ? decodeURIComponent(typeMatch[1]) : '');
+      setCategoryName(catValue);
+
+      // Dynamic SEO for category type
+      const seoKey = catValue.toLowerCase();
+      if (PAGE_SEO[seoKey]) {
+        updatePageSEO(PAGE_SEO[seoKey]);
+      } else if (catValue) {
+        updatePageSEO({
+          title: `${catValue} – Bike Accessories | Mutant Modz Coimbatore`,
+          description: `Shop premium ${catValue} at Mutant Modz, Coimbatore. Genuine aftermarket parts for Royal Enfield, KTM, Yamaha & more. Fast delivery across Tamil Nadu.`,
+          keywords: `${catValue} Coimbatore, ${catValue} bike accessories, buy ${catValue} online India, Mutant Modz`,
+        });
       }
     };
     parseCategoryFromHash();

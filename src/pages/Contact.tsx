@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare, Zap, Target } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function Contact() {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.contact);
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -264,7 +269,7 @@ export default function Contact() {
 
           <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl relative group">
             <iframe
-              src="https://maps.google.com/maps?q=Mutant+Modz,+Opposite+Vibgyor+School,+Uppilipalayam,+Coimbatore,+Tamil+Nadu+641015&z=17&output=embed"
+              src="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
               width="100%"
               height="100%"
               style={{ border: 0 }}

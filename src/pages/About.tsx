@@ -1,6 +1,12 @@
+import { useEffect } from 'react';
 import { Target, Heart, Award, Zap, Shield, Globe, MessageSquare } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function About() {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.about);
+  }, []);
+
   const values = [
     {
       icon: Target,

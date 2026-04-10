@@ -3,10 +3,15 @@ import { Flame } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function GarageSale({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO['garage-sale']);
+  }, []);
 
   useEffect(() => {
     const fetch = async () => {

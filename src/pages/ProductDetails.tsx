@@ -19,6 +19,7 @@ import { Product } from '../types';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
+import { updatePageSEO, getProductDetailSEO } from '../utils/seo';
 
 export default function ProductDetails() {
     const [product, setProduct] = useState<Product | null>(null);
@@ -45,6 +46,12 @@ export default function ProductDetails() {
                 setProduct(selectedProduct);
                 setMainImage(selectedProduct.image);
                 setIsLoaded(true);
+                // Dynamic SEO for this specific product
+                updatePageSEO(getProductDetailSEO(
+                  selectedProduct.name,
+                  selectedProduct.category,
+                  selectedProduct.price
+                ));
             }
         };
         fetchProduct();

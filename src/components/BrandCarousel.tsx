@@ -33,7 +33,7 @@ export default function BrandCarousel({ onNavigate }: { onNavigate: (page: strin
             LEVEL UP YOUR <span className="text-red-600">RIDE</span>
           </h2>
           <p className="text-zinc-500 font-bold uppercase tracking-[0.4em] text-[10px] max-w-xl">
-             Authorized partners of global performance racing brands
+             Authorized partner of premium motorcycle brands in Coimbatore for Royal Enfield, KTM, Yamaha & more.
           </p>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Zap, Phone } from 'lucide-react';
 import { getProducts, getCombos, getGarageSale, getNewArrivals } from '../utils/storage';
 import { Product } from '../types';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 import ProductCard from '../components/ProductCard';
 import { brands } from '../data/brands';
 import { bikes } from '../components/ShopByBike';
@@ -41,6 +42,7 @@ export default function Products({ onNavigate }: ProductsProps) {
     };
     fetchAllData();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    updatePageSEO(PAGE_SEO.products);
   }, []);
 
   // When "New Arrivals" is selected, load fresh data directly from DB
@@ -50,6 +52,27 @@ export default function Products({ onNavigate }: ProductsProps) {
     getNewArrivals().then(data => {
       if (data.length > 0) setProducts(data);
     });
+  }, [selectedCategory]);
+
+  // Dynamic SEO based on active category
+  useEffect(() => {
+    const catKey = selectedCategory.toLowerCase().replace(/[\s-]+/g, '');
+    const seoMap: Record<string, string> = {
+      'helmets': 'helmets',
+      'accessories': 'accessories',
+      'gear': 'gear',
+      'ridinggear': 'gear',
+      'luggage': 'luggage',
+      'super': 'super',
+      'combos': 'combos',
+      'combo': 'combos',
+      'garagesale': 'garage-sale',
+      'offer': 'garage-sale',
+    };
+    const seoKey = seoMap[catKey];
+    if (seoKey && PAGE_SEO[seoKey]) {
+      updatePageSEO(PAGE_SEO[seoKey]);
+    }
   }, [selectedCategory]);
 
   useEffect(() => {

@@ -101,7 +101,7 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
               NEW <span className="text-red-600">ARRIVALS!!</span>
             </h2>
             <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px] sm:text-xs">
-              Fresh additions to our collection.
+              Explore the latest helmets, riding gear, and bike modifications in Coimbatore.
             </p>
           </div>
           <div className="hidden sm:flex gap-3">

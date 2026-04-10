@@ -1,6 +1,12 @@
+import { useEffect } from 'react';
 import { brands } from '../data/brands';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function Brands({ onNavigate }: { onNavigate: (page: string, params?: string) => void }) {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.brands);
+  }, []);
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-8 pb-20">
       <div className="max-w-7xl mx-auto px-6 mb-16">

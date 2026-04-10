@@ -169,7 +169,7 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
                 BEST <span className="text-red-600">DEALS!!</span>
               </h2>
               <p className="text-zinc-500 text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1">
-                Limited time offers on top products
+                Best offers to buy bike accessories online in Coimbatore. Save big on premium motorcycle gear.
               </p>
             </div>
           </div>

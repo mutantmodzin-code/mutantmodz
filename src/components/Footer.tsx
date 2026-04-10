@@ -5,68 +5,78 @@ export default function Footer() {
     <footer className="bg-black text-white border-t-2 border-red-600">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-2xl font-bold mb-4">
+          <div className="space-y-6">
+            <h3 className="text-2xl font-black tracking-tighter">
               <span className="text-white">MUTANT</span>
               <span className="text-red-600 ml-2">MODZ</span>
             </h3>
-            <p className="text-gray-400 leading-relaxed">
-              Premium bike accessories and riding gear for motorcycle enthusiasts in Coimbatore.
+            <p className="text-zinc-500 font-medium uppercase tracking-widest text-[10px] leading-loose">
+              Coimbatore's premier destination for high-performance bike accessories, premium helmets, and professional riding gear. We specialize in modifications for Royal Enfield, KTM, Yamaha, and more.
             </p>
+            <div className="flex gap-4">
+              <a href="https://instagram.com/mutant_modz" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-red-600 transition-all">
+                <Instagram size={18} />
+              </a>
+              <a href="https://facebook.com/mutantmodz" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-xl bg-zinc-900 flex items-center justify-center hover:bg-red-600 transition-all">
+                <Facebook size={18} />
+              </a>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600">Quick Links</h4>
+              <ul className="space-y-4">
+                <li><a href="#products" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Our Arsenal</a></li>
+                <li><a href="#categories" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Collections</a></li>
+                <li><a href="#garage-sale" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Garage Sale</a></li>
+                <li><a href="#about" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Our DNA</a></li>
+              </ul>
+            </div>
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600">Top Sectors</h4>
+              <ul className="space-y-4">
+                <li><a href="#category?type=helmets" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Helmets</a></li>
+                <li><a href="#category?type=gear" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Riding Gear</a></li>
+                <li><a href="#category?type=accessories" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Protection</a></li>
+                <li><a href="#category?type=super" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Superbike</a></li>
+              </ul>
+            </div>
           </div>
 
           <div>
-            <h4 className="text-lg font-bold mb-4 text-red-600">Contact Info</h4>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin size={20} className="text-red-600 mt-1 flex-shrink-0" />
-                <p className="text-gray-400 text-sm">
-                  Opposite Vibgyor School, Uppilipalayam<br />
-                  Coimbatore, Tamil Nadu, India
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8">Contact Base</h4>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4 group">
+                <MapPin size={20} className="text-red-600 group-hover:scale-110 transition-transform" />
+                <p className="text-zinc-500 text-[11px] font-black uppercase tracking-widest leading-relaxed">
+                  Opposite Vibgyor School,<br />Uppilipalayam, Coimbatore<br />Tamil Nadu - 641015
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Phone size={20} className="text-red-600 flex-shrink-0" />
-                <a href="tel:+919876543210" className="text-gray-400 text-sm hover:text-red-600 transition-colors">
-                  +91 98765 43210
+              <div className="flex items-center gap-4 group">
+                <Phone size={20} className="text-red-600 group-hover:scale-110 transition-transform" />
+                <a href="tel:+919597596755" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">
+                  +91 95975 96755
                 </a>
               </div>
-              <div className="flex items-center gap-3">
-                <Mail size={20} className="text-red-600 flex-shrink-0" />
-                <a href="mailto:info@mutantmodz.com" className="text-gray-400 text-sm hover:text-red-600 transition-colors">
+              <div className="flex items-center gap-4 group">
+                <Mail size={20} className="text-red-600 group-hover:scale-110 transition-transform" />
+                <a href="mailto:info@mutantmodz.com" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">
                   info@mutantmodz.com
                 </a>
               </div>
             </div>
           </div>
-
-          <div>
-            <h4 className="text-lg font-bold mb-4 text-red-600">Follow Us</h4>
-            <div className="flex gap-4">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-zinc-900 p-3 rounded-md hover:bg-red-600 transition-colors"
-              >
-                <Instagram size={24} />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-zinc-900 p-3 rounded-md hover:bg-red-600 transition-colors"
-              >
-                <Facebook size={24} />
-              </a>
-            </div>
-          </div>
         </div>
 
-        <div className="border-t border-zinc-800 mt-8 pt-8 text-center">
-          <p className="text-gray-500 text-sm">
-            &copy; {new Date().getFullYear()} Mutant Modz. All rights reserved.
+        <div className="border-t border-white/5 mt-20 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.2em]">
+            &copy; {new Date().getFullYear()} Mutant Modz Coimbatore. Tactical Performance Engineering.
           </p>
+          <div className="flex gap-8">
+            <a href="#" className="text-zinc-700 hover:text-zinc-400 text-[9px] font-black uppercase tracking-widest transition-colors">Privacy Protocol</a>
+            <a href="#" className="text-zinc-700 hover:text-zinc-400 text-[9px] font-black uppercase tracking-widest transition-colors">Terms of Engagement</a>
+          </div>
         </div>
       </div>
     </footer>

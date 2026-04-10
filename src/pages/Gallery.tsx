@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Instagram, Maximize2, Camera } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function Gallery() {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.gallery);
+  }, []);
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const images = [

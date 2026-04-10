@@ -12,6 +12,7 @@ import FeaturedGrid from '../components/FeaturedGrid';
 import ShopByBike from '../components/ShopByBike';
 import CollectionSquares from '../components/CollectionSquares';
 import { ArrowRight, Zap } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 interface HomeProps {
   onNavigate: (page: string, params?: string) => void;
@@ -20,6 +21,7 @@ interface HomeProps {
 export default function Home({ onNavigate }: HomeProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
+    updatePageSEO(PAGE_SEO.home);
   }, []);
 
   return (
@@ -72,7 +74,7 @@ export default function Home({ onNavigate }: HomeProps) {
             READY TO <span className="text-red-600">MUTATE?</span>
           </h2>
           <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs max-w-2xl mx-auto leading-relaxed">
-            Coimbatore's biggest hub for genuine parts, performance accessories, and high-tier riding gear.
+            Coimbatore's biggest hub for genuine bike accessories, premium helmets, and aftermarket parts. Serving riders from Tirupur, Erode, Salem & across Tamil Nadu.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             <button

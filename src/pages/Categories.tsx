@@ -1,10 +1,16 @@
+import { useEffect } from 'react';
 import { Bike, Shield, Shirt, Wrench, Briefcase, Zap, Package, Calendar, ChevronRight, ArrowRight } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 interface CategoriesProps {
   onNavigate: (page: string, params?: string) => void;
 }
 
 export default function Categories({ onNavigate }: CategoriesProps) {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.categories);
+  }, []);
+
   const categories = [
     { 
       id: 'bike', 

@@ -113,11 +113,11 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                     className="max-w-5xl"
                 >
                     <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-white mb-4 sm:mb-6 leading-[1.1] tracking-tighter uppercase">
-                        Upgrade Your Ride with
-                        <span className="block text-red-600 mt-1 sm:mt-2 filter drop-shadow-lg">Premium Gear</span>
+                        Coimbatore's Best
+                        <span className="block text-red-600 mt-1 sm:mt-2 filter drop-shadow-lg">Bike Accessories</span>
                     </h1>
                     <p className="text-sm sm:text-xl md:text-2xl text-gray-200 mb-6 sm:mb-10 leading-relaxed max-w-3xl mx-auto font-medium opacity-95">
-                        Trusted destination for helmets, riding gear, and custom modifications
+                        Shop premium helmets, riding gear, and custom modifications in Coimbatore. Trusted destination for Royal Enfield, KTM & Yamaha riders.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center px-6 sm:px-0">
                         <button

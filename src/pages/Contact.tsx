@@ -259,22 +259,44 @@ export default function Contact() {
           <div className="space-y-4">
             <Target size={40} className="text-red-600 mx-auto" />
             <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
-            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Find us in Coimbatore</p>
+            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
           </div>
 
-          <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 grayscale contrast-125 brightness-75 hover:grayscale-0 transition-all duration-1000 shadow-2xl">
+          <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl relative group">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.264985484765!2d76.99594187454975!3d11.02421499089483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba8588f59af2d03%3A0x6ef3a80d0ef8ecbc!2sVibgyor%20High%20School!5e0!3m2!1sen!2sin!4v1712700000000!5m2!1sen!2sin"
+              src="https://maps.google.com/maps?q=Mutant+Modz,+Opposite+Vibgyor+School,+Uppilipalayam,+Coimbatore,+Tamil+Nadu+641015&z=17&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
-              title="Mutant Modz Location"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Mutant Modz Location – Opposite Vibgyor School, Uppilipalayam, Coimbatore"
+              className="grayscale contrast-125 brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:contrast-100 transition-all duration-1000"
             ></iframe>
+
+            {/* Overlay badge */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+              <div className="flex items-center gap-2 bg-zinc-950/90 backdrop-blur-md border border-red-600/30 px-4 py-2 rounded-full shadow-xl">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse flex-shrink-0"></span>
+                <span className="text-white text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Mutant Modz — Coimbatore</span>
+              </div>
+            </div>
           </div>
+
+          {/* Get Directions Button */}
+          <a
+            href="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-10 py-5 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl transition-all active:scale-95 shadow-xl shadow-red-600/30"
+          >
+            <Target size={18} />
+            Get Directions
+          </a>
         </div>
       </section>
+
     </div>
   );
 }

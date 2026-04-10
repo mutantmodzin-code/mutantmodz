@@ -30,10 +30,10 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
 
   return (
     <div
-      className="flex-shrink-0 w-[260px] sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
+      className="flex-shrink-0 w-[calc(50%-8px)] sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
       onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
     >
-      <div className="relative h-[220px] sm:h-[260px] overflow-hidden bg-white/5 p-4 flex items-center justify-center">
+      <div className="relative h-[150px] sm:h-[260px] overflow-hidden bg-white/5 p-2 sm:p-4 flex items-center justify-center">
         <img
           src={imageUrl}
           alt={product.name}

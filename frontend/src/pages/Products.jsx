@@ -54,6 +54,8 @@ const BIKE_DATA = [
     { name: 'Others', models: ['Universal', 'Custom Bike'] }
 ];
 
+import { getMediaUrl } from '../utils/url';
+
 const Products = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -496,7 +498,7 @@ const Products = () => {
                                     <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                                         {formData.image_urls.map((url, idx) => url ? (
                                             <div key={idx} style={{ position: 'relative', width: '120px', height: '120px', borderRadius: '1rem', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}>
-                                                <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Image ${idx + 1}`} />
+                                                <img src={getMediaUrl(url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Image ${idx + 1}`} />
                                                 <button
                                                     type="button"
                                                     style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', cursor: 'pointer', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}

@@ -4,6 +4,8 @@ import { Plus, Edit, Trash, Search, Zap, AlertCircle } from 'lucide-react';
 
 
 
+import { getMediaUrl } from '../utils/url';
+
 const GarageSale = () => {
     const [items, setItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -188,7 +190,7 @@ const GarageSale = () => {
                         {items.map(item => (
                             <tr key={item.id}>
                                 <td>
-                                    <img src={item.images?.[0] || item.image_url || 'https://via.placeholder.com/50'} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
+                                    <img src={getMediaUrl(item.images?.[0] || item.image_url) || 'https://via.placeholder.com/50'} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
                                 </td>
                                 <td style={{ fontWeight: 600 }}>{item.name}</td>
                                 <td>{item.brand}</td>
@@ -329,7 +331,7 @@ const GarageSale = () => {
                                     </div>
                                     {formData.images.map((url, idx) => url && (
                                         <div key={idx} style={{ position: 'relative', width: '100px', height: '100px' }}>
-                                            <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '1rem' }} />
+                                            <img src={getMediaUrl(url)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '1rem' }} />
                                             <button 
                                                 type="button"
                                                 onClick={() => { const n = [...formData.images]; n[idx] = ''; setFormData({ ...formData, images: n }); }}

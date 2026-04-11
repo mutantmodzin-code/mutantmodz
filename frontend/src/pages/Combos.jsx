@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { Plus, Edit, Trash, Search, Package, AlertCircle } from 'lucide-react';
 
+import { getMediaUrl } from '../utils/url';
+
 const COMBO_TYPES = ['General Combos', 'Riding Combo Kit', 'Monsoon Combo', 'Service Combo', 'Touring Combo'];
 
 const Combos = () => {
@@ -190,7 +192,7 @@ const Combos = () => {
                         {combos.map(c => (
                             <tr key={c.id}>
                                 <td>
-                                    <img src={c.images?.[0] || c.image_url || 'https://via.placeholder.com/50'} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
+                                    <img src={getMediaUrl(c.images?.[0] || c.image_url) || 'https://via.placeholder.com/50'} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
                                 </td>
                                 <td style={{ fontWeight: 600 }}>{c.name}</td>
                                 <td><span className="badge">{c.combo_type}</span></td>
@@ -337,7 +339,7 @@ const Combos = () => {
                                     </div>
                                     {formData.images.map((url, idx) => url && (
                                         <div key={idx} style={{ position: 'relative', width: '100px', height: '100px' }}>
-                                            <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '1rem' }} />
+                                            <img src={getMediaUrl(url)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '1rem' }} />
                                             <button 
                                                 type="button"
                                                 onClick={() => { const n = [...formData.images]; n[idx] = ''; setFormData({ ...formData, images: n }); }}

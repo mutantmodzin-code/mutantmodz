@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { Plus, Trash2, Edit2, Save, X, Video, UploadCloud, Film } from 'lucide-react';
 
+import { getMediaUrl } from '../utils/url';
+
 const ManageReels = () => {
     const [reels, setReels] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -174,7 +176,7 @@ const ManageReels = () => {
                         <div style={{ aspectRatio: '9/16', backgroundColor: '#f1f5f9', position: 'relative', overflow: 'hidden' }}>
                             {reel.video_url ? (
                                 <video 
-                                    src={reel.video_url} 
+                                    src={getMediaUrl(reel.video_url)} 
                                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     muted
                                     onMouseEnter={e => e.target.play()}

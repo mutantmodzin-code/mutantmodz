@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import api from '../api';
 
+import { getMediaUrl } from '../utils/url';
+
 const ManageHero = () => {
     const [slides, setSlides] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
@@ -141,7 +143,7 @@ const ManageHero = () => {
                                     <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Slide Image</label>
                                     <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#f1f5f9', border: '2px dashed #cbd5e1', borderRadius: '1rem', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                         {previewUrl ? (
-                                            <img src={previewUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            <img src={getMediaUrl(previewUrl)} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                         ) : (
                                             <div style={{ textAlign: 'center', color: '#94a3b8' }}>
                                                 <ImageIcon size={32} />
@@ -218,7 +220,7 @@ const ManageHero = () => {
                     {slides.map((slide) => (
                         <div key={slide.id} style={{ backgroundColor: 'white', borderRadius: '1.5rem', overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
                             <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#f1f5f9' }}>
-                                <img src={slide.image_url} alt={slide.title_red} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <img src={getMediaUrl(slide.image_url)} alt={slide.title_red} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 <div style={{ position: 'absolute', top: '1rem', left: '1rem', zIndex: 10 }}>
                                     <span style={{ backgroundColor: slide.is_active ? '#ecfdf5' : '#fef2f2', color: slide.is_active ? '#059669' : '#dc2626', padding: '0.25rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.7rem', fontWeight: 900, textTransform: 'uppercase' }}>
                                         {slide.is_active ? 'Active' : 'Hidden'}

@@ -217,6 +217,9 @@ router.post('/', async (req, res) => {
             client.release();
         }
     } catch (error) {
+        if (error.message.includes('invoices_customer_id_fkey')) {
+            return res.status(400).json({ error: 'Session expired or invalid user profile. Please completely log out, clear your cache, and log back in.' });
+        }
         res.status(500).json({ error: error.message });
     }
 });

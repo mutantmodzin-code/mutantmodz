@@ -76,6 +76,14 @@ router.post('/', async (req, res) => {
                 }
             }
 
+            // 1.5 Update Customer Address if it's an online order
+            if (order_type === 'Online Order' && shipping_address && customer_id) {
+                await client.query(
+                    'UPDATE customers SET address = $1 WHERE id = $2',
+                    [shipping_address, customer_id]
+                );
+            }
+
             // 2. Insert Invoice
             const invoiceResult = await client.query(
                 `INSERT INTO invoices (

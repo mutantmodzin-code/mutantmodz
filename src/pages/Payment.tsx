@@ -114,6 +114,11 @@ export default function Payment() {
                 orderProcessed.current = false;
                 return;
             }
+            if (isNaN(Number(user.uid))) {
+                alert('Session expired due to a security update. Please log out and log back in.');
+                orderProcessed.current = false;
+                return;
+            }
 
             const shippingNum = deliveryCharge;
             const subtotal = totalPrice;
@@ -157,7 +162,7 @@ export default function Payment() {
 
             if (!invoiceResponse.ok) {
                 const errorData = await invoiceResponse.json();
-                throw new Error(errorData.message || 'Failed to create invoice');
+                throw new Error(errorData.error || errorData.message || 'Failed to create invoice');
             }
 
             // Clear cart after successful order

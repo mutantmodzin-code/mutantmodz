@@ -32,25 +32,26 @@ export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
         </div>
 
         {/* Circular Thumbnails Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-6 lg:gap-8">
           {bikes.map((bike, idx) => (
             <button
               key={idx}
               onClick={() => onNavigate('products', `?bike=${encodeURIComponent(bike.name)}`)}
-              className="flex flex-col items-center gap-2 sm:gap-3 group touch-manipulation active:scale-95 transition-transform"
+              className="flex flex-col items-center gap-2 group touch-manipulation active:scale-95 transition-all duration-300"
             >
-              {/* Circular White Content Container */}
-              <div className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full overflow-hidden border-2 border-white/10 bg-white group-hover:border-red-600/50 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] p-2">
+              {/* Circular Content Container */}
+              <div className="relative w-full aspect-square rounded-full overflow-hidden border border-white/10 bg-[#f8f8f8] group-hover:bg-white group-hover:border-red-600/50 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] p-2 sm:p-3">
                 <img
                   src={bike.image}
                   alt={bike.name}
-                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-110 transition-transform duration-500"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 pointer-events-none" />
               </div>
-
+              
               {/* Name Label */}
-              <span className="text-zinc-300 group-hover:text-white text-[11px] sm:text-xs font-black uppercase tracking-wider text-center transition-colors leading-tight">
+              <span className="text-zinc-500 group-hover:text-white text-[9px] sm:text-xs font-black uppercase tracking-tighter sm:tracking-wider text-center transition-colors leading-none truncate w-full px-1">
                 {bike.name}
               </span>
             </button>

@@ -30,6 +30,14 @@ export default function VideoReels() {
   }, []);
 
 
+  const getVideoUrl = (url: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+    const base = apiUrl.replace('/api', '');
+    return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
   if (loading) {
     return (
       <div className="py-24 bg-zinc-950 flex flex-col items-center justify-center gap-4">
@@ -44,29 +52,31 @@ export default function VideoReels() {
   return (
     <section className="py-8 sm:py-24 bg-zinc-950 overflow-hidden border-b border-white/5">
       <div className="max-w-[1700px] mx-auto px-4 sm:px-8 lg:px-12">
-        <div className="flex flex-col items-start gap-3 mb-12 sm:mb-16">
+        <div className="flex flex-col items-start gap-3 mb-10 sm:mb-16">
           <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-3 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
             <span className="text-red-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em]">Live Performance View</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tighter uppercase leading-[0.5] italic">
+          <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tighter uppercase italic">
             MUTANT <span className="text-red-600">PRODUCTS</span>
           </h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-[0.4em] text-[9px] sm:text-xs pl-1">Exclusively engineered in Coimbatore.</p>
+          <p className="text-zinc-500 font-bold uppercase tracking-[0.4em] text-[8px] sm:text-xs pl-1">Exclusively engineered in Coimbatore.</p>
         </div>
         
-        <div className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory -mx-4 px-4 pb-12">
+        <div className="flex gap-3 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory -mx-4 px-4 pb-8">
           {reels.map((v) => {
+            const vUrl = getVideoUrl(v.video_url);
             return (
-              <div key={v.id} className="flex-shrink-0 w-[calc(50%-8px)] sm:w-[320px] aspect-[9/16] rounded-2xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
-                 {v.video_url ? (
+              <div key={v.id} className="flex-shrink-0 w-[240px] sm:w-[320px] aspect-[9/16] rounded-2xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
+                 {vUrl ? (
                    <video
-                     src={v.video_url}
+                     src={vUrl}
                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                      muted 
                      loop 
                      autoPlay
                      playsInline
+                     preload="auto"
                    />
                  ) : (
                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-zinc-700">

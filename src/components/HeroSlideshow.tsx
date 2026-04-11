@@ -85,11 +85,19 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
         },
     };
 
-    if (loading) return <div className="h-[40vh] sm:h-[60vh] bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div></div>;
+    const getImageUrl = (url: string) => {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+        const base = apiUrl.replace('/api', '');
+        return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
+    };
+
+    if (loading) return <div className="h-[50vh] sm:h-[60vh] bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div></div>;
     if (slides.length === 0) return null;
 
     return (
-        <section className="relative h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[65vh] w-full overflow-hidden bg-black">
+        <section className="relative h-[45vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] w-full overflow-hidden bg-black">
             {/* Background Slideshow */}
             <div className="absolute inset-0 z-0">
                 <AnimatePresence initial={false} custom={direction}>
@@ -103,8 +111,8 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         className="absolute inset-0 w-full h-full"
                     >
                         <div
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                            style={{ backgroundImage: `url(${slides[current].image_url})` }}
+                            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
+                            style={{ backgroundImage: `url(${getImageUrl(slides[current].image_url)})` }}
                         />
                     </motion.div>
                 </AnimatePresence>

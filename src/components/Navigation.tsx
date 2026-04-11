@@ -625,7 +625,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       )}
 
       {/* Spacer to prevent content from going under the fixed nav */}
-      <div className="h-[48px] lg:hidden"></div>
+      <div className="h-[56px] lg:hidden"></div>
       <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[60px]' : 'h-[110px]'}`}></div>
     </>
   );

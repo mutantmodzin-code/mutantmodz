@@ -91,53 +91,53 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
 
   return (
     <div
-      className={`group relative animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col h-full bg-zinc-900/40 backdrop-blur-md rounded-[3rem] overflow-hidden border border-white/5 hover:border-red-600/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ${className}`}
+      className={`group relative animate-in fade-in slide-in-from-bottom-8 duration-700 flex flex-col h-full bg-zinc-900/40 backdrop-blur-md rounded-2xl sm:rounded-[3rem] overflow-hidden border border-white/5 hover:border-red-600/30 transition-all duration-700 hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Visual Interface */}
       <div
-        className="h-48 sm:h-56 overflow-hidden relative cursor-pointer"
+        className="h-44 sm:h-56 overflow-hidden relative cursor-pointer"
         onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
       >
         <ProductImage images={product.images} alt={product.name} isHovered={isHovered} />
-
+ 
         {/* Status Badges (Top Left) */}
-        <div className="absolute top-4 left-4 flex flex-col gap-1.5 z-20">
+        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-col gap-1 z-20">
           {status && (
-            <div className={`border ${status.color} px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg`}>
-              {status.icon && <status.icon size={12} className="text-white" />}
+            <div className={`border ${status.color} px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg`}>
+              {status.icon && <status.icon size={10} className="text-white sm:w-[12px]" />}
               {status.label}
             </div>
           )}
           {hasFreeShipping && (
-            <div className="bg-emerald-600 border border-emerald-400 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-              <Truck size={12} />
+            <div className="bg-emerald-600 border border-emerald-400 text-white px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg">
+              <Truck size={10} className="sm:w-[12px]" />
               Free Shipping
             </div>
           )}
           {discount > 0 && (
-            <div className={`bg-red-600 border border-red-400 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg`}>
+            <div className={`bg-red-600 border border-red-400 text-white px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg`}>
               SAVE {Math.round(discount)}%
             </div>
           )}
         </div>
-
+ 
         {/* Marketing Badges (Top Right) */}
-        <div className="absolute top-4 right-4 flex flex-col gap-1.5 z-20">
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex flex-col gap-1 z-20">
           {isBestSeller && (
-            <div className="bg-zinc-950/80 backdrop-blur-md border border-red-600/50 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
-              <Flame size={12} className="text-orange-500" />
+            <div className="bg-zinc-950/80 backdrop-blur-md border border-red-600/50 text-white px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg">
+              <Flame size={10} className="text-orange-500 sm:w-[12px]" />
               Best Seller
             </div>
           )}
           {showNewBadge && (
-            <div className="bg-blue-600 border border-blue-400 text-white px-2.5 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg">
+            <div className="bg-blue-600 border border-blue-400 text-white px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg">
               New
             </div>
           )}
         </div>
-
+ 
         {/* Quick Add Action (Floating) */}
         <button
           onClick={(e) => {
@@ -145,41 +145,41 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
             handleAddToCart();
           }}
           disabled={product.stock <= 0}
-          className={`absolute bottom-4 right-4 z-20 w-10 h-10 rounded-xl flex items-center justify-center text-white transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl ${product.stock > 0 ? 'bg-red-600 border border-red-500 shadow-red-600/40 opacity-100 sm:opacity-0 sm:translate-y-4 sm:group-hover:opacity-100 sm:group-hover:translate-y-0' : 'bg-zinc-800 border border-zinc-700 cursor-not-allowed hidden'}`}
+          className={`absolute bottom-3 right-3 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center text-white transition-all duration-500 hover:scale-110 active:scale-95 shadow-2xl ${product.stock > 0 ? 'bg-red-600 border border-red-500 shadow-red-600/40 opacity-100 sm:opacity-0 sm:translate-y-4 sm:group-hover:opacity-100 sm:group-hover:translate-y-0' : 'bg-zinc-800 border border-zinc-700 cursor-not-allowed hidden'}`}
         >
-          <ShoppingBag size={18} />
+          <ShoppingBag size={14} className="sm:w-[18px]" />
         </button>
-
+ 
         {/* Price Element */}
-        <div className="absolute bottom-4 left-4 z-20 flex flex-col items-start gap-1">
+        <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 flex flex-col items-start gap-0.5 sm:gap-1">
           {originalPrice && (
-            <div className="bg-zinc-950/60 backdrop-blur-md text-zinc-400 px-2 py-1 rounded-lg text-xs font-bold line-through">
+            <div className="bg-zinc-950/60 backdrop-blur-md text-zinc-400 px-1.5 py-0.5 rounded-md text-[9px] sm:text-xs font-bold line-through">
               ₹{originalPrice.toLocaleString()}
             </div>
           )}
-          <div className="bg-white text-zinc-950 px-3 py-1.5 rounded-lg text-[13px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-105">
+          <div className="bg-white text-zinc-950 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-[13px] font-black shadow-[0_10px_30px_rgba(255,255,255,0.2)] group-hover:bg-red-600 group-hover:text-white transition-all transform group-hover:scale-105">
             {product.price}
           </div>
         </div>
       </div>
-
+ 
       {/* Data Panel */}
-      <div className="p-4 sm:p-5 flex flex-1 flex-col justify-between">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-red-500 font-black text-xs uppercase tracking-widest border-b border-red-500/20 pb-0.5">{product.category}</span>
+      <div className="p-3 sm:p-5 flex flex-1 flex-col justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <span className="text-red-500 font-black text-[9px] sm:text-xs uppercase tracking-widest border-b border-red-500/20 pb-0.5">{product.category}</span>
             {/* Added Bike Info if available */}
             {(product as any).bike_brand && (
-              <span className="text-zinc-500 font-black text-xs uppercase tracking-widest">| {(product as any).bike_brand}</span>
+              <span className="text-zinc-500 font-black text-[9px] sm:text-xs uppercase tracking-widest">| {(product as any).bike_brand}</span>
             )}
           </div>
           <h3 
-            className="text-[13px] font-black text-white group-hover:text-red-500 transition-colors tracking-tight leading-tight uppercase line-clamp-1 cursor-pointer"
+            className="text-[11px] sm:text-[13px] font-black text-white group-hover:text-red-500 transition-colors tracking-tight leading-tight uppercase line-clamp-1 cursor-pointer"
             onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
           >
             {product.name}
           </h3>
-          <p className="text-zinc-500 text-[11px] font-medium leading-relaxed line-clamp-1 cursor-pointer" onClick={() => onNavigate(`productDetails?productId=${product.id}`)}>{product.description}</p>
+          <p className="text-zinc-500 text-[10px] sm:text-[11px] font-medium leading-relaxed line-clamp-1 cursor-pointer opacity-80" onClick={() => onNavigate(`productDetails?productId=${product.id}`)}>{product.description}</p>ion}</p>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <div className="flex items-center gap-1 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">

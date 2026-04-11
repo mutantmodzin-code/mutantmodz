@@ -32,7 +32,7 @@ export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
         </div>
 
         {/* Circular Thumbnails Grid */}
-        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-6 lg:gap-8 justify-items-center">
           {bikes.map((bike, idx) => (
             <button
               key={idx}
@@ -40,7 +40,7 @@ export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
               className="flex flex-col items-center gap-2 group touch-manipulation active:scale-95 transition-all duration-300"
             >
               {/* Circular Content Container */}
-              <div className="relative w-full aspect-square rounded-full overflow-hidden border border-white/10 bg-[#f8f8f8] group-hover:bg-white group-hover:border-red-600/50 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] p-2 sm:p-3">
+              <div className="relative w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] lg:w-[110px] lg:h-[110px] rounded-full overflow-hidden border border-white/10 bg-[#f8f8f8] group-hover:bg-white group-hover:border-red-600/50 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] p-2 sm:p-3">
                 <img
                   src={bike.image}
                   alt={bike.name}

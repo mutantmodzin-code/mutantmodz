@@ -91,7 +91,7 @@ export default function About() {
                 Mutant Modz emerged from the asphalt—a synthesis of raw passion and mechanical precision. Founded in the automotive hub of Coimbatore, we identified a void in the market for hardware that didn't just fit, but truly modified the rider's journey.
               </p>
               <p className="animate-on-scroll">
-                Located opposite Vibgyor School in Uppilipalayam, our workshop serves as the core processor for bike customization. We don't just sell parts; we provide tactical upgrades that allow every rider to express their unique identity.
+                Located in Singanallur, opposite Vibgyor School in Uppilipalayam, our workshop serves as the core processor for bike customization. We don't just sell parts; we provide tactical upgrades that allow every rider to express their unique identity. As the premier <strong>pitshop in Coimbatore</strong>, we are committed to excellence.
               </p>
               <div className="pt-10 grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="p-6 bg-zinc-900/50 rounded-3xl border border-white/5 space-y-4">

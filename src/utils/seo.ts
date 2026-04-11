@@ -61,9 +61,9 @@ export function updatePageSEO(config: SEOConfig): void {
 /** Page-specific SEO configurations */
 export const PAGE_SEO: Record<string, SEOConfig> = {
   home: {
-    title: 'Mutant Modz – Best Bike Accessories & Premium Helmets in Coimbatore',
-    description: 'Coimbatore\'s leading bike accessories store & modding shop. Shop premium helmets, Royal Enfield accessories, riding gear, crash guards & performance parts. Visit our Tamil Nadu store or buy online.',
-    keywords: 'bike accessories Coimbatore, premium helmets Coimbatore, Royal Enfield accessories, bike modding shop Tamil Nadu, motorcycle accessories Tamil Nadu, custom bike parts Coimbatore, aftermarket accessories Coimbatore, Mutant Modz Coimbatore',
+    title: 'Mutant Modz – Best Pitshop & Bike Accessories in Coimbatore',
+    description: 'Looking for the best Pit Stop in Coimbatore? Mutant Modz is your #1 pitshop for premium bike accessories, helmets, riding gear, and custom modifications in Singanallur. Shop Royal Enfield accessories & more.',
+    keywords: 'pitshop Coimbatore, pit shop in Coimbatore, Mutant Modz Coimbatore, bike accessories Singanallur, premium helmets Coimbatore, Royal Enfield accessories, bike modding shop Tamil Nadu, mutantmodz, mutant modz',
     canonical: 'https://mutantmodz.in/',
   },
   products: {
@@ -109,15 +109,15 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
     canonical: 'https://mutantmodz.in/#products?cat=combos',
   },
   about: {
-    title: 'About Mutant Modz – Coimbatore\'s Premier Bike Modification Shop',
-    description: 'Mutant Modz is a specialized bike modding shop in Tamil Nadu. Since 2021, we\'ve provided Coimbatore riders with premium helmets, accessories, and expert customization services.',
-    keywords: 'about Mutant Modz, bike shop Coimbatore, best bike accessories Tamil Nadu, motorcycle customization expert Coimbatore',
+    title: 'About Mutant Modz – Coimbatore\'s Premier Bike Modification Pitshop',
+    description: 'Mutant Modz is a specialized bike modding pitshop in Singanallur, Coimbatore. Since 2021, we\'ve provided riders with premium helmets, accessories, and expert customization services.',
+    keywords: 'about Mutant Modz, pitshop Coimbatore, best bike accessories Tamil Nadu, motorcycle customization expert Coimbatore, Singanallur bike shop',
     canonical: 'https://mutantmodz.in/#about',
   },
   contact: {
-    title: 'Contact Mutant Modz – Visit Our Store in Coimbatore, Tamil Nadu',
-    description: 'Find us in Uppilipalayam, Coimbatore. Contact Tamil Nadu\'s favorite bike modding shop for genuine accessories, helmets, and expert advice. Call +91 95975 96755.',
-    keywords: 'Mutant Modz address, bike shop Coimbatore, motorcycle shop phone number Coimbatore, check bike parts availability Coimbatore',
+    title: 'Contact Mutant Modz – Visit Our Pitshop in Singanallur, Coimbatore',
+    description: 'Find the best pit shop in Singanallur, Coimbatore at Mutant Modz. Located in Uppilipalayam, we offer genuine accessories, helmets, and expert advice. Call +91 95975 96755.',
+    keywords: 'Mutant Modz address, pitshop Coimbatore, bike shop Singanallur, motorcycle shop phone number Coimbatore, check bike parts availability Coimbatore',
     canonical: 'https://mutantmodz.in/#contact',
   },
   gallery: {

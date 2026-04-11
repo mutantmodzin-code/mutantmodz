@@ -53,9 +53,9 @@ export default function Contact() {
     {
       icon: MapPin,
       label: 'Address',
-      value: 'Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015',
+      value: 'Singanallur, Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015',
       link: 'https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7',
-      sub: 'Our Location'
+      sub: 'Our Location (Singanallur)'
     },
     {
       icon: Phone,

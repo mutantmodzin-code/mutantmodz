@@ -111,6 +111,75 @@ export default function Home({ onNavigate }: HomeProps) {
           </div>
         </div>
       </section>
+
+      {/* 10. SEO Knowledge Base / Local Content Hub */}
+      <section className="py-16 sm:py-24 bg-zinc-950 border-t border-white/5">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="prose prose-invert prose-zinc max-w-none">
+            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter text-white mb-8">
+              Mutant Modz: The Ultimate <span className="text-red-600">Pitshop Coimbatore</span> for Enthusiasts
+            </h1>
+            
+            <p className="text-zinc-400 text-lg leading-relaxed mb-12 font-medium">
+              Welcome to <strong>Mutant Modz</strong>, the premier destination for automotive enthusiasts in South India. 
+              Located in the heart of Singanallur, we are recognized as the leading <strong>pitshop Coimbatore</strong> has to offer 
+              for those who demand performance, style, and safety. Whether you are looking to enhance your daily commute or 
+              prep your machine for a cross-country adventure, our expert team at our <strong>pit shop in Coimbatore</strong> 
+              is dedicated to transforming your vision into reality.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-12">
+              <div className="space-y-6">
+                <h2 className="text-xl font-black uppercase tracking-widest text-white border-l-4 border-red-600 pl-4">
+                  Bike Accessories in Coimbatore
+                </h2>
+                <p className="text-zinc-500 text-sm leading-relaxed">
+                  Your motorcycle is an extension of your personality. At Mutant Modz (often searched as mutantmodz or mutant modz), we offer an extensive collection of <strong>bike accessories in Coimbatore</strong> designed to improve both the aesthetics and functionality of your ride. From high-performance exhaust systems to ergonomic seats and crash guards, we stock products from the world's most trusted brands.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="text-xl font-black uppercase tracking-widest text-white border-l-4 border-red-600 pl-4">
+                  Riding Gear & Helmets
+                </h2>
+                <p className="text-zinc-500 text-sm leading-relaxed">
+                  Safety should never be a compromise. That is why Mutant Modz is the go-to hub for high-quality <strong>riding gear in Coimbatore</strong>. We house a curated selection of helmets, armored jackets, gloves, and boots that provide maximum protection without sacrificing comfort. Our experts help you find the perfect fit for your style.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="text-xl font-black uppercase tracking-widest text-white border-l-4 border-red-600 pl-4">
+                  Bike & Car Modifications
+                </h2>
+                <p className="text-zinc-500 text-sm leading-relaxed">
+                  Uniqueness is at the core of what we do. Our <strong>bike and car modification</strong> services are tailored to those who want to stand out from the crowd. Our workshop in Singanallur is equipped with state-of-the-art tools to handle everything from subtle aesthetic upgrades to complete performance overhauls. 
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <h2 className="text-xl font-black uppercase tracking-widest text-white border-l-4 border-red-600 pl-4">
+                  Why Choose Mutant Modz?
+                </h2>
+                <p className="text-zinc-500 text-sm leading-relaxed">
+                  Choosing the right partner for your vehicle is crucial. Mutant Modz stands out because of our deep-rooted passion for the automotive culture. We offer expert craftsmanship, genuine parts, and a customer-centric approach that ensures your ride is always in safe hands.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-16 p-8 rounded-3xl bg-zinc-900/50 border border-white/5 text-center">
+              <p className="text-zinc-300 text-lg mb-6">
+                Ready to elevate your riding experience? Visit our store in Singanallur today or call us for expert advice.
+              </p>
+              <button 
+                onClick={() => onNavigate('contact')}
+                className="text-red-500 font-black uppercase tracking-[0.2em] text-sm hover:text-red-400 transition-colors"
+              >
+                Get in Touch with our Pit Shop &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
       
       {/* Scroll to top buffer */}
       <div className="h-20 lg:hidden"></div>

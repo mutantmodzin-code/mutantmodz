@@ -34,5 +34,7 @@ export const getMediaUrl = (url) => {
   
   // 6. Combine base and path
   const separator = cleanUrl.startsWith('/') ? '' : '/';
-  return `${base}${separator}${cleanUrl}`;
+  const finalUrl = `${base}${separator}${cleanUrl}`;
+  console.log('DEBUG: Resolved Media URL:', { input: url, resolved: finalUrl, base, cleanUrl });
+  return finalUrl;
 };

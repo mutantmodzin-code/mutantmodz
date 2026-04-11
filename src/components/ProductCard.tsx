@@ -179,7 +179,7 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
           >
             {product.name}
           </h3>
-          <p className="text-zinc-500 text-[10px] sm:text-[11px] font-medium leading-relaxed line-clamp-1 cursor-pointer opacity-80" onClick={() => onNavigate(`productDetails?productId=${product.id}`)}>{product.description}</p>ion}</p>
+          <p className="text-zinc-500 text-[10px] sm:text-[11px] font-medium leading-relaxed line-clamp-1 cursor-pointer opacity-80" onClick={() => onNavigate(`productDetails?productId=${product.id}`)}>{product.description}</p>
 
           <div className="flex flex-wrap gap-2 pt-2">
             <div className="flex items-center gap-1 text-[10px] font-black text-zinc-400 uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/5">

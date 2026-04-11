@@ -27,7 +27,7 @@ export const brands = [
   { name: 'Guardian Gears', logo: '/brands/GuardianGearsLogoMetallic8-min_600x600.png' },
   { name: 'Bobo', logo: '/brands/BOBO-Logo-Blue-Black.png' },
   { name: 'Carbonado', logo: '/brands/carbondo.jpg' },
-  { name: '100%', logo: '/brands/100%.jpg' },
+  { name: '100%', logo: '/brands/100_percent.jpg' },
   { name: 'Acerbis', logo: '/brands/acerbis.svg' },
   { name: 'Akro', logo: '/brands/akro.png' },
   { name: 'Dochaki', logo: '/brands/dochaki.jpg' },

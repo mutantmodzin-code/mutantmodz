@@ -4,6 +4,8 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { getMediaUrl } from '../utils/url';
+
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
@@ -85,14 +87,6 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
         },
     };
 
-    const getImageUrl = (url: string) => {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-        const base = apiUrl.replace('/api', '');
-        return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
-    };
-
     if (loading) return <div className="h-[50vh] sm:h-[60vh] bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div></div>;
     if (slides.length === 0) return null;
 
@@ -112,7 +106,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                     >
                         <div
                             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
-                            style={{ backgroundImage: `url(${getImageUrl(slides[current].image_url)})` }}
+                            style={{ backgroundImage: `url(${getMediaUrl(slides[current].image_url)})` }}
                         />
                     </motion.div>
                 </AnimatePresence>

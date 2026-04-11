@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getMediaUrl } from '../utils/url';
 import { ShoppingCart, ShoppingBag, ArrowUpRight, CheckCircle, Zap, Flame, Truck, AlertTriangle } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
@@ -8,18 +9,10 @@ import toast from 'react-hot-toast';
 interface ProductCardProps {
   product: Product;
   onNavigate: (page: string) => void;
-  className?: string;
-}
-
-const getImageUrl = (url: string) => {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-  const base = apiUrl.replace('/api', '');
-  return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
-};
-
-const ProductImage = ({ images, alt, isHovered }: { images?: string[], alt: string, isHovered: boolean }) => {
+   className?: string;
+ }
+ 
+ const ProductImage = ({ images, alt, isHovered }: { images?: string[], alt: string, isHovered: boolean }) => {
   const imageList = images && images.length > 0
     ? images.filter(url => url && url.trim() !== '')
     : [];
@@ -32,7 +25,7 @@ const ProductImage = ({ images, alt, isHovered }: { images?: string[], alt: stri
     <div className="relative w-full h-full overflow-hidden">
       {/* Primary Image */}
       <img
-        src={getImageUrl(finalList[0])}
+        src={getMediaUrl(finalList[0])}
         alt={alt}
         className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out ${isHovered && finalList.length > 1 ? 'opacity-0' : 'opacity-100'}`}
       />
@@ -40,7 +33,7 @@ const ProductImage = ({ images, alt, isHovered }: { images?: string[], alt: stri
       {/* Secondary Image for Hover (Dual Image Hover) */}
       {finalList.length > 1 && (
         <img
-          src={getImageUrl(finalList[1])}
+          src={getMediaUrl(finalList[1])}
           alt={`${alt} hover`}
           className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-in-out hidden md:block ${isHovered ? 'opacity-100' : 'opacity-0'}`}
         />

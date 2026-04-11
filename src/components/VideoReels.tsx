@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
+import { getMediaUrl } from '../utils/url';
+
 interface Reel {
   id: number;
   title: string;
@@ -30,14 +32,6 @@ export default function VideoReels() {
   }, []);
 
 
-  const getVideoUrl = (url: string) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
-    const base = apiUrl.replace('/api', '');
-    return `${base}${url.startsWith('/') ? '' : '/'}${url}`;
-  };
-
   if (loading) {
     return (
       <div className="py-24 bg-zinc-950 flex flex-col items-center justify-center gap-4">
@@ -65,7 +59,7 @@ export default function VideoReels() {
         
         <div className="flex gap-3 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory -mx-4 px-4 pb-8">
           {reels.map((v) => {
-            const vUrl = getVideoUrl(v.video_url);
+            const vUrl = getMediaUrl(v.video_url);
             return (
               <div key={v.id} className="flex-shrink-0 w-[240px] sm:w-[320px] aspect-[9/16] rounded-2xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
                  {vUrl ? (

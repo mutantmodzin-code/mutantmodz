@@ -9,28 +9,28 @@ const banners = [
   {
     title: 'Motorcycle Accessories',
     subtitle: 'Mounts, guards & LED upgrades',
-    image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: '/banner/pexels-gautham-reghu-1029880-34035152.jpg',
     link: 'products',
     params: '?cat=Accessories',
   },
   {
     title: 'Riding Gear',
     subtitle: 'Jackets, gloves & protection',
-    image: 'https://images.pexels.com/photos/104842/bmw-vehicle-ride-bike-104842.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: '/banner/IMG_20260411_194553.jpg',
     link: 'products',
     params: '?cat=Riding Gear',
   },
   {
     title: 'Performance Parts',
     subtitle: 'Exhausts, sliders & racing parts',
-    image: 'https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: '/banner/a-machine-tool-and-other-machines-sitting-on-a-black-background-free-photo.jpg',
     link: 'products',
     params: '?cat=Performance Parts',
   },
   {
     title: 'Luggage & Touring',
     subtitle: 'Saddle bags, top boxes & kits',
-    image: 'https://images.pexels.com/photos/5956934/pexels-photo-5956934.jpeg?auto=compress&cs=tinysrgb&w=800',
+    image: '/banner/IMG_20260411_194215.jpg',
     link: 'products',
     params: '?cat=Luggage',
   },
@@ -67,12 +67,12 @@ export default function CategoryBanners({ onNavigate }: CategoryBannersProps) {
   return (
     <section className="bg-zinc-950 py-4 sm:py-8" ref={sectionRef}>
       <div className="px-3 sm:px-8 lg:px-12 max-w-[1700px] mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {banners.map((banner, idx) => (
             <button
               key={idx}
               onClick={() => onNavigate(banner.link, banner.params)}
-              className="category-box scroll-fade-up relative w-full aspect-[1/1.1] sm:aspect-square overflow-hidden rounded-xl sm:rounded-2xl group active:scale-[0.97] transition-transform duration-200 touch-manipulation"
+              className="category-box scroll-fade-up relative w-full aspect-square overflow-hidden rounded-xl sm:rounded-2xl group active:scale-[0.97] transition-transform duration-200 touch-manipulation"
             >
               {/* Background Image */}
               <img

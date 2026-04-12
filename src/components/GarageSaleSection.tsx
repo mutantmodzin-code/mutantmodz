@@ -149,12 +149,12 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
       
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
         <div className="flex flex-col items-center text-center gap-6 mb-12 sm:mb-16">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">
+          <div className="space-y-3 sm:space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">
               <Zap size={14} className="text-orange-500 fill-current" />
-              <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.2em]">Flash Clearance</span>
+              <span className="text-xs sm:text-sm font-black text-orange-500 uppercase tracking-[0.2em]">Flash Clearance</span>
             </div>
-            <h2 className="text-4xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-[0.8]">
+            <h2 className="text-[2.5rem] sm:text-6xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] mt-2">
               TODAY <span className="text-orange-600">SALES!!</span>
             </h2>
             <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-xl mx-auto">

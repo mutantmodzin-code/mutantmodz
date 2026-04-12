@@ -91,9 +91,9 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
     if (slides.length === 0) return null;
 
     return (
-        <section className="relative h-[45vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] w-full overflow-hidden bg-black">
-            {/* Background Slideshow */}
-            <div className="absolute inset-0 z-0">
+        <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-x-hidden bg-black">
+            {/* 1. Main Banner Image Area (Force Full Width) */}
+            <div className="relative h-[65vh] sm:h-[75vh] md:h-[80vh] w-full overflow-hidden">
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={current}
@@ -104,113 +104,91 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         exit="exit"
                         className="absolute inset-0 w-full h-full"
                     >
-                        <div
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
-                            style={{ backgroundImage: `url(${getMediaUrl(slides[current].image_url)})` }}
+                        {/* Use real img tag with object-fit for the edge-to-edge guarantee */}
+                        <img
+                            src={getMediaUrl(slides[current].image_url)}
+                            alt={slides[current].title_red || 'Hero Banner'}
+                            className="w-full h-full object-cover transition-transform duration-1000 scale-105"
                         />
+                        {/* Gradient Overlay for text contrast */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
                     </motion.div>
                 </AnimatePresence>
+
+                {/* Content - Hero Text Overlay */}
+                <div className="relative z-20 h-full flex items-center justify-center px-6 lg:px-8">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 1 }}
+                        className="text-center"
+                    >
+                        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                            {slides[current].title_white}
+                            {slides[current].title_red && (
+                                <span className="block text-red-600 filter drop-shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                                    {slides[current].title_red}
+                                </span>
+                            )}
+                        </h1>
+                        <p className="mt-8 text-zinc-300 text-sm sm:text-xl font-bold uppercase tracking-[0.4em] max-w-3xl mx-auto opacity-70">
+                            {slides[current].subtitle}
+                        </p>
+                    </motion.div>
+                </div>
+
+                {/* Slide Indicators */}
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-4">
+                    {slides.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => {
+                                setDirection(index > current ? 1 : -1);
+                                setCurrent(index);
+                            }}
+                            className={cn(
+                                "h-1 transition-all duration-700 rounded-full",
+                                current === index ? "w-16 bg-red-600" : "w-6 bg-white/20 hover:bg-white/40"
+                            )}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
+                </div>
             </div>
 
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none" />
-            <div className="absolute inset-0 z-10 bg-black/20 pointer-events-none" />
-
-            {/* Content */}
-            <div className="relative z-20 h-full flex items-center justify-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="max-w-4xl"
-                >
-                    <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 leading-none tracking-tighter uppercase">
-                        {slides[current].title_white}
-                        {slides[current].title_red && (
-                            <span className="block text-red-600 mt-1 filter drop-shadow-lg">
-                                {slides[current].title_red}
-                            </span>
-                        )}
-                    </h1>
-                    
-                    <div className="flex flex-row gap-3 sm:gap-6 justify-center">
-                        <button
-                            onClick={() => onNavigate('products')}
-                            className="group bg-red-600 hover:bg-black text-white px-6 py-3 sm:px-10 sm:py-4 rounded-xl text-sm sm:text-base font-bold flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-xl shadow-red-600/20"
-                        >
-                            Explore Store
-                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-                        </button>
-                        <button
-                            onClick={() => onNavigate('contact')}
-                            className="bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white hover:text-black text-white px-6 py-3 sm:px-10 sm:py-4 rounded-xl text-sm sm:text-base font-bold transition-all transform active:scale-95"
-                        >
-                            Get Contact
-                        </button>
-                    </div>
-                </motion.div>
+            {/* 2. Primary CTA Space - Relocated Below Banner Image */}
+            <div className="bg-zinc-950 border-b border-white/5 py-12 sm:py-20 px-6">
+                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-6 justify-center items-center">
+                    <button
+                        onClick={() => onNavigate('products')}
+                        className="w-full sm:w-auto h-[70px] px-12 bg-red-600 hover:bg-red-700 hover:scale-105 text-white rounded-full text-lg font-black uppercase tracking-widest transition-all shadow-[0_20px_40px_-10px_rgba(220,38,38,0.3)] flex items-center justify-center gap-3"
+                    >
+                        Explore Store <ArrowRight size={24} />
+                    </button>
+                    <button
+                        onClick={() => onNavigate('contact')}
+                        className="w-full sm:w-auto h-[70px] px-12 bg-zinc-900 border border-zinc-800 hover:border-red-600 hover:text-red-500 hover:scale-105 text-zinc-300 rounded-full text-lg font-black uppercase tracking-widest transition-all"
+                    >
+                        Get Contact
+                    </button>
+                </div>
             </div>
 
-            {/* Navigation Arrows */}
+            {/* Navigation Arrows (Hidden and desktop) */}
             <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white hover:bg-red-600 transition-all group hidden md:block"
+                className="absolute left-8 top-[40vh] -translate-y-1/2 z-30 p-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-red-600 transition-all hidden lg:block group"
                 aria-label="Previous slide"
             >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={28} />
             </button>
             <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white hover:bg-red-600 transition-all group hidden md:block"
+                className="absolute right-8 top-[40vh] -translate-y-1/2 z-30 p-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white hover:bg-red-600 transition-all hidden lg:block group"
                 aria-label="Next slide"
             >
-                <ChevronRight size={20} />
+                <ChevronRight size={28} />
             </button>
-
-            {/* Slide Indicators */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-                {slides.map((_, index) => (
-                    <button
-                        key={index}
-                        onClick={() => {
-                            setDirection(index > current ? 1 : -1);
-                            setCurrent(index);
-                        }}
-                        className={cn(
-                            "h-1.5 transition-all duration-300 rounded-full",
-                            current === index ? "w-8 bg-red-600" : "w-3 bg-white/30 hover:bg-white/50"
-                        )}
-                        aria-label={`Go to slide ${index + 1}`}
-                    />
-                ))}
-            </div>
-
-            {/* Scroll Down Indicator */}
-            <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 hidden lg:flex flex-col items-center gap-2 text-white/50 cursor-pointer"
-                onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-            >
-                <span className="text-xs font-black uppercase tracking-[0.3em] ml-1">Scroll</span>
-                <div className="w-px h-12 bg-white/20 relative">
-                    <motion.div
-                        animate={{ top: ['0%', '70%', '0%'] }}
-                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                        className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-600 rounded-full"
-                    />
-                </div>
-            </motion.div>
-
-            {/* Parallax elements (Hidden on small mobile) */}
-            <motion.div
-                style={{ y: y2 }}
-                className="absolute top-20 right-20 w-64 h-64 bg-red-600/5 rounded-full blur-[100px] pointer-events-none z-10 hidden sm:block"
-            />
-            <motion.div
-                style={{ y: y1 }}
-                className="absolute bottom-20 left-20 w-96 h-96 bg-red-600/10 rounded-full blur-[120px] pointer-events-none z-10 hidden sm:block"
-            />
         </section>
     );
 }

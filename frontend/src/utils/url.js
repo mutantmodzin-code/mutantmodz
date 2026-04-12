@@ -4,8 +4,12 @@ export const getMediaUrl = (url) => {
   // 1. Clean up any accidental localhost strings from the database
   let cleanUrl = url.replace('http://localhost:3001', '');
   
-  // 2. If it's already an absolute external URL or a Base64 data URI, return it
-  if (cleanUrl.startsWith('http') || cleanUrl.startsWith('data:')) return cleanUrl;
+  // 2. If it's already a full URL or a data/blob URI, return it as-is
+  if (
+    cleanUrl.startsWith('http') || 
+    cleanUrl.startsWith('data:') || 
+    cleanUrl.startsWith('blob:')
+  ) return cleanUrl;
   
   // 3. Get the API URL from environment variables
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -19,8 +23,7 @@ export const getMediaUrl = (url) => {
   // 5. If running in production (not localhost) and API URL is missing 
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
     if (!base) {
-       // Browser will try to resolve relative to current domain, which fails for Admin on Vercel
-       // We really need VITE_API_URL here, but as a fallback we stay relative
+       // Browser will try to resolve relative to current domain
        return cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`;
     }
     // Ensure base uses https if the page is https
@@ -34,7 +37,5 @@ export const getMediaUrl = (url) => {
   
   // 6. Combine base and path
   const separator = cleanUrl.startsWith('/') ? '' : '/';
-  const finalUrl = `${base}${separator}${cleanUrl}`;
-  console.log('DEBUG: Resolved Media URL:', { input: url, resolved: finalUrl, base, cleanUrl });
-  return finalUrl;
+  return `${base}${separator}${cleanUrl}`;
 };

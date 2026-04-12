@@ -202,7 +202,7 @@ const ManageHero = () => {
                                     disabled={uploading}
                                     style={{ flex: 1, backgroundColor: '#0f172a', color: 'white', padding: '1rem', borderRadius: '0.75rem', border: 'none', fontWeight: 800, cursor: uploading ? 'not-allowed' : 'pointer' }}
                                 >
-                                    {uploading ? 'SAVING...' : (editingSlide ? 'UPDATE SLIDE' : 'DEPKLOY SLIDE')}
+                                    {uploading ? 'SAVING...' : (editingSlide ? 'UPDATE SLIDE' : 'DEPLOY SLIDE')}
                                 </button>
                                 <button
                                     type="button"

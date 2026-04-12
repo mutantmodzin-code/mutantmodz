@@ -4,8 +4,12 @@ export const getMediaUrl = (url: string) => {
   // 1. Clean up any accidental localhost strings from the database
   let cleanUrl = url.replace('http://localhost:3001', '');
   
-  // 2. If it's already an absolute external URL or a Base64 data URI, return it
-  if (cleanUrl.startsWith('http') || cleanUrl.startsWith('data:')) return cleanUrl;
+  // 2. If it's already a full URL or a data/blob URI, return it as-is
+  if (
+    cleanUrl.startsWith('http') || 
+    cleanUrl.startsWith('data:') || 
+    cleanUrl.startsWith('blob:')
+  ) return cleanUrl;
   
   // 3. Get the API URL from environment variables
   const apiUrl = (import.meta as any).env?.VITE_API_URL;

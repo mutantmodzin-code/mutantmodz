@@ -286,7 +286,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3 pr-1">
                <button
                  onClick={() => setShowMobileSearch(true)}
                  aria-label="Open Search"

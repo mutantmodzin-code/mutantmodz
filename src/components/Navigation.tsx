@@ -271,9 +271,9 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
             <button
                onClick={() => onOpenMenu?.()}
                aria-label="Open Navigation Menu"
-               className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-white active:scale-95 touch-manipulation transition-all"
+               className="h-[48px] w-[48px] flex items-center justify-center rounded-xl text-white active:scale-90 touch-manipulation transition-all bg-white/5 border border-white/5"
              >
-              <Menu size={24} strokeWidth={2} />
+              <Menu size={26} strokeWidth={2.5} />
             </button>
 
             <div
@@ -580,7 +580,9 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
             </div>
           </div>
         </div>
-        <AnnouncementBar />
+        <div className="hidden lg:block">
+          <AnnouncementBar />
+        </div>
       </nav>
 
       {showMobileSearch && (
@@ -627,6 +629,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       {/* Spacer to prevent content from going under the fixed nav */}
       <div className="h-[56px] lg:hidden"></div>
       <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[50px]' : 'h-[90px]'}`}></div>
+      
     </>
   );
 }

@@ -63,7 +63,8 @@ export default function Home({ onNavigate }: HomeProps) {
       <TestimonialSlider />
 
       {/* Final Premium CTA Section */}
-      <section className="py-8 sm:py-20 relative overflow-hidden bg-zinc-900/40">
+      {/* Final Premium CTA Section */}
+      <section className="py-12 sm:py-20 relative overflow-hidden bg-zinc-900/40">
         <div className="absolute inset-0 bg-gradient-to-b from-red-600/5 to-transparent pointer-events-none"></div>
         <div className="max-w-5xl mx-auto px-6 text-center space-y-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-600/20 bg-red-600/5 backdrop-blur-sm mb-1">
@@ -79,13 +80,13 @@ export default function Home({ onNavigate }: HomeProps) {
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <button
               onClick={() => onNavigate('products')}
-              className="group bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-xl shadow-red-600/20"
+              className="group bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-xl shadow-red-600/20"
             >
               Shop All Products <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={() => onNavigate('contact')}
-              className="px-6 py-3.5 rounded-xl border border-white/10 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 bg-zinc-900/60 backdrop-blur-md"
+              className="px-6 py-4 rounded-2xl border border-white/10 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 bg-zinc-900/60 backdrop-blur-md"
             >
               Visit Our Store
             </button>
@@ -182,7 +183,7 @@ export default function Home({ onNavigate }: HomeProps) {
       </section>
       
       {/* Scroll to top buffer */}
-      <div className="h-20 lg:hidden"></div>
+      <div className="h-32 lg:hidden"></div>
     </div>
   );
 }

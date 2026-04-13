@@ -6,7 +6,7 @@ export default function WhatsAppButton() {
   const whatsappUrl = `https://wa.me/91${9597596755}?text=${encodeURIComponent(message)}`;
 
   return (
-    <div className="fixed bottom-[80px] sm:bottom-[20px] right-[16px] sm:right-[20px] z-[60] group">
+    <div className="fixed bottom-[180px] sm:bottom-[20px] right-[16px] sm:right-[20px] z-[60] group">
       {/* Pulse Animation Layers */}
       <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20 group-hover:opacity-40 transition-opacity"></span>
       <span className="absolute -inset-2 rounded-full bg-[#25D366] animate-pulse opacity-10 group-hover:opacity-20 transition-opacity delay-75"></span>

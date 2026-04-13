@@ -91,9 +91,9 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
     if (slides.length === 0) return null;
 
     return (
-        <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-x-hidden bg-black">
+        <section className="relative w-full overflow-hidden bg-black">
             {/* 1. Main Banner Image Area (Force Full Width) */}
-            <div className="relative h-[65vh] sm:h-[75vh] md:h-[80vh] w-full overflow-hidden">
+            <div className="relative h-[70vh] sm:h-[75vh] md:h-[80vh] w-full overflow-hidden">
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={current}
@@ -108,37 +108,37 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         <img
                             src={getMediaUrl(slides[current].image_url)}
                             alt={slides[current].title_red || 'Hero Banner'}
-                            className="w-full h-full object-cover transition-transform duration-1000 scale-105"
+                            className="w-full h-full object-cover transition-transform duration-1000 scale-100 sm:scale-105"
                         />
-                        {/* Gradient Overlay for text contrast */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
+                        {/* Enhanced Gradient Overlay for text contrast */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/50" />
                     </motion.div>
                 </AnimatePresence>
 
                 {/* Content - Hero Text Overlay */}
                 <div className="relative z-20 h-full flex items-center justify-center px-6 lg:px-8">
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1 }}
-                        className="text-center"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center w-full max-w-5xl"
                     >
-                        <h1 className="text-4xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                             {slides[current].title_white}
                             {slides[current].title_red && (
-                                <span className="block text-red-600 filter drop-shadow-[0_0_30px_rgba(220,38,38,0.4)]">
+                                <span className="block text-red-600 filter drop-shadow-[0_0_30px_rgba(220,38,38,0.5)] mt-2 sm:mt-0">
                                     {slides[current].title_red}
                                 </span>
                             )}
                         </h1>
-                        <p className="mt-6 text-zinc-300 text-[10px] sm:text-xl font-bold uppercase tracking-[0.4em] max-w-3xl mx-auto opacity-70">
+                        <p className="mt-8 text-zinc-300 text-[11px] sm:text-lg md:text-xl font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-2xl mx-auto opacity-90 drop-shadow-md">
                             {slides[current].subtitle}
                         </p>
                     </motion.div>
                 </div>
 
                 {/* Slide Indicators */}
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-4">
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-3">
                     {slides.map((_, index) => (
                         <button
                             key={index}
@@ -148,7 +148,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                             }}
                             className={cn(
                                 "h-1 transition-all duration-700 rounded-full",
-                                current === index ? "w-16 bg-red-600" : "w-6 bg-white/20 hover:bg-white/40"
+                                current === index ? "w-12 sm:w-16 bg-red-600" : "w-4 sm:w-6 bg-white/30 hover:bg-white/50"
                             )}
                             aria-label={`Go to slide ${index + 1}`}
                         />
@@ -157,17 +157,17 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
             </div>
 
             {/* 2. Primary CTA Space - Relocated Below Banner Image */}
-            <div className="bg-zinc-950 border-b border-white/5 py-8 sm:py-20 px-6">
+            <div className="bg-zinc-950 border-b border-white/5 py-10 sm:py-20 px-4 sm:px-6">
                 <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <button
                         onClick={() => onNavigate('products')}
-                        className="w-full sm:w-auto h-14 sm:h-[70px] px-8 sm:px-12 bg-red-600 hover:bg-red-700 hover:scale-105 text-white rounded-full text-xs sm:text-lg font-black uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-3"
+                        className="w-full sm:w-[280px] h-14 sm:h-[70px] px-8 sm:px-12 bg-red-600 hover:bg-red-700 hover:scale-[1.02] text-white rounded-2xl sm:rounded-full text-xs sm:text-lg font-black uppercase tracking-widest transition-all shadow-2xl shadow-red-600/30 flex items-center justify-center gap-3 active:scale-95"
                     >
-                        Explore Store <ArrowRight size={18} />
+                        Explore Store <ArrowRight size={20} />
                     </button>
                     <button
                         onClick={() => onNavigate('contact')}
-                        className="w-full sm:w-auto h-14 sm:h-[70px] px-8 sm:px-12 bg-zinc-900 border border-zinc-800 hover:border-red-600 hover:text-red-500 hover:scale-105 text-zinc-300 rounded-full text-xs sm:text-lg font-black uppercase tracking-widest transition-all"
+                        className="w-full sm:w-[280px] h-14 sm:h-[70px] px-8 sm:px-12 bg-zinc-900 border border-white/10 hover:border-red-600 hover:text-red-500 hover:scale-[1.02] text-zinc-300 rounded-2xl sm:rounded-full text-xs sm:text-lg font-black uppercase tracking-widest transition-all active:scale-95"
                     >
                         Get Contact
                     </button>

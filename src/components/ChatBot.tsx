@@ -145,7 +145,7 @@ export default function ChatBot() {
             <button
                 onClick={() => setIsOpen((v) => !v)}
                 aria-label={isOpen ? 'Close chat' : 'Open chat'}
-                className="fixed bottom-6 right-6 z-50 w-16 h-16 rounded-[1.5rem] bg-red-600 hover:bg-white text-white hover:text-red-600 shadow-2xl flex items-center justify-center transition-all duration-500 hover:rotate-12 group border-4 border-zinc-950"
+                className="fixed bottom-28 sm:bottom-6 right-6 z-50 w-16 h-16 rounded-[1.5rem] bg-red-600 hover:bg-white text-white hover:text-red-600 shadow-2xl flex items-center justify-center transition-all duration-500 hover:rotate-12 group border-4 border-zinc-950"
             >
                 {isOpen ? <X size={24} /> : <Zap size={24} className="group-hover:animate-pulse" />}
                 {!isOpen && (

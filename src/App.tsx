@@ -88,7 +88,7 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-zinc-950 overflow-x-hidden w-full">
       <Navigation
         currentPage={currentPage}
         onNavigate={navigate}

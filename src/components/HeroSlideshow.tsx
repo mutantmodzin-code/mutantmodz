@@ -35,7 +35,17 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                 const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
                 const res = await fetch(`${apiUrl}/hero`);
                 const data = await res.json();
-                setSlides(data.filter((s: any) => s.is_active));
+                const activeSlides = data.filter((s: any) => s.is_active);
+                setSlides(activeSlides);
+
+                // PERFORMANCE BOOST: Eagerly pre-load all hero images into browser cache instantly 
+                // after the API resolves, so they don't wait for React hydration/animations.
+                activeSlides.forEach((slide: Slide) => {
+                    if (slide.image_url) {
+                        const img = new Image();
+                        img.src = getMediaUrl(slide.image_url);
+                    }
+                });
             } catch (err) {
                 console.error('Error fetching slides:', err);
             } finally {
@@ -103,6 +113,9 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         <img
                             src={getMediaUrl(slides[current].image_url)}
                             alt={slides[current].title_red || 'Hero Banner'}
+                            fetchPriority="high"
+                            loading="eager"
+                            decoding="async"
                             className="w-full h-full object-cover transition-transform duration-1000 scale-100 sm:scale-105"
                         />
                         {/* Enhanced Gradient Overlay for text contrast */}

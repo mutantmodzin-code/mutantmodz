@@ -128,7 +128,6 @@ export default function Products({ onNavigate }: ProductsProps) {
       const bike = searchParams.get('bike');
       const model = searchParams.get('model');
       const comboType = searchParams.get('comboType');
-      setSelectedComboType(comboType ? decodeURIComponent(comboType) : null);
 
       if (search) setSearchQuery(decodeURIComponent(search));
       else if (bike) setSearchQuery(decodeURIComponent(bike));
@@ -140,9 +139,9 @@ export default function Products({ onNavigate }: ProductsProps) {
       }
 
       if (brand) {
-        setSelectedBrand(decodeURIComponent(brand).toLowerCase());
+        setSelectedBrands([decodeURIComponent(brand).toLowerCase()]);
       } else {
-        setSelectedBrand(null);
+        setSelectedBrands([]);
       }
 
       if (cat) {

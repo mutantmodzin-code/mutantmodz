@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence, Variants, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -24,11 +24,6 @@ interface HeroSlideshowProps {
 }
 
 export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
-    const { scrollY } = useScroll();
-    const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-    const y2 = useTransform(scrollY, [0, 500], [0, -150]);
-    const opacity = useTransform(scrollY, [0, 300], [1, 0]);
-
     const [slides, setSlides] = useState<Slide[]>([]);
     const [loading, setLoading] = useState(true);
     const [current, setCurrent] = useState(0);

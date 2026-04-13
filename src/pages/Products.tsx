@@ -6,9 +6,6 @@ import { getProducts, getCombos, getGarageSale, getNewArrivals } from '../utils/
 import { Product } from '../types';
 import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 import ProductCard from '../components/ProductCard';
-import { brands } from '../data/brands';
-import { bikes } from '../components/ShopByBike';
-
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
@@ -19,13 +16,11 @@ interface ProductsProps {
 
 export default function Products({ onNavigate }: ProductsProps) {
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('featured');
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [selectedComboType, setSelectedComboType] = useState<string | null>(null);
 
   const [expandedSections, setExpandedSections] = useState<string[]>(['availability', 'price', 'brand', 'product-type']);
   const toggleSection = (section: string) => {

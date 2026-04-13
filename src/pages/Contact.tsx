@@ -84,7 +84,7 @@ export default function Contact() {
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000`}>
 
       {/* Communication Hub Header */}
-      <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[40vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black">
           <img
             src="https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg"
@@ -95,15 +95,15 @@ export default function Contact() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950"></div>
 
         <div className="max-w-5xl mx-auto relative z-10 px-6 text-center pt-20">
-          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-4 py-2 rounded-full mb-8">
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
-            <span className="text-red-500 text-xs font-black uppercase tracking-[0.4em]">Ready to Contact</span>
+          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-3 py-1.5 rounded-full mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+            <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Ready to Contact</span>
           </div>
-          <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6">
+          <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter leading-tight uppercase mb-4">
             GET IN <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">TOUCH</span>
           </h1>
-          <p className="text-lg text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[12px] opacity-80">
+          <p className="text-sm text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] opacity-80 leading-relaxed">
             Get in touch with the Mutant Modz support team.
           </p>
         </div>
@@ -114,11 +114,11 @@ export default function Contact() {
         <div className="max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-20">
 
           {/* Methods Array (Left Side) */}
-          <div className="lg:col-span-5 space-y-8 sm:space-y-10">
-            <div className="space-y-4 mb-8 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">CONTACT <span className="text-red-600">OPTIONS</span></h2>
-              <div className="w-16 h-1 bg-red-600"></div>
-              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-xs">Choose how you want to contact us</p>
+          <div className="lg:col-span-5 space-y-6 sm:space-y-8">
+            <div className="space-y-3 mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">CONTACT <span className="text-red-600">OPTIONS</span></h2>
+              <div className="w-12 h-1 bg-red-600"></div>
+              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[10px]">Choose how you want to contact us</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
@@ -165,13 +165,13 @@ export default function Contact() {
 
           {/* Contact Form (Right Side) */}
           <div className="lg:col-span-7">
-            <div className="bg-zinc-900/40 backdrop-blur-3xl p-6 sm:p-20 rounded-2xl sm:rounded-[4rem] border border-white/5 shadow-2xl relative overflow-hidden">
+            <div className="bg-zinc-900/40 backdrop-blur-3xl p-6 sm:p-12 md:p-16 rounded-2xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent"></div>
 
-              <div className="relative z-10 space-y-8 sm:space-y-12">
-                <div className="space-y-3 sm:space-y-4">
-                  <h3 className="text-3xl sm:text-5xl font-black text-white leading-none uppercase tracking-tighter">CONTACT <br /><span className="text-red-600">US</span></h3>
-                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-xs">Fill the form below and we will contact you</p>
+              <div className="relative z-10 space-y-6 sm:space-y-10">
+                <div className="space-y-2 sm:space-y-3">
+                  <h3 className="text-2xl sm:text-4xl font-black text-white leading-none uppercase tracking-tighter">CONTACT <br /><span className="text-red-600">US</span></h3>
+                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[10px]">Fill the form below and we will contact you</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-10">
@@ -234,7 +234,7 @@ export default function Contact() {
                   <button
                     type="submit"
                     disabled={isLoading || submitted}
-                    className={`relative w-full h-16 sm:h-20 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-xs transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden disabled:opacity-80 ${
+                    className={`relative w-full h-14 sm:h-16 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-[11px] transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden disabled:opacity-80 ${
                       submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
                     }`}
                   >
@@ -261,10 +261,10 @@ export default function Contact() {
       {/* Map Section */}
       <section className="py-12 sm:py-24 px-4 sm:px-12 bg-black border-t border-white/5">
         <div className="max-w-[1700px] mx-auto text-center space-y-8 sm:space-y-12">
-          <div className="space-y-4">
-            <Target size={40} className="text-red-600 mx-auto" />
-            <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
-            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-xs">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
+          <div className="space-y-3">
+            <Target size={32} className="text-red-600 mx-auto" />
+            <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
+            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[10px]">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
           </div>
 
           <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl relative group">
@@ -294,9 +294,9 @@ export default function Contact() {
             href="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 px-10 py-5 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.3em] text-base rounded-2xl transition-all active:scale-95 shadow-xl shadow-red-600/30"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.3em] text-xs rounded-2xl transition-all active:scale-95 shadow-xl shadow-red-600/30"
           >
-            <Target size={18} />
+            <Target size={16} />
             Get Directions
           </a>
         </div>

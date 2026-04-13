@@ -123,7 +123,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         transition={{ duration: 1 }}
                         className="text-center"
                     >
-                        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                        <h1 className="text-4xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
                             {slides[current].title_white}
                             {slides[current].title_red && (
                                 <span className="block text-red-600 filter drop-shadow-[0_0_30px_rgba(220,38,38,0.4)]">
@@ -131,7 +131,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                                 </span>
                             )}
                         </h1>
-                        <p className="mt-8 text-zinc-300 text-sm sm:text-xl font-bold uppercase tracking-[0.4em] max-w-3xl mx-auto opacity-70">
+                        <p className="mt-6 text-zinc-300 text-[10px] sm:text-xl font-bold uppercase tracking-[0.4em] max-w-3xl mx-auto opacity-70">
                             {slides[current].subtitle}
                         </p>
                     </motion.div>
@@ -157,17 +157,17 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
             </div>
 
             {/* 2. Primary CTA Space - Relocated Below Banner Image */}
-            <div className="bg-zinc-950 border-b border-white/5 py-12 sm:py-20 px-6">
-                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <div className="bg-zinc-950 border-b border-white/5 py-8 sm:py-20 px-6">
+                <div className="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <button
                         onClick={() => onNavigate('products')}
-                        className="w-full sm:w-auto h-[70px] px-12 bg-red-600 hover:bg-red-700 hover:scale-105 text-white rounded-full text-lg font-black uppercase tracking-widest transition-all shadow-[0_20px_40px_-10px_rgba(220,38,38,0.3)] flex items-center justify-center gap-3"
+                        className="w-full sm:w-auto h-14 sm:h-[70px] px-8 sm:px-12 bg-red-600 hover:bg-red-700 hover:scale-105 text-white rounded-full text-xs sm:text-lg font-black uppercase tracking-widest transition-all shadow-xl flex items-center justify-center gap-3"
                     >
-                        Explore Store <ArrowRight size={24} />
+                        Explore Store <ArrowRight size={18} />
                     </button>
                     <button
                         onClick={() => onNavigate('contact')}
-                        className="w-full sm:w-auto h-[70px] px-12 bg-zinc-900 border border-zinc-800 hover:border-red-600 hover:text-red-500 hover:scale-105 text-zinc-300 rounded-full text-lg font-black uppercase tracking-widest transition-all"
+                        className="w-full sm:w-auto h-14 sm:h-[70px] px-8 sm:px-12 bg-zinc-900 border border-zinc-800 hover:border-red-600 hover:text-red-500 hover:scale-105 text-zinc-300 rounded-full text-xs sm:text-lg font-black uppercase tracking-widest transition-all"
                     >
                         Get Contact
                     </button>

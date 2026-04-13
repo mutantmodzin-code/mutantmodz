@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Package,
     ChevronDown,
@@ -9,10 +9,13 @@ import {
     Building2,
     ArrowLeft,
     Check,
-    X
+    X,
+    ShoppingCart
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
+import { getProducts, getCombos, getGarageSale } from '../utils/storage';
+import { Product } from '../types';
 
 const SectionHeader = ({ title, icon: Icon }: { title: string, icon?: any }) => (
     <div className="flex items-center gap-3 mb-8 pb-4 border-b border-zinc-800/50">
@@ -35,14 +38,59 @@ const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
 );
 
 export default function Payment() {
-    const { items: cartItems, totalPrice, clearCart } = useCart();
+    const { items: cartItems, totalPrice: cartTotalPrice, clearCart } = useCart();
     const { user } = useUserAuth();
     const [paymentDone, setPaymentDone] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('razorpay');
     const [deliveryCharge, setDeliveryCharge] = useState(100);
     const [isFetchingCharge, setIsFetchingCharge] = useState(false);
+    const [buyNowProduct, setBuyNowProduct] = useState<{product: Product, quantity: number} | null>(null);
     const orderProcessed = { current: false };
+
+    useEffect(() => {
+        const checkBuyNow = async () => {
+            const hash = window.location.hash;
+            if (!hash.includes('productId=')) return;
+
+            const params = new URLSearchParams(hash.split('?')[1]);
+            const productId = params.get('productId');
+            const type = params.get('type');
+            const quantity = parseInt(localStorage.getItem('checkout_quantity') || '1');
+
+            if (productId) {
+                setIsLoading(true);
+                try {
+                    let product: Product | undefined;
+                    if (type === 'combo') {
+                        const combos = await getCombos();
+                        product = combos.find(c => c.id === productId);
+                    } else if (type === 'garage') {
+                        const garage = await getGarageSale();
+                        product = garage.find(g => g.id === productId);
+                    } else {
+                        const products = await getProducts();
+                        product = products.find(p => p.id === productId);
+                    }
+
+                    if (product) {
+                        setBuyNowProduct({ product, quantity });
+                    }
+                } catch (error) {
+                    console.error('Error fetching buy now product:', error);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        };
+        checkBuyNow();
+    }, []);
+
+    // Combine items: Use buyNowProduct if available, otherwise use cartItems
+    const items = buyNowProduct ? [buyNowProduct] : cartItems;
+    const totalPrice = buyNowProduct 
+        ? parseFloat(String(buyNowProduct.product.price).replace(/[^0-9.]/g, '')) * buyNowProduct.quantity
+        : cartTotalPrice;
 
     const fetchDeliveryCharge = async (state: string, city: string) => {
         if (!state) return;
@@ -85,19 +133,21 @@ export default function Payment() {
         });
     };
 
-    // Redirect if no cart items
-    if (cartItems.length === 0 && !paymentDone) {
+    // Redirect if no items
+    if (items.length === 0 && !paymentDone) {
         return (
             <div className="min-h-screen bg-zinc-950 flex items-center justify-center pt-20 px-4">
                 <div className="text-center space-y-6 animate-on-scroll">
                     <div className="w-24 h-24 bg-zinc-900 rounded-[2rem] flex items-center justify-center mx-auto border border-zinc-800">
                         <Package size={40} className="text-zinc-600" />
                     </div>
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Cart Empty</h2>
-                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Please add items to proceed with checkout.</p>
-                    <a href="/products" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-4 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase mt-8">
-                        Continue Shopping
-                    </a>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{isLoading ? 'Loading Checkout...' : 'Arsenal Empty'}</h2>
+                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">{isLoading ? 'Synchronizing with database servers...' : 'Please add modules to proceed with deployment.'}</p>
+                    {!isLoading && (
+                        <a href="/#products" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-4 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase mt-8">
+                            Continue Scavenging
+                        </a>
+                    )}
                 </div>
             </div>
         );
@@ -124,15 +174,17 @@ export default function Payment() {
             const subtotal = totalPrice;
             const totalAmt = subtotal + shippingNum;
 
-            // Build items array from cart
-            const items = cartItems.map(cartItem => ({
-                product_id: cartItem.product.is_combo ? null : cartItem.product.id,
-                combo_id: cartItem.product.is_combo ? cartItem.product.id : null,
-                quantity: cartItem.quantity,
-                unit_price: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')),
-                line_total: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity,
+            // Build items array from current items (either Buy Now or Cart)
+            const apiItems = items.map(item => ({
+                product_id: (item.product.is_combo || item.product.is_garage_sale) ? null : item.product.id,
+                combo_id: item.product.is_combo ? item.product.id : null,
+                garage_sale_id: item.product.is_garage_sale ? item.product.id : null,
+                quantity: item.quantity,
+                unit_price: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')),
+                line_total: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
                 gst_percentage: 0,
-                taxable_amount: parseFloat(String(cartItem.product.price).replace(/[^0-9.]/g, '')) * cartItem.quantity
+                taxable_amount: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
+                selected_size: (item as any).size || null
             }));
 
             // Create invoice using API
@@ -154,7 +206,7 @@ export default function Payment() {
                     payment_method: paymentMethod.toUpperCase(),
                     payment_id: razorpayPaymentId,
                     gst_percentage: 0,
-                    items: items,
+                    items: apiItems,
                     shipping_address: `${customer.address}, ${customer.city}, ${customer.state} - ${customer.zip}`,
                     delivery_charge: deliveryCharge
                 })
@@ -165,8 +217,12 @@ export default function Payment() {
                 throw new Error(errorData.error || errorData.message || 'Failed to create invoice');
             }
 
-            // Clear cart after successful order
-            clearCart();
+            // Clear data after successful order
+            if (!buyNowProduct) clearCart();
+            else {
+                localStorage.removeItem('checkout_quantity');
+                localStorage.removeItem('checkout_size');
+            }
             setPaymentDone(true);
         } catch (error: any) {
             orderProcessed.current = false;
@@ -207,7 +263,7 @@ export default function Payment() {
                 amount: Math.round(totalAmt * 100), // Amount in paise
                 currency: 'INR',
                 name: 'MUTANT MODZ',
-                description: `Order for ${cartItems.length} modules`,
+                description: `Order for ${items.length} modules`,
                 handler: function (response: any) {
                     processOrder(response.razorpay_payment_id);
                 },
@@ -246,7 +302,7 @@ export default function Payment() {
                         <Check size={48} className="text-red-600" />
                     </div>
                     <h2 className="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Order Confirmed</h2>
-                    <p className="text-zinc-500 mb-12 font-medium leading-relaxed">Your order for <span className="text-white">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''}</span> has been successfully placed.</p>
+                    <p className="text-zinc-500 mb-12 font-medium leading-relaxed">Your order for <span className="text-white">{items.length} unit{items.length !== 1 ? 's' : ''}</span> has been successfully placed.</p>
                     <div className="space-y-4">
                         <a href="/#orders" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-6 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase">
                             View Order Details
@@ -435,19 +491,23 @@ export default function Payment() {
                         <div className="glass-card p-10 rounded-[3rem] border border-white/5 sticky top-32 space-y-10 animate-on-scroll">
                             <SectionHeader title="Order Summary" />
 
-                            {/* Cart Items List */}
+                            {/* Order Items List */}
                             <div className="space-y-4 max-h-80 overflow-y-auto">
-                                {cartItems.map((item, idx) => {
+                                {items.map((item, idx) => {
                                     const itemPrice = parseFloat(String(item.product.price).replace(/[^0-9.]/g, ''));
                                     const itemTotal = itemPrice * item.quantity;
+                                    const imageUrl = Array.isArray(item.product.images) && item.product.images.length > 0 
+                                        ? item.product.images[0] 
+                                        : item.product.image;
+
                                     return (
                                         <div key={idx} className="flex gap-4 p-4 bg-black/40 rounded-2xl border border-zinc-800">
                                             <div className="w-20 h-20 bg-white rounded-lg p-2 flex-shrink-0">
-                                                <img src={item.product.image} alt={item.product.name} className="w-full h-full object-contain" />
+                                                <img src={imageUrl} alt={item.product.name} className="w-full h-full object-contain" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="text-xs font-black text-white uppercase tracking-wider truncate">{item.product.name}</h4>
-                                                <p className="text-[9px] text-zinc-600 font-bold uppercase mt-1">Qty: {item.quantity}</p>
+                                                <p className="text-[9px] text-zinc-600 font-bold uppercase mt-1">Qty: {item.quantity} { (item as any).size ? `| Size: ${(item as any).size}` : '' }</p>
                                                 <p className="text-sm font-black text-red-600 mt-2">{currencyFormat.format(itemTotal)}</p>
                                             </div>
                                         </div>

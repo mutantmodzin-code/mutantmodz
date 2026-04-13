@@ -50,13 +50,13 @@ export default function TestimonialSlider() {
   const prev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
-    <section className="py-8 sm:py-24 bg-zinc-950 relative overflow-hidden">
+    <section className="py-12 sm:py-16 bg-zinc-950 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
-        <div className="text-center mb-8 sm:mb-16">
-          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-none">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tighter uppercase leading-none">
             TRUSTED BY <span className="text-red-600">RIDERS</span>
           </h2>
-          <p className="text-zinc-500 font-black uppercase tracking-widest text-[10px] sm:text-xs mt-2">The Feedback Loop</p>
+          <p className="text-zinc-500 font-black uppercase tracking-widest text-[9px] mt-2">The Feedback Loop</p>
         </div>
 
         {/* MOBILE: Vertical List */}
@@ -106,7 +106,7 @@ export default function TestimonialSlider() {
                           <Star key={s} size={20} className="fill-yellow-500 text-yellow-500" />
                         ))}
                       </div>
-                      <p className="text-2xl lg:text-3xl font-black text-white leading-tight uppercase tracking-tighter">
+                      <p className="text-xl lg:text-2xl font-black text-white leading-tight uppercase tracking-tighter">
                         "{t.review}"
                       </p>
                       <div className="flex items-center gap-6 pt-8 border-t border-white/5">

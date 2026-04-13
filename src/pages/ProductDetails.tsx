@@ -14,7 +14,7 @@ import {
     Star,
     AlertTriangle
 } from 'lucide-react';
-import { getProducts } from '../utils/storage';
+import { getProducts, getCombos, getGarageSale } from '../utils/storage';
 import { Product } from '../types';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
@@ -37,10 +37,35 @@ export default function ProductDetails() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
             const params = new URLSearchParams(window.location.hash.split('?')[1]);
             const productId = params.get('productId');
+            const productType = params.get('type');
 
-            const products = await getProducts();
-            setAllProducts(products);
-            const selectedProduct = products.find((p: any) => p.id === productId || p.id === Number(productId)?.toString());
+            // Fetch from all potential data sources
+            const [standardProducts, comboProducts, garageProducts] = await Promise.all([
+                getProducts(),
+                getCombos(),
+                getGarageSale()
+            ]);
+
+            const allFetched = [...standardProducts, ...comboProducts, ...garageProducts];
+            setAllProducts(allFetched);
+
+            // Find the product in the combined list with type disambiguation
+            let selectedProduct: Product | undefined;
+            
+            if (productType === 'combo') {
+                selectedProduct = comboProducts.find(p => p.id === productId);
+            } else if (productType === 'garage') {
+                selectedProduct = garageProducts.find(p => p.id === productId);
+            } else {
+                // Default search: standard first, then others
+                selectedProduct = standardProducts.find(p => p.id === productId) ||
+                                  allFetched.find(p => p.id === productId);
+            }
+
+            // Fallback for numeric ID comparison if string comparison fails
+            if (!selectedProduct && productId) {
+                selectedProduct = allFetched.find(p => p.id === Number(productId).toString());
+            }
 
             if (selectedProduct) {
                 setProduct(selectedProduct);
@@ -95,14 +120,14 @@ export default function ProductDetails() {
             setPendingAction(() => () => {
                 localStorage.setItem('checkout_size', selectedSize);
                 localStorage.setItem('checkout_quantity', quantity.toString());
-                window.location.hash = `payment?productId=${product.id}`;
+                window.location.hash = `checkout?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
             });
             setShowLoginPopup(true);
             return;
         }
         localStorage.setItem('checkout_size', selectedSize);
         localStorage.setItem('checkout_quantity', quantity.toString());
-        window.location.hash = `payment?productId=${product.id}`;
+        window.location.hash = `checkout?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
     };
 
     const handleAddToCart = () => {
@@ -141,19 +166,19 @@ Link: ${window.location.href}`;
         .slice(0, 4);
 
     return (
-        <div className={`min-h-screen bg-zinc-950 pt-44 pb-24 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-12">
+        <div className={`min-h-screen bg-zinc-950 pt-32 pb-16 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="max-w-[1500px] mx-auto px-4 sm:px-8">
 
                 {/* Navigation Header */}
-                <div className="flex items-center justify-between mb-16 animate-on-scroll">
+                <div className="flex items-center justify-between mb-8 sm:mb-12 animate-on-scroll">
                     <button
                         onClick={() => window.history.back()}
                         className="group flex items-center gap-3 text-zinc-500 hover:text-white transition-colors"
                     >
-                        <div className="w-10 h-10 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-colors">
-                            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                        <div className="w-8 h-8 rounded-full border border-zinc-900 flex items-center justify-center group-hover:border-red-600 transition-colors">
+                            <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
                         </div>
-                        <span className="text-xs font-black uppercase tracking-[0.3em]">Back to Hardware</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Back</span>
                     </button>
 
                     <div className="flex gap-4">
@@ -221,13 +246,13 @@ Link: ${window.location.href}`;
                                     </div>
                                 )}
                             </div>
-                            <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight uppercase">{product.name}</h1>
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight uppercase">{product.name}</h1>
 
                             <div className="flex items-center gap-6">
-                                <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
+                                <div className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
                                 <div className="flex items-center gap-1">
-                                    {[1, 2, 3, 4, 5].map(s => <Star key={s} size={14} className="text-red-600 fill-red-600" />)}
-                                    <span className="text-zinc-600 text-xs font-black uppercase tracking-widest ml-2">12 VERIFIED REVIEWS</span>
+                                    {[1, 2, 3, 4, 5].map(s => <Star key={s} size={12} className="text-red-600 fill-red-600" />)}
+                                    <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-1">VERIFIED REVIEWS</span>
                                 </div>
                             </div>
                         </div>
@@ -388,7 +413,7 @@ Link: ${window.location.href}`;
                             {relatedProducts.map((p) => (
                                 <a
                                     key={p.id}
-                                    href={`#productDetails?productId=${p.id}`}
+                                    href={`#productDetails?productId=${p.id}${p.is_combo ? '&type=combo' : p.is_garage_sale ? '&type=garage' : ''}`}
                                     className="group space-y-4"
                                 >
                                     <div className="relative aspect-square bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden flex items-center justify-center p-6 transition-all duration-500 group-hover:border-red-600/30 group-hover:translate-y-[-5px]">

@@ -63,64 +63,64 @@ export default function Home({ onNavigate }: HomeProps) {
       <TestimonialSlider />
 
       {/* Final Premium CTA Section */}
-      <section className="py-16 sm:py-32 relative overflow-hidden bg-zinc-900/40">
+      <section className="py-8 sm:py-20 relative overflow-hidden bg-zinc-900/40">
         <div className="absolute inset-0 bg-gradient-to-b from-red-600/5 to-transparent pointer-events-none"></div>
-        <div className="max-w-5xl mx-auto px-6 text-center space-y-8 relative z-10">
-          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full border border-red-600/20 bg-red-600/5 backdrop-blur-sm mb-4">
-            <Zap size={14} className="text-red-500 animate-pulse" />
-            <span className="text-xs font-black uppercase tracking-[0.3em] text-red-500">Premium Mods Only</span>
+        <div className="max-w-5xl mx-auto px-6 text-center space-y-4 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-600/20 bg-red-600/5 backdrop-blur-sm mb-1">
+            <Zap size={10} className="text-red-500 animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-red-500">Premium Mods Only</span>
           </div>
-          <h2 className="text-4xl sm:text-7xl font-black tracking-tighter uppercase leading-[0.9]">
+          <h2 className="text-2xl sm:text-5xl font-black tracking-tighter uppercase leading-tight">
             READY TO <span className="text-red-600">MUTATE?</span>
           </h2>
-          <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs max-w-2xl mx-auto leading-relaxed">
-            Coimbatore's biggest hub for genuine bike accessories, premium helmets, and aftermarket parts. Serving riders from Tirupur, Erode, Salem & across Tamil Nadu.
+          <p className="text-zinc-500 font-bold uppercase tracking-widest text-[9px] max-w-2xl mx-auto leading-relaxed">
+            Coimbatore's biggest hub for genuine hardware.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <button
               onClick={() => onNavigate('products')}
-              className="group bg-red-600 hover:bg-red-700 text-white px-10 py-5 rounded-2xl text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-2xl shadow-red-600/20"
+              className="group bg-red-600 hover:bg-red-700 text-white px-6 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 shadow-xl shadow-red-600/20"
             >
-              Shop All Products <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              Shop All Products <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={() => onNavigate('contact')}
-              className="px-10 py-5 rounded-2xl border border-white/10 hover:bg-white hover:text-black text-white text-lg font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 bg-zinc-900/60 backdrop-blur-md"
+              className="px-6 py-3.5 rounded-xl border border-white/10 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 transition-all transform active:scale-95 bg-zinc-900/60 backdrop-blur-md"
             >
               Visit Our Store
             </button>
           </div>
           
-          <div className="pt-20 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
-             <div className="space-y-2">
-               <div className="text-2xl font-black text-white">10K+</div>
-               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Happy Riders</div>
+          <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 opacity-60">
+             <div className="space-y-0.5">
+               <div className="text-lg font-black text-white">10K+</div>
+               <div className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Happy Riders</div>
              </div>
-             <div className="space-y-2">
-               <div className="text-2xl font-black text-white">50+</div>
-               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Elite Brands</div>
+             <div className="space-y-0.5">
+               <div className="text-lg font-black text-white">50+</div>
+               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Elite Brands</div>
              </div>
-             <div className="space-y-2">
-               <div className="text-2xl font-black text-white">100%</div>
-               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Genuine parts</div>
+             <div className="space-y-1">
+               <div className="text-xl font-black text-white">100%</div>
+               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Genuine parts</div>
              </div>
-             <div className="space-y-2">
-               <div className="text-2xl font-black text-white">4.9/5</div>
-               <div className="text-xs font-black text-zinc-500 uppercase tracking-widest">Store Rating</div>
+             <div className="space-y-1">
+               <div className="text-xl font-black text-white">4.9/5</div>
+               <div className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Store Rating</div>
              </div>
           </div>
         </div>
       </section>
 
       {/* 10. SEO Knowledge Base / Local Content Hub */}
-      <section className="py-16 sm:py-24 bg-zinc-950 border-t border-white/5">
+      <section className="py-12 sm:py-20 bg-zinc-950 border-t border-white/5">
         <div className="max-w-4xl mx-auto px-6">
           <div className="prose prose-invert prose-zinc max-w-none">
-            <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tighter text-white mb-8">
+            <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter text-white mb-6">
               Mutant Modz: The Ultimate <span className="text-red-600">Pitshop Coimbatore</span> for Enthusiasts
             </h1>
             
-            <p className="text-zinc-400 text-lg leading-relaxed mb-12 font-medium">
+            <p className="text-zinc-500 text-sm leading-relaxed mb-10 font-medium">
               Welcome to <strong>Mutant Modz</strong>, the premier destination for automotive enthusiasts in South India. 
               Located in the heart of Singanallur, we are recognized as the leading <strong>pitshop Coimbatore</strong> has to offer 
               for those who demand performance, style, and safety. Whether you are looking to enhance your daily commute or 

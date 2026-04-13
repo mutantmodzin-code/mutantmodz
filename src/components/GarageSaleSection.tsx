@@ -43,18 +43,18 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
 
   return (
     <div
-      className="flex-shrink-0 w-[calc(50%-8px)] sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-orange-500/30 hover:shadow-[0_20px_40px_rgba(249,115,22,0.1)]"
-      onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
+      className="flex-shrink-0 w-44 sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-orange-500/30 hover:shadow-[0_20px_40px_rgba(249,115,22,0.1)]"
+      onClick={() => onNavigate(`productDetails?productId=${product.id}&type=garage`)}
     >
-      <div className="relative h-[160px] sm:h-[250px] overflow-hidden bg-white/5 p-2 sm:p-4 flex items-center justify-center">
+      <div className="relative h-[130px] sm:h-[250px] overflow-hidden bg-white/5 p-2 sm:p-4 flex items-center justify-center">
         <img
           src={imageUrl}
           alt={product.name}
           className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
         />
-        <div className="absolute top-4 left-4 z-20 bg-orange-600 text-white text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md border border-orange-400/30">
-          <Zap size={12} className="fill-current" /> Today Sales
+        <div className="absolute top-2.5 left-2.5 z-20 bg-orange-600 text-white text-[8px] sm:text-[10px] font-black px-2 py-1 rounded-lg shadow-lg uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md border border-orange-400/30">
+          <Zap size={10} className="fill-current" /> Today Sales
         </div>
         {product.discount_percent && (
             <div className="absolute top-4 right-4 z-20 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg uppercase tracking-wider">
@@ -63,7 +63,7 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
         )}
       </div>
 
-      <div className="p-5 flex flex-col flex-1 relative z-20 bg-zinc-900/80 backdrop-blur-sm border-t border-white/5">
+      <div className="p-3.5 sm:p-5 flex flex-col flex-1 relative z-20 bg-zinc-900/80 backdrop-blur-sm border-t border-white/5">
         <div className="flex flex-col h-full">
           {product.brand && (
             <span className="text-orange-500 text-[9px] font-black uppercase tracking-[0.2em] mb-2 block">
@@ -81,25 +81,23 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
               <span className="text-zinc-500 text-[9px] font-bold uppercase tracking-widest">Clearance Rate</span>
             </div>
             <div className="text-right">
-                <span className="text-zinc-600 line-through text-xs block font-bold">₹{(product.price_num * 1.4).toLocaleString()}</span>
+                <span className="text-zinc-600 line-through text-[10px] block font-bold">₹{(product.price_num * 1.4).toLocaleString()}</span>
                 <span className="text-green-500 text-[9px] font-black uppercase tracking-widest">Save Big</span>
             </div>
           </div>
 
           {product.stock > 0 ? (
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
               <button
                 onClick={handleAddToCart}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 bg-zinc-800 border border-white/10 text-white hover:bg-orange-600 hover:border-orange-600 hover:shadow-lg hover:shadow-orange-500/20"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-zinc-800 border border-white/10 text-white"
               >
-                <ShoppingCart size={14} />
-                Add to Cart
+                <ShoppingCart size={12} /> Add to Cart
               </button>
               <button
                 onClick={handleBuyNow}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 bg-orange-600 text-white hover:bg-orange-500 shadow-lg shadow-orange-600/30"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-orange-600 text-white"
               >
-                <Zap size={14} className="fill-current" />
                 Buy Now
               </button>
             </div>
@@ -143,23 +141,22 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
   if (products.length === 0) return null;
 
   return (
-    <section className="py-8 sm:py-16 bg-zinc-950 overflow-hidden border-b border-white/5">
+    <section className="py-8 sm:py-12 bg-zinc-950 overflow-hidden border-b border-white/5">
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-orange-600/5 rounded-full blur-[120px] -translate-y-1/2"></div>
       
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
-        <div className="flex flex-col items-center text-center gap-6 mb-12 sm:mb-16">
-          <div className="space-y-3 sm:space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">
-              <Zap size={14} className="text-orange-500 fill-current" />
-              <span className="text-xs sm:text-sm font-black text-orange-500 uppercase tracking-[0.2em]">Flash Clearance</span>
+        <div className="flex flex-col items-center text-center gap-4 mb-8 sm:mb-12">
+          <div className="space-y-2 sm:space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/20">
+              <Zap size={12} className="text-orange-500 fill-current" />
+              <span className="text-[10px] sm:text-xs font-black text-orange-500 uppercase tracking-[0.2em]">Flash Clearance</span>
             </div>
-            <h2 className="text-[2.5rem] sm:text-6xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] mt-2">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-[0.85] mt-2">
               TODAY <span className="text-orange-600">SALES!!</span>
             </h2>
-            <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-xl mx-auto">
+            <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-relaxed max-w-xl mx-auto">
               Extreme clearout event. High-performance mods at factory outlet rates. 
-              <span className="text-orange-500/60 ml-2">Hardware refresh in progress.</span>
             </p>
           </div>
           
@@ -198,12 +195,12 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
           {/* Final card */}
           <div 
             onClick={() => onNavigate('products', '?cat=garage-sale')}
-            className="flex-shrink-0 w-[260px] sm:w-[300px] snap-end bg-orange-600/5 border border-orange-500/20 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 cursor-pointer group hover:bg-orange-600/10 transition-all active:scale-95"
+            className="flex-shrink-0 w-44 sm:w-[300px] snap-end bg-orange-600/5 border border-orange-500/20 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer group transition-all"
           >
-            <div className="w-20 h-20 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/40 group-hover:scale-110 transition-transform">
-              <ArrowRight size={36} />
+            <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white shadow-xl shadow-orange-500/40">
+              <ArrowRight size={24} />
             </div>
-            <span className="text-white font-black uppercase tracking-[0.3em] text-[10px]">Explore All Deals</span>
+            <span className="text-white font-black uppercase tracking-[0.3em] text-[8px] text-center">Explore All</span>
           </div>
         </div>
       </div>

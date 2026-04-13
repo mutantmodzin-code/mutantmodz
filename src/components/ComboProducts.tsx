@@ -30,8 +30,8 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
 
   return (
     <div
-      className="flex-shrink-0 w-[calc(50%-8px)] sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
-      onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
+      className="flex-shrink-0 w-44 sm:w-[300px] snap-start bg-zinc-900/40 border border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col group transition-all duration-500 hover:border-sky-500/30 hover:shadow-[0_20px_40px_rgba(14,165,233,0.1)]"
+      onClick={() => onNavigate(`productDetails?productId=${product.id}&type=combo`)}
     >
       <div className="relative h-[150px] sm:h-[260px] overflow-hidden bg-white/5 p-2 sm:p-4 flex items-center justify-center">
         <img
@@ -113,22 +113,22 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-12 sm:py-24 bg-zinc-950 relative overflow-hidden">
+    <section className="py-8 sm:py-16 bg-zinc-950 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-sky-600/5 rounded-full blur-[120px] -translate-y-1/2"></div>
       
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
         <div className="flex flex-col items-center text-center gap-6 mb-12 sm:mb-16">
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-sky-500/10 border border-sky-500/20">
-              <Package size={14} className="text-sky-500" />
+              <Package size={12} className="text-sky-500" />
               <span className="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em]">Curated Bundles</span>
             </div>
-            <h2 className="text-4xl sm:text-6xl font-black text-white tracking-tighter uppercase leading-[0.8]">
+            <h2 className="text-xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-[0.8]">
               MONSTER <span className="text-sky-500">COMBOS!!</span>
             </h2>
-            <p className="text-zinc-500 text-xs sm:text-sm font-bold uppercase tracking-widest leading-relaxed max-w-2xl mx-auto">
-              Professional upgrade kits designed for peak performance and style. Save big when you mutation in bulk.
+            <p className="text-zinc-500 text-[9px] sm:text-xs font-bold uppercase tracking-widest leading-relaxed max-w-2xl mx-auto">
+              Professional upgrade kits.
             </p>
           </div>
           
@@ -167,12 +167,12 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
           {/* Last View All card */}
           <div 
             onClick={() => onNavigate('products', '?cat=combos')}
-            className="flex-shrink-0 w-[260px] sm:w-[300px] snap-end bg-sky-600/5 border border-sky-500/20 rounded-[2.5rem] flex flex-col items-center justify-center gap-4 cursor-pointer group hover:bg-sky-600/10 transition-all active:scale-95"
+            className="flex-shrink-0 w-44 sm:w-[300px] snap-end bg-sky-600/5 border border-sky-500/20 rounded-2xl flex flex-col items-center justify-center gap-3 cursor-pointer group transition-all"
           >
-            <div className="w-16 h-16 rounded-full bg-sky-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/40 group-hover:scale-110 transition-transform">
-              <ArrowRight size={30} />
+            <div className="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/40">
+              <ArrowRight size={24} />
             </div>
-            <span className="text-white font-black uppercase tracking-[0.2em] text-[10px]">Explore More Combos</span>
+            <span className="text-white font-black uppercase tracking-[0.2em] text-[8px] text-center px-4">Explore More</span>
           </div>
         </div>
       </div>

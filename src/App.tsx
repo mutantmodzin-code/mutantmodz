@@ -76,7 +76,7 @@ function AppContent() {
         return <Category onNavigate={navigate} />;
       case 'categories':
         return <Categories onNavigate={navigate} />;
-      case 'payment':
+      case 'checkout':
         return <Payment />;
       case 'orders':
         return <MyOrders />;

@@ -65,7 +65,7 @@ export default function CategoryBanners({ onNavigate }: CategoryBannersProps) {
   }, []);
 
   return (
-    <section className="bg-zinc-950 py-4 sm:py-8" ref={sectionRef}>
+    <section className="bg-zinc-950 py-2 sm:py-8" ref={sectionRef}>
       <div className="px-3 sm:px-8 lg:px-12 max-w-[1700px] mx-auto">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {banners.map((banner, idx) => (
@@ -86,8 +86,8 @@ export default function CategoryBanners({ onNavigate }: CategoryBannersProps) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20 group-hover:from-black/85 group-hover:via-black/50 transition-all duration-500" />
 
               {/* Content */}
-              <div className="relative z-10 h-full flex flex-col justify-end p-3 sm:p-5 lg:p-6">
-                <h3 className="text-white font-black uppercase tracking-tight text-sm sm:text-lg lg:text-xl leading-tight">
+              <div className="relative z-10 h-full flex flex-col justify-end p-2.5 sm:p-5 lg:p-6">
+                <h3 className="text-white font-black uppercase tracking-tight text-xs sm:text-lg lg:text-xl leading-tight">
                   {banner.title}
                 </h3>
                 <p className="text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mt-0.5 sm:mt-1 line-clamp-1">

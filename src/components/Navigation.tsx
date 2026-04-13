@@ -280,7 +280,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               className="flex items-center cursor-pointer group"
               onClick={() => handleNavClick('home')}
             >
-              <div className="font-extrabold tracking-tighter text-xl">
+              <div className="font-extrabold tracking-tight text-lg">
                 <span className="text-white">MUTANT</span>
                 <span className="text-red-600 ml-0.5 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]">MODZ</span>
               </div>
@@ -312,9 +312,9 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation relative"
                 aria-label="Open Cart"
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={18} />
                 {totalCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-red-600 text-white text-[11px] font-bold w-[20px] h-[20px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
+                  <span className="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-black w-[16px] h-[16px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
                     {totalCount}
                   </span>
                 )}
@@ -331,7 +331,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                 className="flex items-center cursor-pointer group shrink-0"
                 onClick={() => handleNavClick('home')}
               >
-                <div className={`font-extrabold tracking-tighter transition-all duration-500 ${isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
+                <div className={`font-extrabold tracking-tighter transition-all duration-500 ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
                   <span className="text-white group-hover:text-red-500 transition-colors duration-300 drop-shadow-md">MUTANT</span>
                   <span className="text-red-600 group-hover:text-white transition-colors duration-300 ml-1 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]">MODZ</span>
                 </div>
@@ -626,7 +626,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
 
       {/* Spacer to prevent content from going under the fixed nav */}
       <div className="h-[56px] lg:hidden"></div>
-      <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[60px]' : 'h-[110px]'}`}></div>
+      <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[50px]' : 'h-[90px]'}`}></div>
     </>
   );
 }

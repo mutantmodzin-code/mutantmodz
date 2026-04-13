@@ -205,14 +205,13 @@ export default function Products({ onNavigate }: ProductsProps) {
         <div className="pt-2 pb-4 flex items-center justify-between">
           <button
             onClick={() => window.history.back()}
-            className="group flex items-center gap-4 text-white hover:text-red-500 transition-all duration-300 bg-zinc-900/50 pr-6 pl-2 py-2 rounded-full border border-white/5 hover:border-red-600/50"
+            className="group flex items-center gap-3 text-white hover:text-red-500 transition-all duration-300 bg-zinc-900/50 pr-4 pl-1.5 py-1.5 rounded-full border border-white/5 hover:border-red-600/50"
           >
-            <div className="w-12 h-12 rounded-full bg-red-600 flex items-center justify-center group-hover:bg-white transition-all shadow-[0_0_20px_rgba(220,38,38,0.4)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-              <span className="text-[24px] text-white group-hover:text-red-600 transition-colors font-black">←</span>
+            <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center group-hover:bg-white transition-all shadow-[0_0_20px_rgba(220,38,38,0.4)]">
+              <span className="text-[14px] text-white group-hover:text-red-600 transition-colors font-black">←</span>
             </div>
             <div className="flex flex-col items-start">
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 group-hover:text-white transition-colors">Navigation</span>
-               <span className="text-[12px] font-black uppercase tracking-widest text-white group-hover:text-red-500 transition-colors">Go Back</span>
+               <span className="text-[10px] font-black uppercase tracking-widest text-white">Back</span>
             </div>
           </button>
           
@@ -251,18 +250,18 @@ export default function Products({ onNavigate }: ProductsProps) {
             </div>
           ) : (
             <>
-              <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none uppercase mb-4">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none uppercase mb-3">
                 {(selectedCategory === 'all' || selectedCategory === 'new' || ['garage-sale', 'offer', 'garage sale'].includes(selectedCategory)) ? (selectedCategory === 'new' ? 'LATEST' : (selectedCategory === 'all' ? 'PREMIUM' : 'GARAGE')) : selectedCategory} <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">
                   {(selectedCategory === 'all' || selectedCategory === 'new' || ['garage-sale', 'offer', 'garage sale'].includes(selectedCategory)) ? (selectedCategory === 'new' ? 'ARRIVALS' : (selectedCategory === 'all' ? 'MODZ' : 'SALE')) : 'COLLECTION'}
                 </span>
               </h1>
-              <p className="text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[10px] sm:text-[12px] leading-relaxed">
+              <p className="text-zinc-500 font-bold max-w-xl mx-auto uppercase tracking-[0.3em] text-[9px] sm:text-[11px] leading-relaxed">
                 {selectedCategory === 'all' 
-                  ? 'THE DEFINITIVE ARCHIVE OF HIGH-PERFORMANCE BIKE HARDWARE.'
+                  ? 'HIGH-PERFORMANCE BIKE HARDWARE ARCHIVE.'
                   : selectedCategory === 'new'
-                  ? 'THE LATEST PERFORMANCE EVOLUTION HAS ARRIVED. ENGINEERED PRECISELY.'
-                  : `CURATED ${selectedCategory.toUpperCase()} ENGINEERED FOR PERFORMANCE.`}
+                  ? 'THE LATEST PERFORMANCE EVOLUTION HAS ARRIVED.'
+                  : `CURATED ${selectedCategory.toUpperCase()} COLLECTION.`}
               </p>
             </>
           )}

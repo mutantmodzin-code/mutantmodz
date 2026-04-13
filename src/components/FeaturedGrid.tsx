@@ -26,23 +26,23 @@ export default function FeaturedGrid({ onNavigate }: FeaturedGridProps) {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-16 sm:py-24 bg-zinc-950 relative overflow-hidden">
+    <section className="py-8 sm:py-16 bg-zinc-950 relative overflow-hidden">
         {/* Dynamic background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-red-600/[0.02] rounded-full blur-[150px] pointer-events-none"></div>
 
       <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
         
         {/* Optimized Header Area */}
-        <div className="mb-12 sm:mb-20">
-            <div className="space-y-4 text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-red-600/10 border border-red-600/20">
-                  <PackageSearch size={14} className="text-red-500" />
-                  <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em]">Curated Hardware</span>
+        <div className="mb-8 sm:mb-20">
+            <div className="space-y-3 text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-lg bg-red-600/10 border border-red-600/20">
+                  <PackageSearch size={12} className="text-red-500" />
+                  <span className="text-[9px] font-black text-red-500 uppercase tracking-[0.2em]">Curated Hardware</span>
                 </div>
-                <h2 className="text-4xl sm:text-7xl font-black text-white tracking-tighter uppercase leading-[0.8] mb-2">
+                <h2 className="text-xl sm:text-5xl font-black text-white tracking-tighter uppercase leading-[0.8] mb-1">
                   OUR <span className="text-red-600">PRODUCTS</span>
                 </h2>
-                <div className="h-1.5 w-20 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.8)] mx-auto md:mx-0"></div>
+                <div className="h-1 w-16 bg-red-600 rounded-full shadow-[0_0_15px_rgba(220,38,38,0.8)] mx-auto md:mx-0"></div>
             </div>
         </div>
 
@@ -59,10 +59,10 @@ export default function FeaturedGrid({ onNavigate }: FeaturedGridProps) {
         </div>
         
         {/* Desktop View All Button */}
-        <div className="mt-16 sm:mt-24 flex justify-center">
+        <div className="mt-8 sm:mt-16 flex justify-center">
             <button 
                 onClick={() => onNavigate('products')}
-                className="group relative inline-flex items-center justify-center gap-6 px-12 sm:px-16 py-5 sm:py-6 rounded-3xl bg-white text-black font-black uppercase tracking-[0.4em] text-[10px] sm:text-[11px] transition-all duration-500 hover:bg-red-600 hover:text-white shadow-[0_20px_60px_rgba(0,0,0,0.4)] active:scale-95 overflow-hidden"
+                className="group relative inline-flex items-center justify-center gap-4 sm:gap-6 px-8 sm:px-12 py-3.5 sm:py-5 rounded-xl sm:rounded-2xl bg-white text-black font-black uppercase tracking-[0.4em] text-[9px] sm:text-[11px] transition-all duration-500 hover:bg-red-600 hover:text-white shadow-xl active:scale-95 overflow-hidden"
             >
                 <div className="absolute inset-x-0 bottom-0 h-1 bg-red-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
                 <span className="relative z-10 transition-colors">Complete Collection</span>

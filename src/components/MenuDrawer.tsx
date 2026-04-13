@@ -192,9 +192,12 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950">
           <div className="flex items-center gap-3">
-             <div className="font-extrabold tracking-tighter text-lg">
-                <span className="text-white">MUTANT</span>
-                <span className="text-red-600 ml-1">MODZ</span>
+             <div 
+               className="font-extrabold tracking-tight text-lg cursor-pointer group"
+               onClick={() => handleNav('home')}
+             >
+                <span className="text-white group-hover:text-red-500 transition-colors">MUTANT</span>
+                <span className="text-red-600 ml-1 group-hover:text-white transition-colors">MODZ</span>
              </div>
           </div>
           <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors">

@@ -391,119 +391,6 @@ export default function Products({ onNavigate }: ProductsProps) {
                     <Filter size={14} className="text-red-600" />
                     <span className="text-white">Filter</span>
                   </button>
-
-                  {/* Drawer for Mobile */}
-                  <div className={cn("fixed inset-0 z-[100] transition-opacity duration-300 pointer-events-none lg:hidden", showSortMenu ? "opacity-100 pointer-events-auto" : "opacity-0")}>
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowSortMenu(false)} />
-                    <div className={cn("absolute top-0 left-0 h-full w-[85%] bg-zinc-950 border-r border-white/5 flex flex-col transition-transform duration-500", showSortMenu ? "translate-x-0" : "-translate-x-full")}>
-                      <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
-                        <h2 className="text-white font-black text-2xl uppercase tracking-tighter">FILTERS</h2>
-                        <button onClick={() => setShowSortMenu(false)} className="p-2 text-zinc-400 hover:text-white"><span className="text-xl">✕</span></button>
-                      </div>
-                      <div className="flex-1 overflow-y-auto no-scrollbar p-8 pt-0 space-y-10">
-                        {/* Availability Section */}
-                        <div className="space-y-4">
-                          <button onClick={() => toggleSection('availability')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
-                            Availability <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('availability') ? "rotate-180" : "")}>↓</span>
-                          </button>
-                          {expandedSections.includes('availability') && (
-                            <div className="space-y-3 pt-2">
-                              {['all', 'in-stock', 'out-of-stock'].map(val => (
-                                <label key={val} className="flex items-center gap-3 cursor-pointer group">
-                                  <input type="radio" checked={availabilityFilter === val} onChange={() => setAvailabilityFilter(val as any)} className="hidden" />
-                                  <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", availabilityFilter === val ? "border-red-600" : "border-white/10")}>
-                                    {availabilityFilter === val && <div className="w-2 h-2 bg-red-600 rounded-full" />}
-                                  </div>
-                                  <span className={cn("text-[11px] font-bold uppercase tracking-widest transition-colors", availabilityFilter === val ? "text-white" : "text-zinc-500")}>{val.replace('-', ' ')}</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Price Section */}
-                        <div className="space-y-6">
-                          <button onClick={() => toggleSection('price')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
-                            Price <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('price') ? "rotate-180" : "")}>↓</span>
-                          </button>
-                          {expandedSections.includes('price') && (
-                            <div className="space-y-6 pt-2">
-                              <div className="px-1">
-                                <input 
-                                  type="range" min="0" max="50000" step="1000" value={priceRange.max} 
-                                  onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) }))}
-                                  className="w-full accent-red-600 bg-white/5 h-1 rounded-full appearance-none cursor-pointer"
-                                />
-                              </div>
-                              <div className="flex items-center gap-4">
-                                <div className="flex-1 bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2">
-                                  <p className="text-[8px] font-black text-zinc-600 uppercase mb-1">Min</p>
-                                  <input type="number" value={priceRange.min} onChange={e => setPriceRange(p => ({ ...p, min: parseInt(e.target.value) || 0 }))} className="bg-transparent text-white text-[11px] font-black focus:outline-none w-full" />
-                                </div>
-                                <div className="flex-1 bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2">
-                                  <p className="text-[8px] font-black text-zinc-600 uppercase mb-1">Max</p>
-                                  <input type="number" value={priceRange.max} onChange={e => setPriceRange(p => ({ ...p, max: parseInt(e.target.value) || 0 }))} className="bg-transparent text-white text-[11px] font-black focus:outline-none w-full" />
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Brand Section */}
-                        <div className="space-y-4">
-                          <button onClick={() => toggleSection('brand')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
-                            Brand <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('brand') ? "rotate-180" : "")}>↓</span>
-                          </button>
-                          {expandedSections.includes('brand') && (
-                            <div className="space-y-3 pt-2">
-                              {Object.entries(availableFilters.brands).map(([name, count]) => (
-                                <label key={name} className="flex items-center justify-between group cursor-pointer">
-                                  <div className="flex items-center gap-3">
-                                    <input type="checkbox" checked={selectedBrands.includes(name.toLowerCase())} onChange={() => setSelectedBrands(prev => prev.includes(name.toLowerCase()) ? prev.filter(b => b !== name.toLowerCase()) : [...prev, name.toLowerCase()])} className="hidden" />
-                                    <div className={cn("w-4 h-4 border-2 rounded transition-all flex items-center justify-center", selectedBrands.includes(name.toLowerCase()) ? "bg-red-600 border-red-600" : "border-white/10")}>
-                                      {selectedBrands.includes(name.toLowerCase()) && <span className="text-[8px] text-white">✓</span>}
-                                    </div>
-                                    <span className={cn("text-[11px] font-bold uppercase tracking-widest transition-colors", selectedBrands.includes(name.toLowerCase()) ? "text-white" : "text-zinc-500")}>{name}</span>
-                                  </div>
-                                  <span className="text-zinc-700 text-[10px] font-black">({count})</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Product Type Section */}
-                        <div className="space-y-4">
-                          <button onClick={() => toggleSection('product-type')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
-                            Product Type <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('product-type') ? "rotate-180" : "")}>↓</span>
-                          </button>
-                          {expandedSections.includes('product-type') && (
-                            <div className="space-y-3 pt-2">
-                              {Object.entries(availableFilters.types).map(([type, count]) => (
-                                <label key={type} className="flex items-center justify-between group cursor-pointer">
-                                  <div className="flex items-center gap-3">
-                                    <input type="checkbox" checked={selectedTypes.includes(type.toLowerCase())} onChange={() => setSelectedTypes(prev => prev.includes(type.toLowerCase()) ? prev.filter(t => t !== type.toLowerCase()) : [...prev, type.toLowerCase()])} className="hidden" />
-                                    <div className={cn("w-4 h-4 border-2 rounded transition-all flex items-center justify-center", selectedTypes.includes(type.toLowerCase()) ? "bg-red-600 border-red-600" : "border-white/10")}>
-                                      {selectedTypes.includes(type.toLowerCase()) && <span className="text-[8px] text-white">✓</span>}
-                                    </div>
-                                    <span className={cn("text-[11px] font-bold uppercase tracking-widest transition-colors", selectedTypes.includes(type.toLowerCase()) ? "text-white" : "text-zinc-500")}>{type}</span>
-                                  </div>
-                                  <span className="text-zinc-700 text-[10px] font-black">({count})</span>
-                                </label>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        <button 
-                          onClick={() => { setSelectedBrands([]); setSelectedTypes([]); setPriceRange({ min: 0, max: 25000 }); setAvailabilityFilter('all'); setShowSortMenu(false); }}
-                          className="w-full py-4 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
-                        >
-                          Reset Filters
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -527,6 +414,119 @@ export default function Products({ onNavigate }: ProductsProps) {
                 </div>
               </div>
             </section>
+
+            {/* Drawer for Mobile (Detached from sticky header to prevent backdrop-blur z-index trapping) */}
+            <div className={cn("fixed inset-0 z-[100] transition-opacity duration-300 pointer-events-none lg:hidden", showSortMenu ? "opacity-100 pointer-events-auto" : "opacity-0")}>
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowSortMenu(false)} />
+              <div className={cn("absolute top-0 left-0 h-full w-[85%] bg-zinc-950 border-r border-white/5 flex flex-col transition-transform duration-500", showSortMenu ? "translate-x-0" : "-translate-x-full")}>
+                <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
+                  <h2 className="text-white font-black text-2xl uppercase tracking-tighter">FILTERS</h2>
+                  <button onClick={() => setShowSortMenu(false)} className="p-2 text-zinc-400 hover:text-white"><span className="text-xl">✕</span></button>
+                </div>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-8 pt-0 space-y-10">
+                  {/* Availability Section */}
+                  <div className="space-y-4">
+                    <button onClick={() => toggleSection('availability')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
+                      Availability <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('availability') ? "rotate-180" : "")}>↓</span>
+                    </button>
+                    {expandedSections.includes('availability') && (
+                      <div className="space-y-3 pt-2">
+                        {['all', 'in-stock', 'out-of-stock'].map(val => (
+                          <label key={val} className="flex items-center gap-3 cursor-pointer group">
+                            <input type="radio" checked={availabilityFilter === val} onChange={() => setAvailabilityFilter(val as any)} className="hidden" />
+                            <div className={cn("w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all", availabilityFilter === val ? "border-red-600" : "border-white/10")}>
+                              {availabilityFilter === val && <div className="w-2 h-2 bg-red-600 rounded-full" />}
+                            </div>
+                            <span className={cn("text-[11px] font-bold uppercase tracking-widest transition-colors", availabilityFilter === val ? "text-white" : "text-zinc-500")}>{val.replace('-', ' ')}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Price Section */}
+                  <div className="space-y-6">
+                    <button onClick={() => toggleSection('price')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
+                      Price <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('price') ? "rotate-180" : "")}>↓</span>
+                    </button>
+                    {expandedSections.includes('price') && (
+                      <div className="space-y-6 pt-2">
+                        <div className="px-1">
+                          <input 
+                            type="range" min="0" max="50000" step="1000" value={priceRange.max} 
+                            onChange={(e) => setPriceRange(prev => ({ ...prev, max: parseInt(e.target.value) }))}
+                            className="w-full accent-red-600 bg-white/5 h-1 rounded-full appearance-none cursor-pointer"
+                          />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1 bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2">
+                            <p className="text-[8px] font-black text-zinc-600 uppercase mb-1">Min</p>
+                            <input type="number" value={priceRange.min} onChange={e => setPriceRange(p => ({ ...p, min: parseInt(e.target.value) || 0 }))} className="bg-transparent text-white text-[11px] font-black focus:outline-none w-full" />
+                          </div>
+                          <div className="flex-1 bg-zinc-900/50 border border-white/5 rounded-xl px-4 py-2">
+                            <p className="text-[8px] font-black text-zinc-600 uppercase mb-1">Max</p>
+                            <input type="number" value={priceRange.max} onChange={e => setPriceRange(p => ({ ...p, max: parseInt(e.target.value) || 0 }))} className="bg-transparent text-white text-[11px] font-black focus:outline-none w-full" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Brand Section */}
+                  <div className="space-y-4">
+                    <button onClick={() => toggleSection('brand')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
+                      Brand <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('brand') ? "rotate-180" : "")}>↓</span>
+                    </button>
+                    {expandedSections.includes('brand') && (
+                      <div className="space-y-3 pt-2">
+                        {Object.entries(availableFilters.brands).map(([name, count]) => (
+                          <label key={name} className="flex items-center justify-between group cursor-pointer">
+                            <div className="flex items-center gap-3">
+                              <input type="checkbox" checked={selectedBrands.includes(name.toLowerCase())} onChange={() => setSelectedBrands(prev => prev.includes(name.toLowerCase()) ? prev.filter(b => b !== name.toLowerCase()) : [...prev, name.toLowerCase()])} className="hidden" />
+                              <div className={cn("w-4 h-4 border-2 rounded transition-all flex items-center justify-center", selectedBrands.includes(name.toLowerCase()) ? "bg-red-600 border-red-600" : "border-white/10")}>
+                                {selectedBrands.includes(name.toLowerCase()) && <span className="text-[8px] text-white">✓</span>}
+                              </div>
+                              <span className={cn("text-[11px] font-bold uppercase tracking-widest transition-colors", selectedBrands.includes(name.toLowerCase()) ? "text-white" : "text-zinc-500")}>{name}</span>
+                            </div>
+                            <span className="text-zinc-700 text-[10px] font-black">({count})</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Type Section */}
+                  <div className="space-y-4">
+                    <button onClick={() => toggleSection('product-type')} className="w-full flex items-center justify-between text-white font-bold uppercase tracking-widest text-[11px]">
+                      Product Type <span className={cn("text-zinc-600 transition-transform duration-300", expandedSections.includes('product-type') ? "rotate-180" : "")}>↓</span>
+                    </button>
+                    {expandedSections.includes('product-type') && (
+                      <div className="space-y-3 pt-2">
+                        {Object.entries(availableFilters.types).map(([type, count]) => (
+                          <label key={type} className="flex items-center justify-between group cursor-pointer">
+                            <div className="flex items-center gap-3">
+                              <input type="checkbox" checked={selectedTypes.includes(type.toLowerCase())} onChange={() => setSelectedTypes(prev => prev.includes(type.toLowerCase()) ? prev.filter(t => t !== type.toLowerCase()) : [...prev, type.toLowerCase()])} className="hidden" />
+                              <div className={cn("w-4 h-4 border-2 rounded transition-all flex items-center justify-center", selectedTypes.includes(type.toLowerCase()) ? "bg-red-600 border-red-600" : "border-white/10")}>
+                                {selectedTypes.includes(type.toLowerCase()) && <span className="text-[8px] text-white">✓</span>}
+                              </div>
+                              <span className={cn("text-[11px] font-bold uppercase tracking-widest transition-colors", selectedTypes.includes(type.toLowerCase()) ? "text-white" : "text-zinc-500")}>{type}</span>
+                            </div>
+                            <span className="text-zinc-700 text-[10px] font-black">({count})</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <button 
+                    onClick={() => { setSelectedBrands([]); setSelectedTypes([]); setPriceRange({ min: 0, max: 25000 }); setAvailabilityFilter('all'); setShowSortMenu(false); }}
+                    className="w-full py-4 bg-red-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {sortedProducts.length === 0 ? (
               <div className="text-center py-48 bg-zinc-900/10 rounded-[3rem] border border-white/5 border-dashed">

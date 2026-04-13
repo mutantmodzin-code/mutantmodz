@@ -127,7 +127,6 @@ export default function Products({ onNavigate }: ProductsProps) {
       const brand = searchParams.get('brand');
       const bike = searchParams.get('bike');
       const model = searchParams.get('model');
-      const comboType = searchParams.get('comboType');
 
       if (search) setSearchQuery(decodeURIComponent(search));
       else if (bike) setSearchQuery(decodeURIComponent(bike));

@@ -1,8 +1,8 @@
 export const getMediaUrl = (url: string) => {
   if (!url) return '';
   
-  // 1. Clean up any accidental localhost strings from the database
-  let cleanUrl = url.replace('http://localhost:3001', '');
+  // 1. Force remove any local dev host strings from the database string
+  let cleanUrl = url.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?/, '');
   
   // 2. If it's already a full URL or a data/blob URI, return it as-is
   if (

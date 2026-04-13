@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Filter, Zap, Phone } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -408,8 +409,9 @@ export default function Products({ onNavigate }: ProductsProps) {
               </div>
             </section>
 
-            {/* Drawer for Mobile (Detached from sticky header to prevent backdrop-blur z-index trapping) */}
-            <div className={cn("fixed inset-0 z-[100] transition-opacity duration-300 pointer-events-none lg:hidden", showSortMenu ? "opacity-100 pointer-events-auto" : "opacity-0")}>
+            {/* Drawer for Mobile (Detached and Portaled to prevent ANY stacking context/z-index trapping) */}
+            {typeof document !== 'undefined' && createPortal(
+            <div className={cn("fixed inset-0 z-[9999] transition-opacity duration-300 pointer-events-none lg:hidden", showSortMenu ? "opacity-100 pointer-events-auto" : "opacity-0")}>
               <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowSortMenu(false)} />
               <div className={cn("absolute top-0 left-0 h-full w-[85%] bg-zinc-950 border-r border-white/5 flex flex-col transition-transform duration-500", showSortMenu ? "translate-x-0" : "-translate-x-full")}>
                 <div className="px-8 py-8 border-b border-white/5 flex items-center justify-between">
@@ -519,7 +521,9 @@ export default function Products({ onNavigate }: ProductsProps) {
                   </button>
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body
+            )}
 
             {sortedProducts.length === 0 ? (
               <div className="text-center py-48 bg-zinc-900/10 rounded-[3rem] border border-white/5 border-dashed">

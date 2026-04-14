@@ -24,8 +24,19 @@ interface HeroSlideshowProps {
 }
 
 export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
-    const [slides, setSlides] = useState<Slide[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [slides, setSlides] = useState<Slide[]>(() => {
+        try {
+            const cached = localStorage.getItem('hero_slides');
+            if (cached) return JSON.parse(cached);
+        } catch (e) {
+            console.error('Error parsing cached slides', e);
+        }
+        return [];
+    });
+    const [loading, setLoading] = useState(() => {
+        const cached = localStorage.getItem('hero_slides');
+        return !cached;
+    });
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(0);
 
@@ -37,6 +48,12 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                 const data = await res.json();
                 const activeSlides = data.filter((s: any) => s.is_active);
                 setSlides(activeSlides);
+                // Cache locally for instant loading next time
+                try {
+                    localStorage.setItem('hero_slides', JSON.stringify(activeSlides));
+                } catch (e) {
+                    console.error('Error caching slides:', e);
+                }
 
                 // PERFORMANCE BOOST: Eagerly pre-load all hero images into browser cache instantly 
                 // after the API resolves, so they don't wait for React hydration/animations.

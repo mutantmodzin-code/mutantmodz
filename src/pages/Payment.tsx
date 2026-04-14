@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Package,
     ChevronDown,
@@ -6,11 +6,8 @@ import {
     Lock,
     CreditCard,
     Smartphone,
-    Building2,
     ArrowLeft,
-    Check,
-    X,
-    ShoppingCart
+    Check
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';

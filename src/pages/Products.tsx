@@ -168,7 +168,17 @@ export default function Products({ onNavigate }: ProductsProps) {
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
+      // Special logic for new arrivals category
+      if (selectedCategory === 'new' || selectedCategory === 'new arrivals') {
+        const tenDaysAgo = new Date();
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+        const isNew = p.isNew || (p.created_at && new Date(p.created_at) >= tenDaysAgo);
+        if (!isNew) return false;
+      }
+
       const matchesCategory = selectedCategory === 'all' || 
+        selectedCategory === 'new' || 
+        selectedCategory === 'new arrivals' ||
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.category?.toLowerCase() === selectedCategory.toLowerCase() ||
         p.sub_category_type?.toLowerCase() === selectedCategory.toLowerCase() ||

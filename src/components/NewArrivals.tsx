@@ -134,7 +134,7 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
 
         <div className="flex justify-center mt-4">
           <button 
-            onClick={() => onNavigate('products', '?filter=new')}
+            onClick={() => onNavigate('products', '?cat=new')}
             className="group flex items-center gap-3 px-8 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 hover:text-white transition-all transform active:scale-95 shadow-xl"
           >
             See All New <ArrowUpRight size={14} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />

@@ -150,8 +150,8 @@ export default function AccountSettings() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-4xl font-black text-white uppercase tracking-tighter">Account Setup</h1>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em]">Protocol Profile Management</p>
+            <h1 className="text-4xl font-black text-white uppercase tracking-tighter">Account Settings</h1>
+            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em]">Manage your profile details</p>
           </div>
           <button 
             onClick={() => window.history.back()}
@@ -167,7 +167,7 @@ export default function AccountSettings() {
             {/* Name */}
             <div className="space-y-3">
                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                 <User size={12} className="text-red-500" /> Authorized Identity
+                 <User size={12} className="text-red-500" /> Full Name
                </label>
                <input 
                  type="text"
@@ -200,7 +200,7 @@ export default function AccountSettings() {
             {/* Phone */}
             <div className="space-y-3">
                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
-                 <Phone size={12} className="text-red-500" /> Secure Mobile Line
+                 <Phone size={12} className="text-red-500" /> Mobile Number
                </label>
                <input 
                  type="tel"
@@ -219,7 +219,7 @@ export default function AccountSettings() {
                 onClick={() => setIsEditing(true)}
                 className="flex-1 bg-white text-black font-black uppercase py-5 rounded-2xl tracking-[0.2em] text-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
-                Modify Access Data
+                Edit Profile
               </button>
             ) : (
               <>
@@ -246,7 +246,7 @@ export default function AccountSettings() {
         <div className="p-6 bg-red-600/5 border border-red-600/10 rounded-2xl flex items-start gap-4">
           <ShieldCheck className="text-red-500 mt-1" size={20} />
           <div className="space-y-1">
-             <h4 className="text-white text-xs font-black uppercase tracking-widest">Protocol Protection Active</h4>
+             <h4 className="text-white text-xs font-black uppercase tracking-widest">Privacy Protected</h4>
              <p className="text-zinc-500 text-[10px] font-medium leading-relaxed">Your data is encrypted using 256-bit AES protection. All changes require secure authentication headers.</p>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function AccountSettings() {
                  <Mail size={32} className="text-red-500" />
                </div>
                <div className="space-y-2">
-                 <h3 className="text-2xl font-black text-white uppercase">Verify New Line</h3>
+                 <h3 className="text-2xl font-black text-white uppercase">Verify Email</h3>
                  <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">Code sent to {email}</p>
                </div>
             </div>

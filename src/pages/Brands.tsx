@@ -25,7 +25,7 @@ export default function Brands({ onNavigate }: { onNavigate: (page: string, para
       </div>
 
       <div className="max-w-[1700px] mx-auto px-4 sm:px-12">
-        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 2xl:grid-cols-3 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700">
           {brands.map((brand, i) => (
             <button
               key={i}

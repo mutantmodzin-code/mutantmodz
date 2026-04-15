@@ -604,9 +604,6 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
             </div>
           </div>
         </div>
-        <div className="hidden lg:block">
-          <AnnouncementBar />
-        </div>
       </nav>
 
       {showMobileSearch && (

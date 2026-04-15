@@ -46,7 +46,11 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                 const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
                 const res = await fetch(`${apiUrl}/hero`);
                 const data = await res.json();
-                const activeSlides = data.filter((s: any) => s.is_active);
+                
+                // Ensure data is an array before filtering
+                const slidesArray = Array.isArray(data) ? data : [];
+                const activeSlides = slidesArray.filter((s: any) => s.is_active);
+                
                 setSlides(activeSlides);
                 // Cache locally for instant loading next time
                 try {
@@ -109,13 +113,13 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
         },
     };
 
-    if (loading) return <div className="h-[50vh] sm:h-[60vh] bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div></div>;
+    if (loading) return <div className="aspect-[16/9] sm:h-[60vh] bg-black flex items-center justify-center"><div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div></div>;
     if (slides.length === 0) return null;
 
     return (
         <section className="relative w-full overflow-hidden bg-black">
             {/* 1. Main Banner Image Area (Force Full Width) */}
-            <div className="relative h-[70vh] sm:h-[75vh] md:h-[80vh] w-full overflow-hidden">
+            <div className="relative aspect-[16/9] sm:h-[75vh] md:h-[80vh] w-full overflow-hidden">
                 <AnimatePresence initial={false} custom={direction}>
                     <motion.div
                         key={current}
@@ -130,7 +134,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         <img
                             src={getMediaUrl(slides[current].image_url)}
                             alt={slides[current].title_red || 'Hero Banner'}
-                            fetchPriority="high"
+                            fetchpriority="high"
                             loading="eager"
                             decoding="async"
                             className="w-full h-full object-cover transition-transform duration-1000 scale-100 sm:scale-105"
@@ -148,22 +152,22 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         transition={{ duration: 0.8 }}
                         className="text-center w-full max-w-5xl"
                     >
-                        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+                        <h1 className="text-3xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black text-white leading-[0.85] tracking-tighter uppercase drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
                             {slides[current].title_white}
                             {slides[current].title_red && (
-                                <span className="block text-red-600 filter drop-shadow-[0_0_30px_rgba(220,38,38,0.5)] mt-2 sm:mt-0">
+                                <span className="block text-red-600 filter drop-shadow-[0_0_30px_rgba(220,38,38,0.5)] mt-1 sm:mt-0">
                                     {slides[current].title_red}
                                 </span>
                             )}
                         </h1>
-                        <p className="mt-8 text-zinc-300 text-[11px] sm:text-lg md:text-xl font-bold uppercase tracking-[0.3em] sm:tracking-[0.4em] max-w-2xl mx-auto opacity-90 drop-shadow-md">
+                        <p className="mt-4 sm:mt-8 text-zinc-300 text-[9px] sm:text-lg md:text-xl font-bold uppercase tracking-[0.2em] sm:tracking-[0.4em] max-w-2xl mx-auto opacity-90 drop-shadow-md">
                             {slides[current].subtitle}
                         </p>
                     </motion.div>
                 </div>
 
                 {/* Slide Indicators */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+                <div className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 flex gap-2 sm:gap-3">
                     {slides.map((_, index) => (
                         <button
                             key={index}
@@ -173,7 +177,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                             }}
                             className={cn(
                                 "h-1 transition-all duration-700 rounded-full",
-                                current === index ? "w-12 sm:w-16 bg-red-600" : "w-4 sm:w-6 bg-white/30 hover:bg-white/50"
+                                current === index ? "w-8 sm:w-16 bg-red-600" : "w-3 sm:w-6 bg-white/30 hover:bg-white/50"
                             )}
                             aria-label={`Go to slide ${index + 1}`}
                         />

@@ -222,7 +222,7 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
               <Zap size={20} className="text-orange-500" /> Garage Sale
             </button>
 
-            <button onClick={() => handleNav('products', '?brands=all')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
+            <button onClick={() => handleNav('brands')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
               <Star size={20} className="text-zinc-500" /> Shop By Brands
             </button>
 

@@ -202,7 +202,9 @@ export const getCombos = async (): Promise<Product[]> => {
         if (!response.ok) throw new Error('Failed to fetch combos');
         
         const data = await response.json();
-        return data.map((c: any) => ({
+        // Ensure data is an array
+        const combosArray = Array.isArray(data) ? data : [];
+        return combosArray.map((c: any) => ({
             id: c.id.toString(),
             category: 'combos',
             name: c.name,
@@ -229,7 +231,9 @@ export const getGarageSale = async (): Promise<Product[]> => {
         if (!response.ok) throw new Error('Failed to fetch garage sale items');
         
         const data = await response.json();
-        return data.map((g: any) => ({
+        // Ensure data is an array
+        const garageSaleArray = Array.isArray(data) ? data : [];
+        return garageSaleArray.map((g: any) => ({
             id: g.id.toString(),
             category: 'garage-sale',
             name: g.name,

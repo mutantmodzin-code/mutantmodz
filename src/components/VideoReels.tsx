@@ -21,9 +21,13 @@ export default function VideoReels() {
         const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
         const res = await fetch(`${apiUrl}/reels`);
         const data = await res.json();
-        setReels(data);
+        
+        // Ensure data is an array before setting state
+        const reelsArray = Array.isArray(data) ? data : [];
+        setReels(reelsArray);
       } catch (err) {
         console.error('Error fetching reels:', err);
+        setReels([]);
       } finally {
         setLoading(false);
       }

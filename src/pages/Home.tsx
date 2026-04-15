@@ -26,9 +26,6 @@ export default function Home({ onNavigate }: HomeProps) {
 
   return (
     <div className="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
-      {/* 5. Shop By Brands - Updated Grid Layout */}
-      <BrandCarousel onNavigate={onNavigate} />
-
       {/* 1. Hero Slideshow - Touch Swipeable */}
       <HeroSlideshow onNavigate={onNavigate} />
 

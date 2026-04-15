@@ -4,7 +4,6 @@ import { Search, Filter, Zap, Phone } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getProducts, getCombos, getGarageSale, getNewArrivals } from '../utils/storage';
-import { brands } from '../data/brands';
 import { Product } from '../types';
 import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 import ProductCard from '../components/ProductCard';
@@ -262,25 +261,12 @@ export default function Products({ onNavigate }: ProductsProps) {
               <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
               <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Official Mutant Collection</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none uppercase mb-3 text-center">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-none uppercase mb-3">
               {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'LATEST' : 'PREMIUM') : selectedCategory} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-red-800">
                 {(selectedCategory === 'all' || selectedCategory === 'new') ? (selectedCategory === 'new' ? 'ARRIVALS' : 'MODZ') : 'COLLECTION'}
               </span>
             </h1>
-
-            {/* Brand Logo Display when a single brand is filtered */}
-            {selectedBrands.length === 1 && (
-              <div className="flex justify-center pt-2 animate-in fade-in zoom-in-95 duration-700">
-                <div className="w-24 sm:w-32 aspect-[3/1.5] bg-white rounded-xl border border-white/10 p-2 flex items-center justify-center shadow-2xl shadow-red-600/10 transition-transform duration-500 hover:scale-110">
-                  <img 
-                    src={brands.find(b => b.name.toLowerCase() === selectedBrands[0].toLowerCase())?.logo} 
-                    alt={selectedBrands[0]} 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
-            )}
           </div>
         </div>
 

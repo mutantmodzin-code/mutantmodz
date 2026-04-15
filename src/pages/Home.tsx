@@ -29,6 +29,8 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 1. Hero Slideshow - Touch Swipeable */}
       <HeroSlideshow onNavigate={onNavigate} />
 
+      <BrandCarousel onNavigate={onNavigate} />
+
       {/* 2. Category Banners - NEW Stacked */}
       <CategoryBanners onNavigate={onNavigate} />
 

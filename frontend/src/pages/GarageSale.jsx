@@ -282,8 +282,6 @@ const GarageSale = () => {
                                 </div>
                             </div>
 
-                            </div>
-
                             <div style={{ gridColumn: 'span 2', backgroundColor: '#fff7ed', padding: '1.5rem', borderRadius: '1.5rem', border: '1px solid #ffedd5' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                                     <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#9a3412' }}>📦 Link to Core Inventory SKU</h3>

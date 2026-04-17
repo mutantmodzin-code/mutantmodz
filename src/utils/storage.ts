@@ -252,3 +252,15 @@ export const getGarageSale = async (): Promise<Product[]> => {
         return [];
     }
 };
+
+export const getPromoBanners = async () => {
+    try {
+        const url = API_URL ? `${API_URL}/promo` : '/api/promo';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch promo banners');
+        return await response.json();
+    } catch (error) {
+        console.error('Failed to fetch promo banners:', error);
+        return [];
+    }
+};

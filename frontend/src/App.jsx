@@ -81,6 +81,7 @@ const App = () => {
           <Route path="/gst-reports" element={<Layout><GstReports /></Layout>} />
           <Route path="/reels" element={<Layout><ManageReels /></Layout>} />
           <Route path="/hero" element={<Layout><ManageHero /></Layout>} />
+          <Route path="/promo" element={<Layout><ManagePromo /></Layout>} />
         </Routes>
       </Router>
     </AuthProvider>

@@ -11,6 +11,7 @@ import ComboProducts from '../components/ComboProducts';
 import FeaturedGrid from '../components/FeaturedGrid';
 import ShopByBike from '../components/ShopByBike';
 import CollectionSquares from '../components/CollectionSquares';
+import PromoGrid from '../components/PromoGrid';
 import { ArrowRight, Zap } from 'lucide-react';
 import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
@@ -28,6 +29,9 @@ export default function Home({ onNavigate }: HomeProps) {
     <div className="bg-zinc-950 text-white min-h-screen overflow-x-hidden">
       {/* 1. Hero Slideshow - Touch Swipeable */}
       <HeroSlideshow onNavigate={onNavigate} />
+
+      {/* 2. Promo Ad Grid - NEW */}
+      <PromoGrid />
 
       {/* 2. Category Banners - NEW Stacked */}
       <CategoryBanners onNavigate={onNavigate} />

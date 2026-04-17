@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -108,11 +109,43 @@ async function setup() {
       );
     `);
 
+    // 7. Promo Banners Table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS promo_banners (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(100),
+        subtitle VARCHAR(100),
+        discount_text VARCHAR(50),
+        price_text VARCHAR(50),
+        image_url TEXT,
+        link_url TEXT,
+        bg_color VARCHAR(50) DEFAULT '#fbbf24',
+        display_order INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Default Categories
     const catCheck = await pool.query('SELECT COUNT(*) FROM categories');
     if (parseInt(catCheck.rows[0].count) === 0) {
       await pool.query("INSERT INTO categories (name) VALUES ('Helmets'), ('Accessories'), ('Gear'), ('Mods'), ('Luggage'), ('Lighting')");
       console.log('✅ Categories initialized');
+    }
+
+    // Seed initial promo banners if empty
+    const promoCheck = await pool.query('SELECT COUNT(*) FROM promo_banners');
+    if (parseInt(promoCheck.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO promo_banners (title, discount_text, price_text, bg_color) VALUES 
+        ('METAL PRODUCTS', '40% OFF', '₹1099', '#fbbf24'),
+        ('TOP BOX', '46% OFF', '₹2599', '#fbbf24'),
+        ('JERRY CAN', '41% OFF', '₹1599', '#fbbf24'),
+        ('COMMUNICATION', '35% OFF', '₹1099', '#fbbf24'),
+        ('FOGLIGHT', '80% OFF', '₹249', '#fbbf24'),
+        ('MIRROR', '60% OFF', '₹149', '#fbbf24')
+      `);
+      console.log('✅ Promo banners initialized');
     }
 
     console.log('--- Database Setup Success ---');

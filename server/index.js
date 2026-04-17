@@ -55,6 +55,7 @@ const deliveryChargeRoutes = require('./routes/delivery_charge');
 const contactRoutes = require('./routes/contact');
 const reelRoutes = require('./routes/reels');
 const heroRoutes = require('./routes/hero');
+const promoRoutes = require('./routes/promo');
 
 // Apply Routes
 app.use('/api/auth', authRoutes);
@@ -72,6 +73,7 @@ app.use('/api/delivery-charge', deliveryChargeRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/reels', reelRoutes);
 app.use('/api/hero', heroRoutes);
+app.use('/api/promo', promoRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

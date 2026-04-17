@@ -475,19 +475,34 @@ export default function Payment() {
                                 <SectionHeader title="Payment Method" icon={CreditCard} />
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                                     {[
-                                        { id: 'razorpay', label: 'RAZORPAY', icon: Lock },
-                                        { id: 'upi', label: 'UPI / GPAY', icon: Smartphone },
-                                        { id: 'card', label: 'BANK CARD', icon: CreditCard },
+                                        { id: 'razorpay', label: 'RAZORPAY', image: '/Razorpay-Logo.jpg' },
+                                        { id: 'upi', label: 'UPI / GPAY', image: '/UPI-apps.avif' },
+                                        { id: 'card', label: 'BANK CARD', image: '/world-debit-card.png' },
                                     ].map((method) => (
                                         <button
                                             key={method.id}
                                             type="button"
                                             onClick={() => setPaymentMethod(method.id)}
-                                            className={`flex flex-col items-center justify-center gap-4 p-8 rounded-[2rem] border transition-all text-center
-                                                ${paymentMethod === method.id ? 'bg-red-600 border-red-600 shadow-xl scale-105' : 'bg-black/40 border-zinc-800 hover:border-zinc-700'}`}
+                                            className={`relative flex flex-col items-center justify-center gap-4 p-8 rounded-[2rem] border transition-all duration-500 text-center group overflow-hidden
+                                                ${paymentMethod === method.id ? 'bg-red-600/5 border-red-600 shadow-[0_20px_50px_rgba(220,38,38,0.15)] scale-105' : 'bg-zinc-950/30 border-zinc-900 hover:border-zinc-800'}`}
                                         >
-                                            <method.icon size={24} className={paymentMethod === method.id ? 'text-white' : 'text-zinc-600'} />
-                                            <span className={`text-[9px] font-black tracking-widest uppercase ${paymentMethod === method.id ? 'text-white' : 'text-zinc-500'}`}>{method.label}</span>
+                                            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center p-3 transition-all duration-700 bg-white shadow-inner ${paymentMethod === method.id ? 'scale-110 shadow-xl' : 'group-hover:scale-105'}`}>
+                                                <img 
+                                                    src={method.image} 
+                                                    alt={method.label} 
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            </div>
+                                            <span className={`text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-500 ${paymentMethod === method.id ? 'text-white' : 'text-zinc-600'}`}>{method.label}</span>
+                                            
+                                            {paymentMethod === method.id && (
+                                                <>
+                                                    <div className="absolute top-0 right-0 w-16 h-16 bg-red-600/10 blur-2xl rounded-full"></div>
+                                                    <div className="absolute top-4 right-4 bg-red-600 text-white p-1 rounded-full shadow-lg animate-in zoom-in spin-in-90 duration-500">
+                                                        <Check size={12} strokeWidth={4} />
+                                                    </div>
+                                                </>
+                                            )}
                                         </button>
                                     ))}
                                 </div>

@@ -41,7 +41,6 @@ export default function Payment() {
     const [isLoading, setIsLoading] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState('razorpay');
     const [deliveryCharge, setDeliveryCharge] = useState(100);
-    const [isFetchingCharge, setIsFetchingCharge] = useState(false);
     const [buyNowProduct, setBuyNowProduct] = useState<{product: Product, quantity: number} | null>(null);
     const orderProcessed = { current: false };
 
@@ -151,11 +150,11 @@ export default function Payment() {
                     <div className="w-24 h-24 bg-zinc-900 rounded-[2rem] flex items-center justify-center mx-auto border border-zinc-800">
                         <Package size={40} className="text-zinc-600" />
                     </div>
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{isLoading ? 'Loading Checkout...' : 'Arsenal Empty'}</h2>
-                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">{isLoading ? 'Synchronizing with database servers...' : 'Please add modules to proceed with deployment.'}</p>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{isLoading ? 'Loading Checkout...' : 'Your Cart is Empty'}</h2>
+                    <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">{isLoading ? 'Please wait while we prepare your checkout...' : 'Please add products to your cart to proceed.'}</p>
                     {!isLoading && (
                         <a href="/#products" className="inline-block w-full bg-white hover:bg-red-600 hover:text-white text-black px-8 py-4 rounded-2xl font-black text-[10px] tracking-[0.4em] transition-all uppercase mt-8">
-                            Continue Scavenging
+                            Continue Shopping
                         </a>
                     )}
                 </div>
@@ -273,7 +272,7 @@ export default function Payment() {
                 amount: Math.round(totalAmt * 100), // Amount in paise
                 currency: 'INR',
                 name: 'MUTANT MODZ',
-                description: `Order for ${items.length} modules`,
+                description: `Order for ${items.length} products`,
                 handler: function (response: any) {
                     processOrder(response.razorpay_payment_id);
                 },
@@ -337,9 +336,9 @@ export default function Payment() {
             <div className="max-w-[1400px] mx-auto">
                 <div className="mb-16 space-y-4">
                     <button onClick={() => window.history.back()} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-6">
-                        <ArrowLeft size={14} /> Back to Gear
+                        <ArrowLeft size={14} /> Back to Products
                     </button>
-                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase leading-none">CHECKOUT <span className="text-zinc-800">ORDER</span></h1>
+                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase leading-none">ORDER <span className="text-zinc-800">CHECKOUT</span></h1>
                 </div>
 
                 <form onSubmit={handlePayment} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -549,10 +548,7 @@ export default function Payment() {
                                 <div className="flex justify-between items-center px-4">
                                     <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Delivery</span>
                                     <span className="text-sm font-black uppercase flex items-center gap-2">
-                                        {isFetchingCharge
-                                            ? <span className="text-zinc-600 text-[9px] animate-pulse">Calculating...</span>
-                                            : <span className={deliveryCharge === 100 ? 'text-green-500' : deliveryCharge === 200 ? 'text-yellow-500' : 'text-red-500'}>{currencyFormat.format(deliveryCharge)}</span>
-                                        }
+                                        <span className={deliveryCharge === 100 ? 'text-green-500' : deliveryCharge === 200 ? 'text-yellow-500' : 'text-red-500'}>{currencyFormat.format(deliveryCharge)}</span>
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center p-8 bg-zinc-950 rounded-[2rem] border border-zinc-900 mt-6">

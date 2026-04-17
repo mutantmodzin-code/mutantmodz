@@ -92,9 +92,9 @@ export default function MyOrders() {
             <div className="min-h-screen bg-zinc-950 pt-32 pb-20 px-4 flex items-center justify-center">
                 <div className="bg-zinc-900 border border-white/10 p-12 rounded-[2.5rem] text-center max-w-lg w-full shadow-2xl">
                     <ShieldCheck size={64} className="text-red-600 mx-auto mb-6" />
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Identity Unverified</h2>
-                    <p className="text-zinc-500 mb-8 font-bold uppercase tracking-widest text-[10px]">Secure login required to access order vault</p>
-                    <button className="w-full py-4 bg-red-600 text-white font-black uppercase rounded-2xl hover:bg-red-700 transition-all">Sign In Protocol</button>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Login Required</h2>
+                    <p className="text-zinc-500 mb-8 font-bold uppercase tracking-widest text-[10px]">Please sign in to view your order history</p>
+                    <button className="w-full py-4 bg-red-600 text-white font-black uppercase rounded-2xl hover:bg-red-700 transition-all">Sign In</button>
                 </div>
             </div>
         );
@@ -111,9 +111,9 @@ export default function MyOrders() {
                             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em]">Operational Manifest 2026</span>
                         </div>
                         <h1 className="text-6xl sm:text-8xl font-black text-white uppercase tracking-tighter leading-none mb-4">
-                            MY <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">VAULT</span>
+                            MY <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">ORDERS</span>
                         </h1>
-                        <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em]">Hardware tracking & acquisition history</p>
+                        <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em]">Tracking & Purchase history</p>
                     </div>
                     {orders.length > 0 && (
                         <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-6">
@@ -133,7 +133,7 @@ export default function MyOrders() {
                 {loading && (
                     <div className="flex flex-col items-center justify-center py-32 space-y-4">
                         <Loader2 className="animate-spin text-red-600" size={64} strokeWidth={3} />
-                        <p className="text-zinc-500 font-black uppercase tracking-[0.3em] text-[10px]">Retrieving secure data...</p>
+                        <p className="text-zinc-500 font-black uppercase tracking-[0.3em] text-[10px]">Loading your orders...</p>
                     </div>
                 )}
 
@@ -141,7 +141,7 @@ export default function MyOrders() {
                     <div className="bg-red-600/5 border border-red-600/20 rounded-[2rem] p-12 text-center max-w-2xl mx-auto backdrop-blur-3xl">
                         <AlertCircle className="text-red-600 mx-auto mb-6" size={48} />
                         <p className="text-white font-black uppercase tracking-widest mb-6">{error}</p>
-                        <button onClick={fetchOrders} className="px-8 py-3 bg-red-600 text-white font-black uppercase rounded-xl hover:bg-red-700 transition-all text-xs">Reconnect Uplink</button>
+                        <button onClick={fetchOrders} className="px-8 py-3 bg-red-600 text-white font-black uppercase rounded-xl hover:bg-red-700 transition-all text-xs">Retry Connection</button>
                     </div>
                 )}
 
@@ -167,8 +167,8 @@ export default function MyOrders() {
                                                     <Package size={32} className="text-red-600" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.4em] mb-1">Assigned Protocol #{order.id}</p>
-                                                    <p className="text-white text-2xl sm:text-3xl font-black uppercase tracking-tight">Initiated {formatDate(order.created_at)}</p>
+                                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.4em] mb-1">Order ID #{order.id}</p>
+                                                    <p className="text-white text-2xl sm:text-3xl font-black uppercase tracking-tight">Placed on {formatDate(order.created_at)}</p>
                                                     <div className="flex items-center gap-4 mt-3">
                                                         <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">Method: {order.payment_method}</span>
                                                         <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">Type: {order.order_type}</span>
@@ -214,7 +214,7 @@ export default function MyOrders() {
                                             {/* Right Info: Financials & Action */}
                                             <div className="flex flex-col sm:flex-row items-center gap-8 min-w-[240px] lg:justify-end">
                                                 <div className="text-right">
-                                                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total Manifest</p>
+                                                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total Amount</p>
                                                     <p className="text-4xl font-black text-white">₹{Number(order.total_amount || 0).toLocaleString('en-IN')}</p>
                                                 </div>
                                                 <button 
@@ -248,7 +248,7 @@ export default function MyOrders() {
                                                 {/* Line Items */}
                                                 <div>
                                                     <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-3">
-                                                        <Receipt size={14} className="text-red-600" /> Secure Itemized Manifest
+                                                        <Receipt size={14} className="text-red-600" /> Order Summary
                                                     </h3>
                                                     <div className="space-y-4">
                                                         {order.items.map((item) => (
@@ -275,7 +275,7 @@ export default function MyOrders() {
                                                 {/* Delivery Intel */}
                                                 <div>
                                                     <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-3">
-                                                        <MapPin size={14} className="text-red-600" /> Logistic Intelligence
+                                                        <MapPin size={14} className="text-red-600" /> Delivery Details
                                                     </h3>
                                                     <div className="bg-zinc-950/50 rounded-3xl p-8 border border-white/5 space-y-8">
                                                         <div className="flex items-center justify-between">
@@ -290,7 +290,7 @@ export default function MyOrders() {
 
                                                         <div className="grid grid-cols-2 gap-8">
                                                             <div>
-                                                                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Payment Protocol</p>
+                                                                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Payment Method</p>
                                                                 <p className="text-[11px] font-bold text-white uppercase">{order.payment_method}</p>
                                                             </div>
                                                             <div>
@@ -304,7 +304,7 @@ export default function MyOrders() {
                                                                 <div className="flex items-center gap-4 text-green-500">
                                                                     <Truck size={24} />
                                                                     <div>
-                                                                        <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-70">Estimated Incursion</p>
+                                                                        <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-70">Estimated Arrival</p>
                                                                         <p className="text-xl font-black uppercase tracking-tighter">{formatDate(order.expected_delivery)}</p>
                                                                     </div>
                                                                 </div>
@@ -325,12 +325,12 @@ export default function MyOrders() {
                 {!loading && orders.length === 0 && !error && (
                     <div className="py-32 text-center border-2 border-dashed border-white/5 rounded-[4rem]">
                         <ShoppingBag size={80} className="text-zinc-900 mx-auto mb-8" strokeWidth={1} />
-                        <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Vault is Vacant</h3>
+                        <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-4">No Orders Found</h3>
                         <p className="text-zinc-600 max-w-sm mx-auto font-bold uppercase tracking-widest text-[10px] leading-relaxed mb-12">
-                            No hardware acquisitions recorded. Start your tactical kit building now.
+                            You haven't placed any orders yet. Explore our arsenal of products.
                         </p>
                         <button className="px-12 py-5 bg-white text-black font-black uppercase rounded-2xl hover:bg-red-600 hover:text-white transition-all transform active:scale-95 text-xs tracking-widest">
-                            Browse Arsenal
+                            Shop Now
                         </button>
                     </div>
                 )}

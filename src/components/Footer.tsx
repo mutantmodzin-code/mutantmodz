@@ -27,14 +27,14 @@ export default function Footer() {
             <div className="space-y-6">
               <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600">Quick Links</h4>
               <ul className="space-y-4">
-                <li><a href="#products" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Our Arsenal</a></li>
+                <li><a href="#products" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Shop Products</a></li>
                 <li><a href="#categories" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Collections</a></li>
                 <li><a href="#garage-sale" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Garage Sale</a></li>
-                <li><a href="#about" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Our DNA</a></li>
+                <li><a href="#about" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">About Us</a></li>
               </ul>
             </div>
             <div className="space-y-6">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600">Top Sectors</h4>
+              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600">Categories</h4>
               <ul className="space-y-4">
                 <li><a href="#category?type=helmets" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Helmets</a></li>
                 <li><a href="#category?type=gear" className="text-zinc-500 hover:text-white text-[11px] font-black uppercase tracking-widest transition-colors">Riding Gear</a></li>
@@ -45,7 +45,7 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8">Contact Base</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8">Contact Us</h4>
             <div className="space-y-6">
               <div className="flex items-start gap-4 group">
                 <MapPin size={20} className="text-red-600 group-hover:scale-110 transition-transform" />
@@ -71,11 +71,11 @@ export default function Footer() {
 
         <div className="border-t border-white/5 mt-20 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-zinc-600 text-[10px] font-black uppercase tracking-[0.2em]">
-            &copy; {new Date().getFullYear()} Mutant Modz Coimbatore. Tactical Performance Engineering.
+            &copy; {new Date().getFullYear()} Mutant Modz Coimbatore. Premium Bike Accessories.
           </p>
           <div className="flex gap-8">
-            <a href="#" className="text-zinc-700 hover:text-zinc-400 text-[9px] font-black uppercase tracking-widest transition-colors">Privacy Protocol</a>
-            <a href="#" className="text-zinc-700 hover:text-zinc-400 text-[9px] font-black uppercase tracking-widest transition-colors">Terms of Engagement</a>
+            <a href="#" className="text-zinc-700 hover:text-zinc-400 text-[9px] font-black uppercase tracking-widest transition-colors">Privacy Policy</a>
+            <a href="#" className="text-zinc-700 hover:text-zinc-400 text-[9px] font-black uppercase tracking-widest transition-colors">Terms of Service</a>
           </div>
         </div>
       </div>

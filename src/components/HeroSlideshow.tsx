@@ -134,7 +134,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                         <img
                             src={getMediaUrl(slides[current].image_url)}
                             alt={slides[current].title_red || 'Hero Banner'}
-                            fetchpriority="high"
+                            fetchPriority="high"
                             loading="eager"
                             decoding="async"
                             className="w-full h-full object-cover transition-transform duration-1000 scale-100 sm:scale-105"

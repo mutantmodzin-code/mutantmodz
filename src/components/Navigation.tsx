@@ -294,19 +294,48 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                >
                 <Search size={20} />
               </button>
-              <button
-                onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
-                aria-label="Account"
-              >
-                {isLoggedIn ? (
-                  <div className="w-8 h-8 sm:w-6 sm:h-6 bg-red-600 rounded-full flex items-center justify-center text-[12px] font-black text-white">
-                    {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+              <div className="relative">
+                <button
+                  onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
+                  aria-label="Account"
+                >
+                  {isLoggedIn ? (
+                    <div className="w-8 h-8 sm:w-6 sm:h-6 bg-red-600 rounded-full flex items-center justify-center text-[12px] font-black text-white">
+                      {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                  ) : (
+                    <User size={20} />
+                  )}
+                </button>
+                {/* Mobile User Menu */}
+                {isLoggedIn && showUserMenu && (
+                  <div className="absolute top-full mt-2 right-0 w-48 bg-zinc-950 border border-zinc-800 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-4 py-3 border-b border-zinc-800">
+                      <p className="text-white text-xs font-bold truncate">{user?.displayName}</p>
+                      <p className="text-zinc-500 text-[10px] truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNavigate('settings'); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-zinc-300 hover:text-white transition-all text-xs font-bold"
+                    >
+                      <User size={14} /> Profile Settings
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNavigate('orders'); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-zinc-300 hover:text-white transition-all text-xs font-bold"
+                    >
+                      <Package size={14} /> My Orders
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); logout(); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-600/10 transition-all text-xs font-black border-t border-zinc-800 mt-1"
+                    >
+                      <LogOut size={14} /> Logout
+                    </button>
                   </div>
-                ) : (
-                  <User size={20} />
                 )}
-              </button>
+              </div>
               <button
                 onClick={onOpenCart}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation relative"
@@ -389,12 +418,13 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               </div>
 
               <div className="hidden lg:flex items-center space-x-5 shrink-0">
-                <button 
-                  onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
-                  aria-label="Account Menu"
+                <div 
                   className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative"
                 >
-                  <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1">
+                  <div 
+                    onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                    className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1"
+                  >
                     {isLoggedIn ? (
                       <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-[9px] font-black text-white">
                         {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
@@ -414,14 +444,26 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                         <p className="text-zinc-500 text-[10px] truncate">{user?.email}</p>
                       </div>
                       <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate('settings'); setShowUserMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-xs font-bold"
+                      >
+                        <User size={14} /> Profile Settings
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate('orders'); setShowUserMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-xs font-bold"
+                      >
+                        <Package size={14} /> My Orders
+                      </button>
+                      <button
                         onClick={(e) => { e.stopPropagation(); logout(); setShowUserMenu(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-red-500 hover:bg-red-600/10 transition-all text-xs font-bold"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-red-500 hover:bg-red-600/10 transition-all text-xs font-bold border-t border-zinc-800 mt-1"
                       >
                         <LogOut size={14} /> Logout
                       </button>
                     </div>
                   )}
-                </button>
+                </div>
                 <div className="w-px h-8 bg-zinc-800"></div>
                 <button
                   onClick={onOpenCart}

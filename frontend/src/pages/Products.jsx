@@ -74,7 +74,8 @@ const Products = () => {
         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
         image_urls: ['', '', '', ''],
         bike_brand: '', bike_model: '',
-        description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: ''
+        description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
+        delivery_tn: 0, delivery_south: 0, delivery_north: 0
     });
 
 
@@ -117,7 +118,8 @@ const Products = () => {
                 price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                 image_urls: ['', '', '', ''],
                 bike_brand: '', bike_model: '',
-                description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: ''
+                description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
+                delivery_tn: 0, delivery_south: 0, delivery_north: 0
             });
 
         } catch (error) {
@@ -202,10 +204,11 @@ const Products = () => {
             bike_brand: p.bike_brand || '',
             bike_model: p.bike_model || '',
             description: p.description || '',
-            discount_percent: p.discount_percent || 0,
-            is_garage_sale: p.is_garage_sale || false,
             is_combo: p.is_combo || false,
-            combo_type: p.combo_type || ''
+            combo_type: p.combo_type || '',
+            delivery_tn: p.delivery_tn || 0,
+            delivery_south: p.delivery_south || 0,
+            delivery_north: p.delivery_north || 0
         });
 
         setIsModalOpen(true);
@@ -233,7 +236,9 @@ const Products = () => {
                         name: '', brand: '', category_id: '', sub_category: '', sub_category_type: '',
                         price: '', stock: 0, vendor_id: '', sku: '', purchase_price: '',
                         image_urls: ['', '', '', ''],
-                        bike_brand: '', bike_model: '', description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: ''
+                        bike_brand: '', bike_model: '',
+                        description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
+                        delivery_tn: 0, delivery_south: 0, delivery_north: 0
                     });
 
                     setIsModalOpen(true);
@@ -429,6 +434,36 @@ const Products = () => {
                             <div style={{ gridColumn: 'span 2' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Stock</label>
                                 <input className="input" style={{ borderRadius: '0.75rem' }} type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+                            </div>
+
+                            <div style={{ gridColumn: 'span 12', backgroundColor: '#fcf8ff', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #d8b4fe' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#7e22ce', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>🚚 Manual Delivery Charges (Region Wise)</span>
+                                    <div style={{ height: '1px', flex: 1, backgroundColor: '#d8b4fe' }}></div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>INSIDE TAMILNADU</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <span style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#9333ea', fontSize: '12px' }}>₹</span>
+                                            <input className="input" style={{ paddingLeft: '1.25rem', borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_tn} onChange={(e) => setFormData({ ...formData, delivery_tn: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>BELOW MAHARASHTRA</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <span style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#9333ea', fontSize: '12px' }}>₹</span>
+                                            <input className="input" style={{ paddingLeft: '1.25rem', borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_south} onChange={(e) => setFormData({ ...formData, delivery_south: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>ABOVE MAHARASHTRA</label>
+                                        <div style={{ position: 'relative' }}>
+                                            <span style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#9333ea', fontSize: '12px' }}>₹</span>
+                                            <input className="input" style={{ paddingLeft: '1.25rem', borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_north} onChange={(e) => setFormData({ ...formData, delivery_north: e.target.value })} />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div style={{ gridColumn: 'span 12', backgroundColor: formData.is_garage_sale ? '#fff7ed' : '#f8fafc', padding: '1rem', borderRadius: '1rem', border: `1px solid ${formData.is_garage_sale ? '#ff7e33' : '#e2e8f0'}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', transition: 'all 0.3s', marginBottom: '1rem' }}>

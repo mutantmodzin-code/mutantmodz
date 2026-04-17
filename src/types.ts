@@ -24,6 +24,9 @@ export interface Product {
     is_combo?: boolean;
     combo_type?: string;
     garage_sale_type?: string;
+    delivery_tn?: number;
+    delivery_south?: number;
+    delivery_north?: number;
 }
 
 

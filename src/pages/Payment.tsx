@@ -89,21 +89,36 @@ export default function Payment() {
         ? parseFloat(String(buyNowProduct.product.price).replace(/[^0-9.]/g, '')) * buyNowProduct.quantity
         : cartTotalPrice;
 
-    const fetchDeliveryCharge = async (state: string, city: string) => {
+    const calculateDeliveryCharge = (state: string) => {
         if (!state) return;
-        setIsFetchingCharge(true);
-        try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-            const params = new URLSearchParams({ state, city: city || '' });
-            const res = await fetch(`${apiUrl}/delivery-charge?${params}`);
-            const data = await res.json();
-            setDeliveryCharge(data.charge || 300);
-        } catch {
-            setDeliveryCharge(300);
-        } finally {
-            setIsFetchingCharge(false);
-        }
+        
+        const southStates = ['Karnataka', 'Kerala', 'Andhra Pradesh', 'Telangana', 'Goa', 'Puducherry'];
+        let totalCharge = 0;
+
+        items.forEach(item => {
+            const prod = item.product;
+            let charge = 0;
+            
+            if (state === 'Tamil Nadu') {
+                charge = Number(prod.delivery_tn) || 0;
+            } else if (southStates.includes(state)) {
+                charge = Number(prod.delivery_south) || 0;
+            } else {
+                charge = Number(prod.delivery_north) || 0;
+            }
+            
+            totalCharge += charge * item.quantity;
+        });
+
+        // Minimum default if no charges set
+        if (totalCharge === 0 && items.length > 0) totalCharge = 100;
+
+        setDeliveryCharge(totalCharge);
     };
+
+    useEffect(() => {
+        calculateDeliveryCharge(customer.state);
+    }, [items, customer.state]);
 
     // Constant for Razorpay Key (User can replace with their actual key in .env)
     const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY;
@@ -402,7 +417,7 @@ export default function Payment() {
                                                 placeholder="City Name"
                                                 value={customer.city}
                                                 onChange={(e) => setCustomer({ ...customer, city: e.target.value })}
-                                                onBlur={(e) => fetchDeliveryCharge(customer.state, e.target.value)}
+
                                             />
                                         </div>
                                         <div>
@@ -414,15 +429,17 @@ export default function Payment() {
                                                     value={customer.state}
                                                     onChange={(e) => {
                                                         setCustomer({ ...customer, state: e.target.value });
-                                                        fetchDeliveryCharge(e.target.value, customer.city);
+                                                        calculateDeliveryCharge(e.target.value);
                                                     }}
                                                 >
                                                     <option>Tamil Nadu</option>
                                                     <option>Karnataka</option>
                                                     <option>Kerala</option>
-                                                    <option>Maharashtra</option>
+                                                    <option>Puducherry</option>
                                                     <option>Andhra Pradesh</option>
                                                     <option>Telangana</option>
+                                                    <option>Maharashtra</option>
+                                                    <option>Goa</option>
                                                     <option>Delhi</option>
                                                     <option>Gujarat</option>
                                                     <option>Rajasthan</option>
@@ -437,7 +454,6 @@ export default function Payment() {
                                                     <option>Jharkhand</option>
                                                     <option>Uttarakhand</option>
                                                     <option>Himachal Pradesh</option>
-                                                    <option>Goa</option>
                                                     <option>Chhattisgarh</option>
                                                 </select>
                                                 <ChevronDown size={14} className="absolute right-6 top-1/2 -translate-y-1/2 text-zinc-500" />

@@ -30,9 +30,6 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 1. Hero Slideshow - Touch Swipeable */}
       <HeroSlideshow onNavigate={onNavigate} />
 
-      {/* 2. Promo Ad Grid - NEW */}
-      <PromoGrid />
-
       {/* 2. Category Banners - NEW Stacked */}
       <CategoryBanners onNavigate={onNavigate} />
 
@@ -59,6 +56,9 @@ export default function Home({ onNavigate }: HomeProps) {
 
       {/* 7. Watch Our Reels - Updated Horizontal Scroll */}
       <VideoReels />
+
+      {/* Promo Ad Grid */}
+      <PromoGrid />
 
       {/* 8. Touring Collections - NEW Square Grid */}
       <CollectionSquares onNavigate={onNavigate} />

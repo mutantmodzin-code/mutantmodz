@@ -18,6 +18,7 @@ import Combos from './pages/Combos';
 import GarageSale from './pages/GarageSale';
 import ManageReels from './pages/ManageReels';
 import ManageHero from './pages/ManageHero';
+import ManagePromo from './pages/ManagePromo';
 
 const Layout = ({ children }) => {
   const { user, loading } = useAuth();

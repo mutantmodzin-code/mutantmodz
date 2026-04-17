@@ -17,6 +17,7 @@ import Brands from './pages/Brands';
 import MenuDrawer from './components/MenuDrawer';
 import MyOrders from './pages/MyOrders';
 import AccountSettings from './pages/AccountSettings';
+import BikeModels from './pages/BikeModels';
 
 import Payment from './pages/Payment';
 import { CartProvider } from './context/CartContext';
@@ -82,6 +83,8 @@ function AppContent() {
         return <MyOrders />;
       case 'settings':
         return <AccountSettings />;
+      case 'bike-models':
+        return <BikeModels onNavigate={navigate} />;
       default:
         return <Home onNavigate={navigate} />;
     }

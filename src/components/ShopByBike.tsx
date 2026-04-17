@@ -36,7 +36,7 @@ export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
           {bikes.map((bike, idx) => (
             <button
               key={idx}
-              onClick={() => onNavigate('products', `?bike=${encodeURIComponent(bike.name)}`)}
+              onClick={() => onNavigate('bike-models', `?bike=${encodeURIComponent(bike.name)}`)}
               className="flex flex-col items-center gap-2 group touch-manipulation active:scale-95 transition-all duration-300"
             >
               {/* Circular Content Container */}

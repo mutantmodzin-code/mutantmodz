@@ -13,6 +13,7 @@ import {
     ShoppingCart,
     Zap,
     Video,
+    Tag,
     X
 } from 'lucide-react';
 

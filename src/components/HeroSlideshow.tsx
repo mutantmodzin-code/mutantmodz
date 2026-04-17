@@ -132,9 +132,9 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                     >
                         {/* Use real img tag with object-fit for the edge-to-edge guarantee */}
                         <img
+                            {...({ fetchpriority: "high" } as any)}
                             src={getMediaUrl(slides[current].image_url)}
                             alt={slides[current].title_red || 'Hero Banner'}
-                            fetchPriority="high"
                             loading="eager"
                             decoding="async"
                             className="w-full h-full object-cover transition-transform duration-1000 scale-100 sm:scale-105"

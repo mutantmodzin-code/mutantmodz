@@ -1,8 +1,11 @@
 export const getMediaUrl = (url: string) => {
   if (!url) return '';
   
+  // 0. Remove any literal quotes and trim whitespace
+  let cleanUrl = url.trim().replace(/^["']|["']$/g, '');
+  
   // 1. Force remove any local dev host strings from the database string
-  let cleanUrl = url.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?/, '');
+  cleanUrl = cleanUrl.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?/, '');
   
   // 2. If it's already a full URL or a data/blob URI, return it as-is
   if (

@@ -13,10 +13,11 @@ const Combos = () => {
     const [editingCombo, setEditingCombo] = useState(null);
 
     const [formData, setFormData] = useState({
-        name: '', brand: '', price: '', stock: 0, image_url: '',
+        name: '', brand: '', price: '', stock: 0, sku: '', image_url: '',
         images: ['', '', '', ''],
         description: '', combo_type: '',
-        linked_items: [] // { sku: '', quantity: 1, name: '' }
+        linked_items: [],
+        delivery_tn: 0, delivery_south: 0, delivery_north: 0
     });
     const [allInventory, setAllInventory] = useState([]);
     const [skuSearch, setSkuSearch] = useState('');
@@ -63,10 +64,11 @@ const Combos = () => {
     const resetForm = () => {
         setEditingCombo(null);
         setFormData({
-            name: '', brand: '', price: '', stock: 0, image_url: '',
+            name: '', brand: '', price: '', stock: 0, sku: '', image_url: '',
             images: ['', '', '', ''],
             description: '', combo_type: '',
-            linked_items: []
+            linked_items: [],
+            delivery_tn: 0, delivery_south: 0, delivery_north: 0
         });
     };
 
@@ -147,11 +149,15 @@ const Combos = () => {
             brand: c.brand || '',
             price: c.price,
             stock: c.stock,
+            sku: c.sku || '',
             image_url: c.image_url || '',
             images: Array.isArray(c.images) ? [...c.images, '', '', '', ''].slice(0, 4) : ['', '', '', ''],
             description: c.description || '',
             combo_type: c.combo_type || '',
-            linked_items: Array.isArray(c.linked_items) ? c.linked_items : []
+            linked_items: Array.isArray(c.linked_items) ? c.linked_items : [],
+            delivery_tn: c.delivery_tn || 0,
+            delivery_south: c.delivery_south || 0,
+            delivery_north: c.delivery_north || 0
         });
         setIsModalOpen(true);
     };
@@ -242,6 +248,11 @@ const Combos = () => {
                             </div>
 
                             <div>
+                                <label className="label">Combo SKU</label>
+                                <input className="input" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} placeholder="UNIQUE-COMBO-ID" />
+                            </div>
+
+                            <div>
                                 <label className="label">Combo Type</label>
                                 <select className="input" value={formData.combo_type} onChange={(e) => setFormData({ ...formData, combo_type: e.target.value })}>
                                     <option value="">Select Type</option>
@@ -259,13 +270,39 @@ const Combos = () => {
                                 <input className="input" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
                             </div>
 
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label className="label">Description</label>
-                                <textarea className="input" style={{ minHeight: '100px' }} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                            <div style={{ gridColumn: 'span 2', backgroundColor: '#fcf8ff', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #d8b4fe' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#7e22ce', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>🚚 Delivery Charges (Region Wise)</span>
+                                    <div style={{ height: '1px', flex: 1, backgroundColor: '#d8b4fe' }}></div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>TAMIL NADU</label>
+                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_tn} onChange={(e) => setFormData({ ...formData, delivery_tn: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>SOUTH INDIA</label>
+                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_south} onChange={(e) => setFormData({ ...formData, delivery_south: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>NORTH INDIA</label>
+                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_north} onChange={(e) => setFormData({ ...formData, delivery_north: e.target.value })} />
+                                    </div>
+                                </div>
                             </div>
 
                             <div style={{ gridColumn: 'span 2', backgroundColor: '#f0f9ff', padding: '1.5rem', borderRadius: '1.5rem', border: '1px solid #bae6fd' }}>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0369a1', marginBottom: '1rem' }}>🔗 Linked Inventory Items</h3>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#0369a1' }}>🔗 Linked Inventory Items</h3>
+                                    {formData.linked_items.length > 0 && (
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#0ea5e9', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '2rem' }}>
+                                            Available: {Math.min(...formData.linked_items.map(li => {
+                                                const inv = allInventory.find(p => p.sku === li.sku);
+                                                return inv ? Math.floor(inv.stock / (li.quantity || 1)) : 0;
+                                            }))} Units
+                                        </div>
+                                    )}
+                                </div>
                                 <div style={{ marginBottom: '1rem' }}>
                                     <div style={{ position: 'relative' }}>
                                         <input 
@@ -299,6 +336,7 @@ const Combos = () => {
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 800, fontSize: '0.8rem', color: '#0369a1' }}>{item.sku}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.name}</div>
+                                                <div style={{ fontSize: '0.65rem', color: '#0ea5e9' }}>Component Stock: {allInventory.find(p => p.sku === item.sku)?.stock || 0}</div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>QTY:</span>
@@ -325,6 +363,11 @@ const Combos = () => {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label className="label">Description</label>
+                                <textarea className="input" style={{ minHeight: '100px' }} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>

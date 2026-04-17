@@ -45,7 +45,10 @@ export const getProducts = async (): Promise<Product[]> => {
                 is_garage_sale: p.is_garage_sale || false,
                 is_combo: p.is_combo || false,
                 combo_type: p.combo_type || '',
-                category_name: p.category_name || ''
+                category_name: p.category_name || '',
+                delivery_tn: parseFloat(p.delivery_tn) || 0,
+                delivery_south: parseFloat(p.delivery_south) || 0,
+                delivery_north: parseFloat(p.delivery_north) || 0
             };
 
         });
@@ -151,9 +154,11 @@ export const getNewArrivals = async (): Promise<Product[]> => {
                 sub_category_type: p.sub_category_type || '',
                 date_added: p.created_at || null,
                 created_at: p.created_at || null,
-                is_garage_sale: p.is_garage_sale || false,
                 is_combo: p.is_combo || false,
-                combo_type: p.combo_type || ''
+                combo_type: p.combo_type || '',
+                delivery_tn: parseFloat(p.delivery_tn) || 0,
+                delivery_south: parseFloat(p.delivery_south) || 0,
+                delivery_north: parseFloat(p.delivery_north) || 0
             };
         });
     } catch (error) {
@@ -216,7 +221,11 @@ export const getCombos = async (): Promise<Product[]> => {
             images: c.images || [c.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
             brand: c.brand || '',
             is_combo: true,
-            combo_type: c.combo_type || 'General Combos'
+            sku: c.sku || '',
+            combo_type: c.combo_type || 'General Combos',
+            delivery_tn: parseFloat(c.delivery_tn) || 0,
+            delivery_south: parseFloat(c.delivery_south) || 0,
+            delivery_north: parseFloat(c.delivery_north) || 0
         }));
     } catch (error) {
         console.error('Failed to fetch combos:', error);
@@ -245,7 +254,11 @@ export const getGarageSale = async (): Promise<Product[]> => {
             images: g.images || [g.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
             brand: g.brand || '',
             is_garage_sale: true,
-            garage_sale_type: g.garage_sale_type || 'Clearance'
+            sku: g.sku || '',
+            garage_sale_type: g.garage_sale_type || 'Clearance',
+            delivery_tn: parseFloat(g.delivery_tn) || 0,
+            delivery_south: parseFloat(g.delivery_south) || 0,
+            delivery_north: parseFloat(g.delivery_north) || 0
         }));
     } catch (error) {
         console.error('Failed to fetch garage sale items:', error);

@@ -44,11 +44,27 @@ const Billing = () => {
     const handleSkuSearch = async (e) => {
         const value = e.target.value;
         setSkuSearch(value);
-        if (value.length >= 3) {
+        if (value.length >= 2) {
+            // Check products
             const prod = products.find(p => p.sku === value);
             if (prod && prod.stock > 0) {
-                addItemToBillDirect(prod);
+                addItemToBillDirect(prod, 1, 'product');
                 setSkuSearch('');
+                return;
+            }
+            // Check combos
+            const combo = combos.find(c => c.sku === value);
+            if (combo) {
+                addItemToBillDirect(combo, 1, 'combo');
+                setSkuSearch('');
+                return;
+            }
+            // Check garage sale
+            const gs = garageSaleItems.find(g => g.sku === value);
+            if (gs) {
+                addItemToBillDirect(gs, 1, 'garage_sale');
+                setSkuSearch('');
+                return;
             }
         }
     };
@@ -215,14 +231,14 @@ const Billing = () => {
                                 <optgroup label="Curated Combos">
                                     {combos.map(c => (
                                         <option key={`combo_${c.id}`} value={`combo_${c.id}`}>
-                                            {c.name} (₹{c.price})
+                                            {c.name} - {c.sku || 'N/A'} (₹{c.price})
                                         </option>
                                     ))}
                                 </optgroup>
                                 <optgroup label="Garage Sale Items">
                                     {garageSaleItems.map(g => (
                                         <option key={`gs_${g.id}`} value={`gs_${g.id}`}>
-                                            {g.name} (₹{g.price})
+                                            {g.name} - {g.sku || 'N/A'} (₹{g.price})
                                         </option>
                                     ))}
                                 </optgroup>

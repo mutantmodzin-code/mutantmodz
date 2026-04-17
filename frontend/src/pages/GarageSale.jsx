@@ -13,10 +13,11 @@ const GarageSale = () => {
     const [editingItem, setEditingItem] = useState(null);
 
     const [formData, setFormData] = useState({
-        name: '', brand: '', price: '', stock: 0, image_url: '',
+        name: '', brand: '', price: '', stock: 0, sku: '', image_url: '',
         images: ['', '', '', ''],
         description: '',
-        linked_items: [] // { sku: '', quantity: 1, name: '' }
+        linked_items: [],
+        delivery_tn: 0, delivery_south: 0, delivery_north: 0
     });
     const [allInventory, setAllInventory] = useState([]);
     const [skuSearch, setSkuSearch] = useState('');
@@ -63,10 +64,11 @@ const GarageSale = () => {
     const resetForm = () => {
         setEditingItem(null);
         setFormData({
-            name: '', brand: '', price: '', stock: 0, image_url: '',
+            name: '', brand: '', price: '', stock: 0, sku: '', image_url: '',
             images: ['', '', '', ''],
-            description: '',
-            linked_items: []
+            description: '', sku: '',
+            linked_items: [],
+            delivery_tn: 0, delivery_south: 0, delivery_north: 0
         });
     };
 
@@ -147,10 +149,14 @@ const GarageSale = () => {
             brand: item.brand || '',
             price: item.price,
             stock: item.stock,
+            sku: item.sku || '',
             image_url: item.image_url || '',
             images: Array.isArray(item.images) ? [...item.images, '', '', '', ''].slice(0, 4) : ['', '', '', ''],
             description: item.description || '',
-            linked_items: Array.isArray(item.linked_items) ? item.linked_items : []
+            linked_items: Array.isArray(item.linked_items) ? item.linked_items : [],
+            delivery_tn: item.delivery_tn || 0,
+            delivery_south: item.delivery_south || 0,
+            delivery_north: item.delivery_north || 0
         });
         setIsModalOpen(true);
     };
@@ -238,6 +244,11 @@ const GarageSale = () => {
                                 <input className="input" value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
                             </div>
 
+                            <div>
+                                <label className="label">Item SKU</label>
+                                <input className="input" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} placeholder="UNIQUE-SALE-ID" />
+                            </div>
+
 
 
                             <div>
@@ -250,13 +261,41 @@ const GarageSale = () => {
                                 <input className="input" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
                             </div>
 
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label className="label">Description</label>
-                                <textarea className="input" style={{ minHeight: '100px' }} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
+                            <div style={{ gridColumn: 'span 2', backgroundColor: '#fcf8ff', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #d8b4fe' }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#7e22ce', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span>🚚 Delivery Charges (Region Wise)</span>
+                                    <div style={{ height: '1px', flex: 1, backgroundColor: '#d8b4fe' }}></div>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>TAMIL NADU</label>
+                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_tn} onChange={(e) => setFormData({ ...formData, delivery_tn: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>SOUTH INDIA</label>
+                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_south} onChange={(e) => setFormData({ ...formData, delivery_south: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>NORTH INDIA</label>
+                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_north} onChange={(e) => setFormData({ ...formData, delivery_north: e.target.value })} />
+                                    </div>
+                                </div>
+                            </div>
+
                             </div>
 
                             <div style={{ gridColumn: 'span 2', backgroundColor: '#fff7ed', padding: '1.5rem', borderRadius: '1.5rem', border: '1px solid #ffedd5' }}>
-                                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#9a3412', marginBottom: '1rem' }}>📦 Link to Core Inventory SKU</h3>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                                    <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#9a3412' }}>📦 Link to Core Inventory SKU</h3>
+                                    {formData.linked_items.length > 0 && (
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#f97316', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '2rem' }}>
+                                            Available: {Math.min(...formData.linked_items.map(li => {
+                                                const inv = allInventory.find(p => p.sku === li.sku);
+                                                return inv ? Math.floor(inv.stock / (li.quantity || 1)) : 0;
+                                            }))} Units
+                                        </div>
+                                    )}
+                                </div>
                                 <p style={{ fontSize: '0.75rem', color: '#9a3412', marginBottom: '1rem', opacity: 0.8 }}>Linking to an SKU ensures that selling this item will automatically reduce the stock of the original product.</p>
                                 <div style={{ marginBottom: '1rem' }}>
                                     <div style={{ position: 'relative' }}>
@@ -291,6 +330,7 @@ const GarageSale = () => {
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 800, fontSize: '0.8rem', color: '#9a3412' }}>{item.sku}</div>
                                                 <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.name}</div>
+                                                <div style={{ fontSize: '0.65rem', color: '#f97316' }}>Component Stock: {allInventory.find(p => p.sku === item.sku)?.stock || 0}</div>
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                                 <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>QTY:</span>
@@ -317,6 +357,11 @@ const GarageSale = () => {
                                         </div>
                                     )}
                                 </div>
+                            </div>
+
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <label className="label">Description</label>
+                                <textarea className="input" style={{ minHeight: '100px' }} value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} />
                             </div>
 
                             <div style={{ gridColumn: 'span 2' }}>

@@ -89,6 +89,17 @@ export default function Payment() {
         ? parseFloat(String(buyNowProduct.product.price).replace(/[^0-9.]/g, '')) * buyNowProduct.quantity
         : cartTotalPrice;
 
+    const [customer, setCustomer] = useState({
+        email: user?.email || '',
+        firstName: user?.displayName?.split(' ')[0] || '',
+        lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
+        phone: user?.phone || '',
+        address: '',
+        city: '',
+        state: 'Tamil Nadu',
+        zip: ''
+    });
+
     const calculateDeliveryCharge = (state: string) => {
         if (!state) return;
         
@@ -119,21 +130,8 @@ export default function Payment() {
     useEffect(() => {
         calculateDeliveryCharge(customer.state);
     }, [items, customer.state]);
-
     // Constant for Razorpay Key (User can replace with their actual key in .env)
     const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY;
-
-    // Customer Detail State
-    const [customer, setCustomer] = useState({
-        email: user?.email || '',
-        firstName: user?.displayName?.split(' ')[0] || '',
-        lastName: user?.displayName?.split(' ').slice(1).join(' ') || '',
-        phone: user?.phone || '',
-        address: '',
-        city: '',
-        state: 'Tamil Nadu',
-        zip: ''
-    });
 
     const loadRazorpayScript = () => {
         return new Promise((resolve) => {

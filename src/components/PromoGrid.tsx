@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowRight, Flame, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { getPromoBanners } from '../utils/storage';
 
 interface PromoBanner {

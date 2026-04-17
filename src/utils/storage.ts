@@ -1,4 +1,6 @@
 import { Product } from '../types';
+import { getMediaUrl } from './url';
+
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -33,8 +35,8 @@ export const getProducts = async (): Promise<Product[]> => {
                 price: p.price?.toString().includes('₹') ? p.price : `₹${parseFloat(p.price).toLocaleString('en-IN')}`,
                 price_num: parseFloat(p.price) || 0,
                 stock: parseInt(p.stock) || 0,
-                image: images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-                images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+                image: getMediaUrl(images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'),
+                images: images.length > 0 ? images.map(img => getMediaUrl(img)) : [getMediaUrl('https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600')],
                 brand: p.brand || '',
                 bike_brand: p.bike_brand || '',
                 bike_model: p.bike_model || '',
@@ -145,8 +147,8 @@ export const getNewArrivals = async (): Promise<Product[]> => {
                 price: `₹${parseFloat(p.price).toLocaleString('en-IN')}`,
                 price_num: parseFloat(p.price) || 0,
                 stock: parseInt(p.stock) || 0,
-                image: images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-                images: images.length > 0 ? images : ['https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+                image: getMediaUrl(images[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'),
+                images: images.length > 0 ? images.map(img => getMediaUrl(img)) : [getMediaUrl('https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600')],
                 brand: p.brand || '',
                 bike_brand: p.bike_brand || '',
                 bike_model: p.bike_model || '',
@@ -217,8 +219,8 @@ export const getCombos = async (): Promise<Product[]> => {
             price: `₹${parseFloat(c.price).toLocaleString('en-IN')}`,
             price_num: parseFloat(c.price) || 0,
             stock: parseInt(c.stock) || 0,
-            image: c.image_url || c.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-            images: c.images || [c.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+            image: getMediaUrl(c.image_url || c.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'),
+            images: (c.images || [c.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']).map((img: string) => getMediaUrl(img)),
             brand: c.brand || '',
             is_combo: true,
             sku: c.sku || '',
@@ -250,8 +252,8 @@ export const getGarageSale = async (): Promise<Product[]> => {
             price: `₹${parseFloat(g.price).toLocaleString('en-IN')}`,
             price_num: parseFloat(g.price) || 0,
             stock: parseInt(g.stock) || 0,
-            image: g.image_url || g.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600',
-            images: g.images || [g.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'],
+            image: getMediaUrl(g.image_url || g.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'),
+            images: (g.images || [g.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']).map((img: string) => getMediaUrl(img)),
             brand: g.brand || '',
             is_garage_sale: true,
             sku: g.sku || '',

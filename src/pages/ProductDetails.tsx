@@ -20,6 +20,7 @@ import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import { updatePageSEO, getProductDetailSEO } from '../utils/seo';
+import { getMediaUrl } from '../utils/url';
 
 export default function ProductDetails() {
     const [product, setProduct] = useState<Product | null>(null);
@@ -69,7 +70,7 @@ export default function ProductDetails() {
 
             if (selectedProduct) {
                 setProduct(selectedProduct);
-                setMainImage(selectedProduct.image);
+                setMainImage(getMediaUrl(selectedProduct.image));
                 setIsLoaded(true);
                 // Dynamic SEO for this specific product
                 updatePageSEO(getProductDetailSEO(
@@ -199,7 +200,7 @@ Link: ${window.location.href}`;
                         <div className="relative group bg-zinc-900 rounded-[3rem] p-12 lg:p-24 border border-zinc-800 overflow-hidden flex items-center justify-center">
                             <div className="absolute inset-0 bg-gradient-to-tr from-red-600/5 via-transparent to-transparent"></div>
                             <img
-                                src={mainImage}
+                                src={getMediaUrl(mainImage)}
                                 alt={product.name}
                                 className="w-full max-h-[600px] object-contain relative z-10 transition-transform duration-700 drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                             />
@@ -220,7 +221,7 @@ Link: ${window.location.href}`;
                                     className={`relative aspect-square rounded-[2rem] overflow-hidden border-2 transition-all p-4 flex items-center justify-center
                                         ${mainImage === img ? 'border-red-600 bg-zinc-900 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border-zinc-900 bg-zinc-950 hover:border-zinc-700'}`}
                                 >
-                                    <img src={img} alt={`view ${idx}`} className="w-full h-full object-contain" />
+                                    <img src={getMediaUrl(img)} alt={`view ${idx}`} className="w-full h-full object-contain" />
                                 </button>
                             ))}
                         </div>
@@ -246,7 +247,7 @@ Link: ${window.location.href}`;
                                     </div>
                                 )}
                             </div>
-                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight uppercase">{product.name}</h1>
+                            <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight uppercase">{product.name}</h1>
 
                             <div className="flex items-center gap-6">
                                 <div className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
@@ -417,7 +418,7 @@ Link: ${window.location.href}`;
                                     className="group space-y-4"
                                 >
                                     <div className="relative aspect-square bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden flex items-center justify-center p-6 transition-all duration-500 group-hover:border-red-600/30 group-hover:translate-y-[-5px]">
-                                        <img src={p.image} alt={p.name} className="w-full h-full object-contain transition-transform duration-700" />
+                                        <img src={getMediaUrl(p.image)} alt={p.name} className="w-full h-full object-contain transition-transform duration-700" />
                                         <button className="absolute top-8 right-8 w-10 h-10 bg-zinc-950 rounded-xl flex items-center justify-center text-zinc-500 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 duration-300">
                                             <Heart size={16} />
                                         </button>

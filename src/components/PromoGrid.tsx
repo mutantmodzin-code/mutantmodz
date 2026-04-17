@@ -27,7 +27,7 @@ export default function PromoGrid() {
   return (
     <div className="bg-zinc-950 py-12 px-6 sm:px-12">
       <div className="max-w-[1300px] mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 lg:gap-16">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-10 lg:gap-16">
           {banners.map((banner) => (
             <div 
               key={banner.id}

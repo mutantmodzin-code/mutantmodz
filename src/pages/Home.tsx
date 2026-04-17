@@ -30,6 +30,9 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 1. Hero Slideshow - Touch Swipeable */}
       <HeroSlideshow onNavigate={onNavigate} />
 
+      {/* Promo Ad Grid */}
+      <PromoGrid />
+
       {/* 2. Category Banners - NEW Stacked */}
       <CategoryBanners onNavigate={onNavigate} />
 
@@ -48,22 +51,19 @@ export default function Home({ onNavigate }: HomeProps) {
       {/* 5. New Arrivals - Updated Horizontal Scroll */}
       <NewArrivals onNavigate={onNavigate} />
 
-      {/* 5. Shop By Brands - Updated Grid Layout */}
-      <BrandCarousel onNavigate={onNavigate} />
-
-      {/* 6. Shop By Bike - NEW Circular Thumbnails */}
+      {/* 5. Shop By Bike - NEW Circular Thumbnails */}
       <ShopByBike onNavigate={onNavigate} />
 
       {/* 7. Watch Our Reels - Updated Horizontal Scroll */}
       <VideoReels />
 
-      {/* Promo Ad Grid */}
-      <PromoGrid />
+      {/* 8. Shop By Brands - Updated Grid Layout */}
+      <BrandCarousel onNavigate={onNavigate} />
 
-      {/* 8. Touring Collections - NEW Square Grid */}
+      {/* 9. Touring Collections - NEW Square Grid */}
       <CollectionSquares onNavigate={onNavigate} />
 
-      {/* 9. Trusted By Riders - Updated Vertical List */}
+      {/* 10. Trusted By Riders - Updated Vertical List */}
       <TestimonialSlider />
 
       {/* Final Premium CTA Section */}

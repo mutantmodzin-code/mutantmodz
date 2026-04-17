@@ -25,13 +25,13 @@ export default function PromoGrid() {
   if (banners.length === 0) return null;
 
   return (
-    <div className="bg-zinc-950 py-12 px-4 sm:px-10">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+    <div className="bg-zinc-950 py-12 px-6 sm:px-12">
+      <div className="max-w-[1300px] mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 sm:gap-12 lg:gap-16">
           {banners.map((banner) => (
             <div 
               key={banner.id}
-              className="relative group cursor-pointer overflow-hidden rounded-[1.5rem] aspect-[4/3] bg-zinc-900 border border-white/5 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(220,38,38,0.2)]"
+              className="relative group cursor-pointer overflow-hidden rounded-[1.25rem] aspect-[16/10] bg-zinc-900 border border-white/5 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(220,38,38,0.2)]"
             >
               {/* Entire Card is the Image - No Stretching */}
               <img 

@@ -6,7 +6,7 @@ export default function AnnouncementBar() {
       {/* Desktop Version */}
       <div className="hidden lg:flex h-9 items-center justify-center bg-zinc-950 border-b border-red-900/30 px-4">
         <p className="text-[11px] font-bold uppercase tracking-widest text-white/80 text-center">
-          🔥 Free Shipping Above <span className="text-red-500 font-black">₹999</span> &nbsp;|&nbsp; COD Available &nbsp;|&nbsp; Trusted by 10,000+ Riders
+          🔥 Boost Your Bike’s Performance <span className="text-red-500 font-black"></span> &nbsp;|&nbsp;  &nbsp;|&nbsp; Trusted by 10,000+ Riders
         </p>
       </div>
 

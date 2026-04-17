@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { 
-  ShoppingBag, Calendar, DollarSign, Loader2, AlertCircle, 
-  CheckCircle2, Clock, Truck, Package, ArrowRight,
+  ShoppingBag, Loader2, AlertCircle, 
+  CheckCircle2, Truck, Package, ArrowRight,
   TrendingUp, MapPin, Receipt, ShieldCheck
 } from 'lucide-react';
 

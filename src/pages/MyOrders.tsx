@@ -123,7 +123,7 @@ export default function MyOrders() {
                             </div>
                             <div className="w-px h-12 bg-white/10"></div>
                             <div className="text-right">
-                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Completed</p>
+                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Delivered</p>
                                 <p className="text-3xl font-black text-white">{orders.filter(o => o.status === 'Completed').length}</p>
                             </div>
                         </div>
@@ -192,7 +192,7 @@ export default function MyOrders() {
                                                         {[
                                                             { label: 'Confirmed', icon: CheckCircle2 },
                                                             { label: 'In Transit', icon: Truck },
-                                                            { label: 'Secured', icon: ShieldCheck }
+                                                            { label: 'Delivered', icon: Package }
                                                         ].map((s, i) => {
                                                             const Icon = s.icon;
                                                             const isActive = step >= i + 1;
@@ -234,7 +234,7 @@ export default function MyOrders() {
                                                 <div className="flex items-center gap-3 text-red-500 bg-red-600/10 px-6 py-3 rounded-2xl border border-red-600/20">
                                                     <Truck size={18} />
                                                     <span className="text-[11px] font-black uppercase tracking-widest">
-                                                        {order.status === 'Shipped' ? 'In Transit' : 'Arrival Expected'}: {order.expected_delivery ? formatDate(order.expected_delivery) : 'Pending Update'}
+                                                        {order.status === 'Completed' ? 'Package Delivered' : (order.status === 'Shipped' ? 'In Transit' : 'Arrival Expected')}: {order.expected_delivery ? formatDate(order.expected_delivery) : 'Pending Update'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -281,7 +281,9 @@ export default function MyOrders() {
                                                         <div className="flex items-center justify-between">
                                                             <div>
                                                                 <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Current Status</p>
-                                                                <p className={`text-sm font-black uppercase tracking-widest ${order.status === 'Completed' ? 'text-green-500' : 'text-red-500'}`}>{order.status}</p>
+                                                                <p className={`text-sm font-black uppercase tracking-widest ${order.status === 'Completed' ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {order.status === 'Completed' ? 'Delivered' : order.status}
+                                                                </p>
                                                             </div>
                                                             <TrendingUp size={24} className="text-zinc-800" />
                                                         </div>

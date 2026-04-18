@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star, ShoppingBag, Zap } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
+import { brands } from '../data/brands';
 
 interface MenuDrawerProps {
   isOpen: boolean;
@@ -207,40 +208,93 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-6">
-          <div className="px-4 space-y-2">
+          <div className="px-4 space-y-1">
             
-            {/* Main Links */}
+            {/* 1. Home */}
             <button onClick={() => handleNav('home')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
               <Home size={20} className="text-zinc-500" /> Home
             </button>
 
+            {/* 2. New Arrivals */}
             <button onClick={() => handleNav('products', '?cat=new')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors border-b border-white/5">
               <Flame size={20} /> New Arrivals!!
             </button>
 
-            <button onClick={() => handleNav('products', '?cat=garage-sale')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-white hover:text-orange-500 transition-colors border-b border-white/5 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-xl mt-2 mb-2">
+            {/* 3. Helmets (Accordion) */}
+            <AccordionItem
+              label="Helmets"
+              icon={Shield}
+              items={[
+                { label: 'View All Helmets', params: '?cat=Helmet' },
+                { label: 'Helmet Accessories', params: '?cat=Helmet%20Accessories' },
+                { label: 'Bluetooth Intercoms', params: '?cat=Bluetooth%20Intercoms' },
+              ]}
+              isOpen={openAccordion === 'helmets'}
+              onToggle={() => setOpenAccordion(openAccordion === 'helmets' ? null : 'helmets')}
+              onNavigate={handleNav}
+            />
+
+            {/* 4. Accessories (Accordion) */}
+            <AccordionItem
+              label="Accessories"
+              icon={Star}
+              items={[
+                { label: 'Motorcycle Accessories', params: '?cat=MOTORCYCLE%20ACCESSORIES' },
+                { label: 'Bike Protection', params: '?sub=Bike%20Protection' },
+                { label: 'Handlebar Accessories', params: '?sub=Handlebar' },
+                { label: 'Electronics', params: '?sub=Electronic' },
+                { label: 'Lighting', params: '?cat=Lighting' },
+              ]}
+              isOpen={openAccordion === 'accessories'}
+              onToggle={() => setOpenAccordion(openAccordion === 'accessories' ? null : 'accessories')}
+              onNavigate={handleNav}
+            />
+
+            {/* 5. Shop By Brands (Accordion) */}
+            <AccordionItem
+              label="Shop By Brand"
+              icon={Star}
+              items={brands.map(b => ({ label: b.name, params: `?brand=${encodeURIComponent(b.name.toLowerCase())}` }))}
+              isOpen={openAccordion === 'brands-list'}
+              onToggle={() => setOpenAccordion(openAccordion === 'brands-list' ? null : 'brands-list')}
+              onNavigate={handleNav}
+            />
+
+            {/* 6. Shop By Bike (Accordion) */}
+            <AccordionItem
+              label="Shop By Bike"
+              icon={Bike}
+              items={[]}
+              brands={categories.find(c => c.id === 'bike')?.brands}
+              isOpen={openAccordion === 'bike'}
+              onToggle={() => setOpenAccordion(openAccordion === 'bike' ? null : 'bike')}
+              onNavigate={handleNav}
+            />
+
+            {/* 7. Garage Sale */}
+            <button onClick={() => handleNav('products', '?cat=garage-sale')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-white hover:text-orange-500 transition-colors border-b border-white/5 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-xl my-2">
               <Zap size={20} className="text-orange-500" /> Garage Sale
             </button>
 
-            <button onClick={() => handleNav('brands')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
-              <Star size={20} className="text-zinc-500" /> Shop By Brands
-            </button>
+            {/* 8. Combos (Accordion) */}
+            <AccordionItem
+              label="Combos"
+              icon={Package}
+              items={categories.find(c => c.id === 'combos')?.subs || []}
+              isOpen={openAccordion === 'combos'}
+              onToggle={() => setOpenAccordion(openAccordion === 'combos' ? null : 'combos')}
+              onNavigate={handleNav}
+            />
 
-
-
-            {/* Accordion Categories */}
-            {categories.map((cat) => (
-              <AccordionItem
-                key={cat.id}
-                label={cat.label}
-                icon={cat.icon}
-                items={(cat as any).subs}
-                brands={(cat as any).brands}
-                isOpen={openAccordion === cat.id}
-                onToggle={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
-                onNavigate={handleNav}
-              />
-            ))}
+            {/* 9. Other Categories (Accordion) */}
+            <AccordionItem
+              label="Other Categories"
+              icon={ChevronDown}
+              items={categories.find(c => c.id === 'additional')?.subs || []}
+              isOpen={openAccordion === 'additional'}
+              onToggle={() => setOpenAccordion(openAccordion === 'additional' ? null : 'additional')}
+              onNavigate={handleNav}
+            />
 
             {/* User Account / Login */}
             <button 

@@ -32,7 +32,7 @@ export const brands = [
   { name: 'KYT', logo: '/brands/kyt.png' },
   { name: 'LGP', logo: '/brands/lgp-logo-lgp-letter-lgp-letter-logo-design-initials-lgp-logo-linked-with-circle-and-uppercase-monogram-logo-lgp-typography-for-technology-business-and-real-estate-brand-vector.jpg' },
   { name: 'Liqui Moly', logo: '/brands/liqui-moly-vector-logo-free-download-11574190307ufvucwifkr.png' },
-  { name: 'LS2', logo: '' },
+  { name: 'LS2', logo: '/brands/ls2.webp' },
   { name: 'Maddog', logo: '/brands/maddog_logo.webp' },
   { name: 'Maxima', logo: '/brands/maxima racing oils.png' },
   { name: 'MICHELIN', logo: '/brands/michline.png' },

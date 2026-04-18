@@ -252,21 +252,25 @@ export default function MyOrders() {
                                                     </h3>
                                                     <div className="space-y-4">
                                                         {order.items.map((item) => (
-                                                            <div key={item.id} className="flex items-center gap-6 p-6 bg-zinc-950/50 rounded-3xl border border-white/5 hover:border-red-600/20 transition-all">
-                                                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shrink-0">
+                                                            <div 
+                                                                key={item.id} 
+                                                                onClick={() => window.location.hash = `productDetails?productId=${item.product_id}`}
+                                                                className="group flex items-center gap-6 p-6 bg-zinc-950/50 rounded-3xl border border-white/5 hover:border-red-600/50 transition-all cursor-pointer"
+                                                            >
+                                                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shrink-0 group-hover:border-red-600/30 transition-colors">
                                                                     <img 
                                                                         src={item.image_url || 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg'} 
                                                                         alt={item.product_name} 
-                                                                        className="w-full h-full object-cover opacity-80"
+                                                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                                                     />
                                                                 </div>
                                                                 <div className="flex-1">
-                                                                    <p className="text-white font-black uppercase tracking-tight leading-tight">{item.product_name}</p>
+                                                                    <p className="text-white font-black uppercase tracking-tight leading-tight group-hover:text-red-500 transition-colors">{item.product_name}</p>
                                                                     <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-1">
                                                                         Qty: {item.quantity} units @ ₹{Number(item.price || 0).toLocaleString('en-IN')}
                                                                     </p>
                                                                 </div>
-                                                                <p className="text-lg font-black text-white">₹{(Number(item.quantity) * Number(item.price || 0)).toLocaleString('en-IN')}</p>
+                                                                <p className="text-lg font-black text-white group-hover:text-red-500 transition-colors">₹{(Number(item.quantity) * Number(item.price || 0)).toLocaleString('en-IN')}</p>
                                                             </div>
                                                         ))}
                                                     </div>

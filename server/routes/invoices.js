@@ -288,9 +288,14 @@ router.get('/online/all', authenticateToken, async (req, res) => {
         if (onlineOrders.length > 0) {
             const invoiceIds = onlineOrders.map(order => order.id);
             const itemsQuery = `
-                SELECT ii.*, p.name as product_name, p.image_url 
+                SELECT ii.*, 
+                       COALESCE(p.name, c.name, gs.name) as product_name, 
+                       COALESCE(p.image_url, c.image_url, gs.image_url) as image_url,
+                       ii.unit_price as price
                 FROM invoice_items ii 
                 LEFT JOIN products p ON ii.product_id = p.id 
+                LEFT JOIN combos c ON ii.combo_id = c.id
+                LEFT JOIN garage_sale gs ON ii.garage_sale_id = gs.id
                 WHERE ii.invoice_id = ANY($1)
             `;
             const itemsResult = await db.query(itemsQuery, [invoiceIds]);
@@ -335,9 +340,14 @@ router.get('/customer/:customerId', authenticateToken, async (req, res) => {
 
         const invoiceIds = invoices.rows.map(inv => inv.id);
         const items = await db.query(
-            `SELECT ii.*, p.name as product_name, p.image_url
+            `SELECT ii.*, 
+                    COALESCE(p.name, c.name, gs.name) as product_name, 
+                    COALESCE(p.image_url, c.image_url, gs.image_url) as image_url,
+                    ii.unit_price as price
              FROM invoice_items ii 
              LEFT JOIN products p ON ii.product_id = p.id 
+             LEFT JOIN combos c ON ii.combo_id = c.id
+             LEFT JOIN garage_sale gs ON ii.garage_sale_id = gs.id
              WHERE ii.invoice_id = ANY($1)`,
             [invoiceIds]
         );
@@ -399,7 +409,15 @@ router.get('/:id', authenticateToken, async (req, res) => {
             [id]
         );
         const items = await db.query(
-            'SELECT ii.*, p.name as product_name FROM invoice_items ii LEFT JOIN products p ON ii.product_id = p.id WHERE ii.invoice_id = $1',
+            `SELECT ii.*, 
+                    COALESCE(p.name, c.name, gs.name) as product_name, 
+                    COALESCE(p.image_url, c.image_url, gs.image_url) as image_url,
+                    ii.unit_price as price
+             FROM invoice_items ii 
+             LEFT JOIN products p ON ii.product_id = p.id 
+             LEFT JOIN combos c ON ii.combo_id = c.id
+             LEFT JOIN garage_sale gs ON ii.garage_sale_id = gs.id
+             WHERE ii.invoice_id = $1`,
             [id]
         );
         res.json({ invoice: invoice.rows[0], items: items.rows });

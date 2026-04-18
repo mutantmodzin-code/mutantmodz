@@ -123,7 +123,7 @@ export default function Payment() {
         // Minimum default if no charges set
         if (totalCharge === 0 && items.length > 0) totalCharge = 100;
 
-        setDeliveryCharge(totalCharge);
+        setDeliveryCharge(Math.min(totalCharge, 300));
     };
 
     useEffect(() => {
@@ -184,17 +184,25 @@ export default function Payment() {
             const totalAmt = subtotal + shippingNum;
 
             // Build items array from current items (either Buy Now or Cart)
-            const apiItems = items.map(item => ({
-                product_id: (item.product.is_combo || item.product.is_garage_sale) ? null : item.product.id,
-                combo_id: item.product.is_combo ? item.product.id : null,
-                garage_sale_id: item.product.is_garage_sale ? item.product.id : null,
-                quantity: item.quantity,
-                unit_price: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')),
-                line_total: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
-                gst_percentage: 0,
-                taxable_amount: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
-                selected_size: (item as any).size || null
-            }));
+            const apiItems = items.map(item => {
+                // Determine if this is a specialized "Builder" item or a standard catalog product
+                // Standard products (even if flagged as garage_sale/combo) belong to the 'products' table
+                // Specialized items (category 'combos' or 'garage-sale') belong to their respective tables
+                const isVirtualCombo = item.product.category === 'combos';
+                const isVirtualGarageSale = item.product.category === 'garage-sale';
+
+                return {
+                    product_id: (isVirtualCombo || isVirtualGarageSale) ? null : Number(item.product.id),
+                    combo_id: isVirtualCombo ? Number(item.product.id) : null,
+                    garage_sale_id: isVirtualGarageSale ? Number(item.product.id) : null,
+                    quantity: item.quantity,
+                    unit_price: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')),
+                    line_total: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
+                    gst_percentage: 0,
+                    taxable_amount: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
+                    selected_size: (item as any).size || null
+                };
+            });
 
             // Create invoice using API
             const authToken = localStorage.getItem('auth_token');

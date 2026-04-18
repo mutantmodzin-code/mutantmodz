@@ -27,9 +27,9 @@ router.post('/', async (req, res) => {
 
     try {
         // Server-side delivery charge verification (prevent tampering)
-        let verifiedDeliveryCharge = 300; // default
-        if (clientDeliveryCharge && [100, 200, 300].includes(Number(clientDeliveryCharge))) {
-            verifiedDeliveryCharge = Number(clientDeliveryCharge);
+        let verifiedDeliveryCharge = 300; // default cap
+        if (clientDeliveryCharge) {
+            verifiedDeliveryCharge = Math.min(Number(clientDeliveryCharge), 300);
         }
 
         const client = await db.pool.connect();

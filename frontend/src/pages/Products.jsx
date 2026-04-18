@@ -3,12 +3,19 @@ import api from '../api';
 import { Plus, Edit, Trash, Search, PackageMinus, PackagePlus, AlertCircle, Package } from 'lucide-react';
 
 const PARTNER_BRANDS = [
-    'FXR', 'Barkbusters', 'SENA', 'SHAD', 'FuelX', 'Maddog', 'PowerTronic', 'Devil Evolution', 
-    'Reise', 'Moto Torque', 'K&N', 'Vesrah', 'Red Rooster', 'Motul', 'SMK', 'Tarmac', 
-    'EBC Brakes', 'RAM Mounts', 'RCB', 'Raida', 'BSDDP', 'Orazo', 'Studds', 'Zana', 
-    'Vega', 'Guardian Gears', 'Bobo', 'Carbonado', '100%', 'Acerbis', 'Akro', 'Dochaki', 
-    'Forma', 'Glosil', 'Grip Puppies', 'HJG', 'NightEye', 'Putoline', 'Rahgear', 'Maxima', 
-    'Liqui Moly', 'JB Racing'
+    '100%', '5M', '66BHP', 'Acerbis', 'AG Star', 'Akro', 'AXOR', 'Barkbusters', 
+    'BIKING BROTHERHOOD', 'BISON', 'Blue armor', 'BMC', 'Bobo', 'BSDDP', 
+    'Carbonado', 'Devil Evolution', 'Dochaki', 'EBC Brakes', 'Ejeas', 
+    'ERODIAN', 'EL FLEET TRACK', 'Forma', 'FuelX', 'FXR', 'Glosil', 
+    'Grip Puppies', 'Guardian Gears', 'HJG', 'JB Racing', 'K&N', 'KYT', 
+    'LGP', 'Liqui Moly', 'LS2', 'Maddog', 'Maxima', 'MICHELIN', 'MOTO GENIUS', 
+    'Moto Torque', 'Moto Wing', 'MOTOMAX', 'Motowolf', 'Motul', 'MOXI', 
+    'MTECHNICS', 'MT Helmets', 'NGAGE', 'NGK', 'NightEye', 'Orazo', 
+    'Power Rage', 'Powershift', 'PowerTronic', 'PROTAPER', 'Putoline', 
+    'RACE DYNAMICS', 'Rahgear', 'Raida', 'RAM Mounts', 'RCB', 'Red Rooster', 
+    'Reise', 'RIDEX', 'ROLON', 'Royal Enfield', 'SENA', 'SHAD', 'SMK', 
+    'STEELBIRD', 'Studds', 'Tarmac', 'TRM Calidad', 'UVHJG', 'Vega', 
+    'Vesrah', 'Zana'
 ];
 
 const SUB_CATEGORIES = {

@@ -144,8 +144,8 @@ router.post('/', async (req, res) => {
                     'INSERT INTO garage_sale (name, brand, sku, price, stock, image_url, images, description, garage_sale_type, linked_items, delivery_tn, delivery_south, delivery_north) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
                     [
                         name, brand, finalSku, parseFloat(price) || 0, parseInt(stock) || 0, 
-                        mainImage, JSON.stringify(imagesArr), description, 
-                        'Today\'s Offer', JSON.stringify([]), 
+                        mainImage, imagesArr, description, 
+                        'Today\'s Offer', [], 
                         parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0
                     ]
                 );
@@ -169,8 +169,8 @@ router.post('/', async (req, res) => {
                     'INSERT INTO combos (name, brand, sku, price, stock, image_url, images, description, combo_type, linked_items, delivery_tn, delivery_south, delivery_north) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
                     [
                         name, brand, finalSku, parseFloat(price) || 0, parseInt(stock) || 0, 
-                        mainImage, JSON.stringify(imagesArr), description, 
-                        combo_type || 'General Combos', JSON.stringify([]), 
+                        mainImage, imagesArr, description, 
+                        combo_type || 'General Combos', [], 
                         parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0
                     ]
                 );
@@ -270,7 +270,7 @@ router.put('/:id', async (req, res) => {
                     'UPDATE garage_sale SET name=$1, brand=$2, price=$3, stock=$4, image_url=$5, images=$6, description=$7, delivery_tn=$8, delivery_south=$9, delivery_north=$10, updated_at=CURRENT_TIMESTAMP WHERE sku=$11',
                     [
                         name, brand, parseFloat(price) || 0, parseInt(stock) || 0, 
-                        mainImage, JSON.stringify(imagesArr), description, 
+                        mainImage, imagesArr, description, 
                         parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0,
                         sku
                     ]
@@ -280,8 +280,8 @@ router.put('/:id', async (req, res) => {
                     'INSERT INTO garage_sale (name, brand, sku, price, stock, image_url, images, description, garage_sale_type, linked_items, delivery_tn, delivery_south, delivery_north) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
                     [
                         name, brand, sku, parseFloat(price) || 0, parseInt(stock) || 0, 
-                        mainImage, JSON.stringify(imagesArr), description, 
-                        'Today\'s Offer', JSON.stringify([]), 
+                        mainImage, imagesArr, description, 
+                        'Today\'s Offer', [], 
                         parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0
                     ]
                 );
@@ -307,10 +307,10 @@ router.put('/:id', async (req, res) => {
             const existingCombo = await client.query('SELECT id FROM combos WHERE sku = $1', [sku]);
             if (existingCombo.rows.length > 0) {
                 await client.query(
-                    'UPDATE combos SET name=$1, brand=$2, price=$3, stock=$4, image_url=$5, images=$6, description=$7, combo_type=$8, delivery_tn=$9, delivery_south=$10, delivery_north=$11 WHERE sku=$12',
+                    'UPDATE combos SET name=$1, brand=$2, price=$3, stock=$4, image_url=$5, images=$6, description=$7, combo_type=$8, delivery_tn=$9, delivery_south=$10, delivery_north=$11, updated_at=CURRENT_TIMESTAMP WHERE sku=$12',
                     [
                         name, brand, parseFloat(price) || 0, parseInt(stock) || 0, 
-                        mainImage, JSON.stringify(imagesArr), description, 
+                        mainImage, imagesArr, description, 
                         combo_type || 'General Combos', 
                         parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0,
                         sku
@@ -321,8 +321,8 @@ router.put('/:id', async (req, res) => {
                     'INSERT INTO combos (name, brand, sku, price, stock, image_url, images, description, combo_type, linked_items, delivery_tn, delivery_south, delivery_north) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)',
                     [
                         name, brand, sku, parseFloat(price) || 0, parseInt(stock) || 0, 
-                        mainImage, JSON.stringify(imagesArr), description, 
-                        combo_type || 'General Combos', JSON.stringify([]), 
+                        mainImage, imagesArr, description, 
+                        combo_type || 'General Combos', [], 
                         parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0
                     ]
                 );

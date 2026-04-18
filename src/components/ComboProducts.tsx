@@ -24,6 +24,18 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
     addToCart(product);
   };
 
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (product.stock <= 0) return;
+    const checkoutParams = `?productId=${product.id}&type=combo`;
+    if (!isLoggedIn) {
+      setPendingAction(() => () => onNavigate('checkout', checkoutParams));
+      setShowLoginPopup(true);
+      return;
+    }
+    onNavigate('checkout', checkoutParams);
+  };
+
   const imageUrl = product.images && product.images.length > 0 && product.images[0].trim()
     ? product.images[0]
     : 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=400';
@@ -69,18 +81,30 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
             )}
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock <= 0}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${
-              product.stock > 0
-                ? 'bg-white text-black hover:bg-sky-500 hover:text-white shadow-xl hover:shadow-sky-500/20'
-                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
-            }`}
-          >
-            <ShoppingCart size={14} />
-            {product.stock > 0 ? 'Claim Offer' : 'Sold Out'}
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock <= 0}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${
+                product.stock > 0
+                  ? 'bg-zinc-800 text-white hover:bg-zinc-700 border border-white/10'
+                  : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+              }`}
+            >
+              <ShoppingCart size={14} /> Add to Cart
+            </button>
+            <button
+              onClick={handleBuyNow}
+              disabled={product.stock <= 0}
+              className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 ${
+                product.stock > 0
+                  ? 'bg-sky-600 text-white hover:bg-sky-500 shadow-lg shadow-sky-600/20'
+                  : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+              }`}
+            >
+              {product.stock > 0 ? 'Buy Now' : 'Sold Out'}
+            </button>
+          </div>
         </div>
       </div>
     </div>

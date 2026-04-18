@@ -28,13 +28,15 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (product.stock <= 0) return;
+    
+    const checkoutParams = `?productId=${product.id}&type=garage`;
+    
     if (!isLoggedIn) {
-      setPendingAction(() => () => { addToCart(product); onNavigate('cart'); });
+      setPendingAction(() => () => onNavigate('checkout', checkoutParams));
       setShowLoginPopup(true);
       return;
     }
-    addToCart(product);
-    onNavigate('cart');
+    onNavigate('checkout', checkoutParams);
   };
 
   const imageUrl = product.images && product.images.length > 0 && product.images[0].trim()

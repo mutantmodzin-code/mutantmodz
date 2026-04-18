@@ -5,6 +5,7 @@ import {
   CheckCircle2, Truck, Package, ArrowRight,
   TrendingUp, MapPin, Receipt, ShieldCheck
 } from 'lucide-react';
+import { getMediaUrl } from '../utils/url';
 
 interface OrderItem {
     id: number;
@@ -259,7 +260,7 @@ export default function MyOrders() {
                                                             >
                                                                 <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shrink-0 group-hover:border-red-600/30 transition-colors">
                                                                     <img 
-                                                                        src={item.image_url || 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg'} 
+                                                                        src={getMediaUrl(item.image_url || 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg')} 
                                                                         alt={item.product_name} 
                                                                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                                                     />

@@ -206,11 +206,11 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-center">
-              <ShieldCheck size={20} className="text-red-500" />
+              <KeyRound size={20} className="text-red-500" />
             </div>
             <div>
-              <h2 className="text-white font-black uppercase tracking-widest text-sm">Auth Access</h2>
-              <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest">Protocol secure</p>
+              <h2 className="text-white font-black text-sm">Login or Sign Up</h2>
+              <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-wider">Fast & Secure Access</p>
             </div>
           </div>
           <button
@@ -233,12 +233,12 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
           {step === 'phone' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Enter Identity</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Input your primary mobile number</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-black text-white tracking-tighter">Welcome back</h3>
+                <p className="text-zinc-500 text-sm font-medium">Please enter your mobile number to continue.</p>
               </div>
               <div className="space-y-4">
-                <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
                 <div className="flex items-center gap-3">
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm font-bold shrink-0">+91</div>
                   <input
@@ -255,11 +255,11 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               <button
                 onClick={handleSubmitPhone}
                 disabled={isLoading}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all group"
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all group shadow-xl shadow-red-600/20"
               >
                 {isLoading ? <Loader2 className="animate-spin" size={24} /> : (
                   <>
-                    <span className="tracking-[0.2em] text-sm">Verify Identity</span>
+                    <span className="tracking-widest text-sm">Continue</span>
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -269,14 +269,14 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
           {step === 'otp' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Verification</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Code sent to {userData?.email || email}</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-black text-white tracking-tighter">Enter OTP</h3>
+                <p className="text-zinc-500 text-sm font-medium">Verification code sent to {userData?.email || email}</p>
               </div>
               
-              <div className="p-4 bg-red-600/10 border border-red-600/30 rounded-2xl">
-                <p className="text-red-400 text-sm font-bold text-center">
-                  Verification protocol initiated. Please check your Gmail and enter the code below.
+              <div className="p-4 bg-zinc-900 border border-white/5 rounded-2xl">
+                <p className="text-zinc-400 text-xs leading-relaxed text-center">
+                  We've sent a 6-digit verification code to your email. Please enter it below to verify your account.
                 </p>
               </div>
               
@@ -306,18 +306,18 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               <button
                 onClick={handleVerifyOTP}
                 disabled={isLoading}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all"
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all shadow-xl shadow-red-600/20"
               >
-                {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Finalize Authentication"}
+                {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Verify & Login"}
               </button>
             </div>
           )}
 
           {step === 'register' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Initialize User</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Setup your protocol profile</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-black text-white tracking-tighter">Create Account</h3>
+                <p className="text-zinc-500 text-sm font-medium">Join the Mutant Mods community today.</p>
               </div>
               <div className="space-y-6">
                 <div className="space-y-3">
@@ -355,8 +355,8 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                 <CheckCircle size={48} className="animate-bounce" />
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tight">Access Granted</h3>
-                <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.2em]">Redirecting to Interface...</p>
+                <h3 className="text-3xl font-black text-white tracking-tight">Access Granted</h3>
+                <p className="text-zinc-500 text-xs font-black uppercase tracking-wider">Welcome to Mutant Mods</p>
               </div>
             </div>
           )}
@@ -365,9 +365,9 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         {/* Footer */}
         <div className="p-8 border-t border-white/5 bg-black/50">
           <div className="flex items-center gap-4 opacity-50">
-            <ShieldCheck size={16} className="text-red-500" />
-            <p className="text-xs font-black text-zinc-500 uppercase tracking-[0.1em]">
-              Encrypted session. 256-bit AES protection active.
+            <ShieldCheck size={16} className="text-zinc-500" />
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              Secure 256-bit SSL Encryption
             </p>
           </div>
         </div>

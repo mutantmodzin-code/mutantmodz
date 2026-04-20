@@ -23,41 +23,45 @@ export const initializeSecurity = () => {
     }
   });
 
-  // 3. Console Override & Protection
-  const noOp = () => {};
-  const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'clear'];
-  
-  methods.forEach((method) => {
-    if (typeof console[method] === 'function') {
-      console[method] = noOp;
-    }
-  });
+  /* Section 3 & 4 disabled to enable console for debugging
+27:   // 3. Console Override & Protection
+28:   const noOp = () => {};
+29:   const methods = ['log', 'debug', 'info', 'warn', 'error', 'table', 'clear'];
+30:   
+31:   methods.forEach((method) => {
+32:     if (typeof console[method] === 'function') {
+33:       console[method] = noOp;
+34:     }
+35:   });
+36: 
+37:   // Periodically clear the console
+38:   setInterval(() => {
+39:     console.clear();
+40:   }, 1000);
+41:   */
 
-  // Periodically clear the console
-  setInterval(() => {
-    console.clear();
-  }, 1000);
-
-  // 4. Anti-Debugger Loop
-  const antiDebugger = function() {
-    try {
-      (function(a) {
-        if (
-          (function() {
-            return !!([]);
-          }
-          .constructor("return  /\\w+/.test(" + a.toString() + ")")
-          .call(false))
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-      .constructor("debugger")
-      .call("action"));
-    } catch (e) {}
-  };
-
-  setInterval(antiDebugger, 100);
+  /*
+42:   // 4. Anti-Debugger Loop
+43:   const antiDebugger = function() {
+44:     try {
+45:       (function(a) {
+46:         if (
+47:           (function() {
+48:             return !!([]);
+49:           }
+50:           .constructor("return  /\\w+/.test(" + a.toString() + ")")
+51:           .call(false))
+52:         ) {
+53:           return true;
+54:         } else {
+55:           return false;
+56:         }
+57:       }
+58:       .constructor("debugger")
+59:       .call("action"));
+60:     } catch (e) {}
+61:   };
+62: 
+63:   setInterval(antiDebugger, 100);
+64:   */
 };

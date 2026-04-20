@@ -1,27 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Configure Multer for slide images
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, '..', 'uploads');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'hero-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
-});
 
 // GET all slides
 router.get('/', async (req, res) => {
@@ -34,17 +13,11 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST new slide
-router.post('/', upload.single('image'), async (req, res) => {
-  const { title_white, title_red, subtitle, display_order, is_active } = req.body;
+// POST new slide (Using Base64)
+router.post('/', async (req, res) => {
+  const { title_white, title_red, subtitle, display_order, is_active, image_url } = req.body;
   const order = parseInt(display_order) || 0;
-  const active = is_active === 'true' || is_active === true;
-  let image_url = null;
-
-  if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
-    image_url = `${baseUrl}/uploads/${req.file.filename}`;
-  }
+  const active = !!is_active;
 
   try {
     const { rows } = await db.query(
@@ -58,18 +31,12 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// PUT update slide
-router.put('/:id', upload.single('image'), async (req, res) => {
+// PUT update slide (Using Base64)
+router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { title_white, title_red, subtitle, display_order, is_active, existing_image_url } = req.body;
+  const { title_white, title_red, subtitle, display_order, is_active, image_url } = req.body;
   const order = parseInt(display_order) || 0;
-  const active = is_active === 'true' || is_active === true;
-  
-  let image_url = existing_image_url;
-  if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
-    image_url = `${baseUrl}/uploads/${req.file.filename}`;
-  }
+  const active = !!is_active;
 
   try {
     const { rows } = await db.query(

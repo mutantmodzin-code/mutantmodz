@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, Save, X, 
-  Image as ImageIcon, Eye, EyeOff, Layout, Tag
+  Image as ImageIcon, Layout, Tag
 } from 'lucide-react';
 import api from '../api';
 import { getMediaUrl } from '../utils/url';
@@ -40,31 +40,37 @@ const ManagePromo = () => {
         }
     };
 
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUploading(true);
-        const data = new FormData();
-        data.append('title', formData.title || '');
-        data.append('display_order', String(formData.display_order || 1));
-        data.append('is_active', String(formData.is_active));
-        data.append('discount_text', '');
-        data.append('price_text', '');
-        data.append('bg_color', '#000000');
-        
+
+        let finalImageUrl = editingBanner?.image_url || '';
         if (imageFile) {
-            data.append('image', imageFile);
+            finalImageUrl = await convertToBase64(imageFile);
         }
+
+        const payload = {
+            ...formData,
+            image_url: finalImageUrl,
+            discount_text: '',
+            price_text: '',
+            bg_color: '#000000'
+        };
 
         try {
             if (editingBanner) {
-                if (!imageFile) data.append('existing_image_url', editingBanner.image_url);
-                await api.put(`/promo/${editingBanner.id}`, data, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await api.put(`/promo/${editingBanner.id}`, payload);
             } else {
-                await api.post('/promo', data, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await api.post('/promo', payload);
             }
             resetForm();
             fetchBanners();
@@ -118,7 +124,7 @@ const ManagePromo = () => {
                             <Tag className="text-amber-500" size={28} />
                             PROMO AD CARDS
                         </h1>
-                        <p style={{ color: '#64748b', fontWeight: 500, marginTop: '0.25rem' }}>Manage image-only promotional banners for the home page</p>
+                        <p style={{ color: '#64748b', fontWeight: 500, marginTop: '0.25rem' }}>Manage promotional banners (Base64 storage for Vercel compatibility)</p>
                     </div>
                     <button
                         onClick={() => {

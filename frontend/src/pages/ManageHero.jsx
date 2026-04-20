@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, Save, X, 
-  Image as ImageIcon, Eye, EyeOff, Layout
+  Image as ImageIcon, Layout
 } from 'lucide-react';
 import api from '../api';
 
@@ -43,30 +43,34 @@ const ManageHero = () => {
         }
     };
 
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUploading(true);
-        const data = new FormData();
-        data.append('title_white', formData.title_white || '');
-        data.append('title_red', formData.title_red || '');
-        data.append('subtitle', formData.subtitle || '');
-        data.append('display_order', String(formData.display_order || 1));
-        data.append('is_active', String(formData.is_active));
         
+        let finalImageUrl = editingSlide?.image_url || '';
         if (imageFile) {
-            data.append('image', imageFile);
+            finalImageUrl = await convertToBase64(imageFile);
         }
+
+        const payload = {
+            ...formData,
+            image_url: finalImageUrl
+        };
 
         try {
             if (editingSlide) {
-                if (!imageFile) data.append('existing_image_url', editingSlide.image_url);
-                await api.put(`/hero/${editingSlide.id}`, data, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await api.put(`/hero/${editingSlide.id}`, payload);
             } else {
-                await api.post('/hero', data, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await api.post('/hero', payload);
             }
             resetForm();
             fetchSlides();
@@ -118,7 +122,7 @@ const ManageHero = () => {
                             <Layout className="text-red-600" size={28} />
                             HOMEPAGE BANNERS
                         </h1>
-                        <p style={{ color: '#64748b', fontWeight: 500, marginTop: '0.25rem' }}>Manage your storefront's main promotional slideshow</p>
+                        <p style={{ color: '#64748b', fontWeight: 500, marginTop: '0.25rem' }}>Manage your storefront's main promotional slideshow (Base64 storage for Vercel compatibility)</p>
                     </div>
                     <button
                         onClick={() => {

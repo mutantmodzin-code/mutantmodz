@@ -71,7 +71,8 @@ const ManagePromo = () => {
             resetForm();
             fetchBanners();
         } catch (err) {
-            alert('Failed to save banner');
+            const errorMsg = err.response?.data?.details || err.response?.data?.error || 'Failed to save banner';
+            alert(`Error: ${errorMsg}`);
         } finally {
             setUploading(false);
         }

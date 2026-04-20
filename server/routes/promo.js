@@ -62,7 +62,8 @@ router.post('/', upload.single('image'), async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error creating promo banner:', err);
+    res.status(500).json({ error: 'Failed to create banner', details: err.message });
   }
 });
 

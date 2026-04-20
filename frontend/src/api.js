@@ -23,7 +23,10 @@ api.interceptors.response.use(
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            // Only redirect if we're not already on the login page to avoid 404 reloads on wrong credentials
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

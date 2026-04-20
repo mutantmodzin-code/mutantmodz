@@ -40,13 +40,6 @@ const ManageReels = () => {
         setVideoFile(null);
     };
 
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-
     const handleSave = async (id) => {
         setUploading(true);
         const formData = new FormData();
@@ -118,16 +111,15 @@ const ManageReels = () => {
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-            {/* Header section with inline styles for reliability */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem', borderBottom: '2px solid #e2e8f0', paddingBottom: '1.5rem' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', margin: 0, letterSpacing: '-0.025em' }}>HOMEPAGE VIDEO REELS</h1>
-                    <p style={{ color: '#64748b', marginTop: '0.25rem', fontWeight: 500 }}>Upload directly to your site. No external links required.</p>
+                    <p style={{ color: '#64748b', marginTop: '0.25rem', fontWeight: 500 }}>Upload directly to your site. Max file size: 50MB.</p>
                 </div>
                 <button
                     onClick={() => {
                         setIsAdding(true);
-                        setEditForm({ title: '', display_order: reels.length + 1, is_active: true });
+                        setEditForm({ title: '', display_order: reels.length + 1, is_active: true, instagram_url: '' });
                         setVideoFile(null);
                     }}
                     style={{ backgroundColor: '#2563eb', color: 'white', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', border: 'none', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.4)' }}
@@ -158,17 +150,16 @@ const ManageReels = () => {
                             />
                         </div>
                         <div style={{ gridColumn: 'span 2' }}>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>External Video / Instagram URL (Optional but Recommended for Large Files)</label>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Instagram URL (Optional)</label>
                             <input
                                 value={editForm.instagram_url || ''}
                                 onChange={e => setEditForm({ ...editForm, instagram_url: e.target.value })}
                                 style={{ width: '100%', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '1rem' }}
                                 placeholder="https://www.instagram.com/reels/..."
                             />
-                            <p style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.4rem' }}>If provided, this link will be used instead of the uploaded file on the frontend.</p>
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>OR Select Video File (Max 4.5MB on Vercel)</label>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Select Video File (Recommended)</label>
                             <div style={{ position: 'relative', border: '2px dashed #e2e8f0', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
                                 <UploadCloud size={32} color="#cbd5e1" style={{ marginBottom: '0.5rem' }} />
                                 <input
@@ -177,7 +168,7 @@ const ManageReels = () => {
                                     onChange={e => setVideoFile(e.target.files[0])}
                                     style={{ cursor: 'pointer' }}
                                 />
-                                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>MP4 or MOV recommended</p>
+                                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>MP4 or MOV recommended (Max 50MB)</p>
                             </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
@@ -197,27 +188,47 @@ const ManageReels = () => {
                 {reels.map((reel) => (
                     <div key={reel.id} style={{ backgroundColor: 'white', borderRadius: '1.25rem', border: '1px solid #e2e8f0', overflow: 'hidden', transition: 'transform 0.2s', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
                         <div style={{ aspectRatio: '9/16', backgroundColor: '#f1f5f9', position: 'relative', overflow: 'hidden' }}>
-                            {reel.video_url ? (
-                                <video 
-                                    src={getMediaUrl(reel.video_url)} 
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                    muted
-                                    onMouseEnter={e => e.target.play()}
-                                    onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
-                                />
-                            ) : reel.instagram_url && reel.instagram_url.includes('instagram.com') ? (
-                                <iframe
-                                    src={`${reel.instagram_url.split('?')[0].endsWith('/') ? reel.instagram_url.split('?')[0] : reel.instagram_url.split('?')[0] + '/'}embed/`}
-                                    style={{ width: '100%', height: '100%', border: 'none' }}
-                                    scrolling="no"
-                                    allowTransparency={true}
-                                />
-                            ) : (
-                                <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
-                                    <Video size={48} />
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, marginTop: '0.5rem' }}>NO MEDIA</span>
-                                </div>
-                            )}
+                            {(() => {
+                                const vUrl = reel.video_url ? getMediaUrl(reel.video_url) : null;
+                                const isInstagram = reel.instagram_url && reel.instagram_url.includes('instagram.com');
+
+                                if (vUrl) {
+                                    return (
+                                        <video 
+                                            src={vUrl} 
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            muted
+                                            onError={e => {
+                                                e.target.style.display = 'none';
+                                                e.target.parentElement.innerHTML = '<div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#ef4444; background:#fef2f2;"><svg size="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span style="font-size:0.75rem; font-weight:700; margin-top:0.5rem;">SOURCE ERROR</span></div>';
+                                            }}
+                                            onMouseEnter={e => {
+                                                const playPromise = e.target.play();
+                                                if (playPromise !== undefined) {
+                                                    playPromise.catch(() => { /* Silence */ });
+                                                }
+                                            }}
+                                            onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
+                                        />
+                                    );
+                                } else if (isInstagram) {
+                                    return (
+                                        <iframe
+                                            src={`${reel.instagram_url.split('?')[0].endsWith('/') ? reel.instagram_url.split('?')[0] : reel.instagram_url.split('?')[0] + '/'}embed/`}
+                                            style={{ width: '100%', height: '100%', border: 'none' }}
+                                            scrolling="no"
+                                            allowTransparency={true}
+                                        />
+                                    );
+                                } else {
+                                    return (
+                                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
+                                            <Video size={48} />
+                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, marginTop: '0.5rem' }}>NO MEDIA</span>
+                                        </div>
+                                    );
+                                }
+                            })()}
                             
                             <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem' }}>
                                 <button

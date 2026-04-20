@@ -1,8 +1,8 @@
 export const getMediaUrl = (url) => {
   if (!url) return '';
   
-  // 1. Clean up any accidental localhost strings from the database
-  let cleanUrl = url.replace('http://localhost:3001', '');
+  // 1. Clean up any accidental localhost strings from the database (any port)
+  let cleanUrl = url.replace(/http:\/\/localhost:\d+/g, '');
   
   // 2. If it's already a full URL or a data/blob URI, return it as-is
   if (
@@ -36,6 +36,7 @@ export const getMediaUrl = (url) => {
   }
   
   // 6. Combine base and path
+  if (!cleanUrl) return null;
   const separator = cleanUrl.startsWith('/') ? '' : '/';
   return `${base}${separator}${cleanUrl}`;
 };

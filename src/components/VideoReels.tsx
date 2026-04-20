@@ -63,8 +63,9 @@ export default function VideoReels() {
         
         <div className="flex gap-3 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory -mx-4 px-4 pb-8">
           {reels.map((v) => {
-            const vUrl = getMediaUrl(v.video_url);
             const isInstagram = v.instagram_url && v.instagram_url.includes('instagram.com');
+            const vUrl = v.video_url ? getMediaUrl(v.video_url) : null;
+            
             let embedUrl = null;
             if (isInstagram) {
               const base = v.instagram_url.split('?')[0];
@@ -117,6 +118,3 @@ export default function VideoReels() {
     </section>
   );
 }
-
-
-

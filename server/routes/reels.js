@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const multer = require('multer');
+const fs = require('fs');
 const path = require('path');
 
 // Configure multer for local storage
@@ -52,7 +53,7 @@ router.post('/', upload.single('video'), async (req, res) => {
   let video_url = null;
   
   if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
+    const baseUrl = process.env.VPS_URL || 'http://localhost:3001';
     video_url = `${baseUrl}/uploads/${req.file.filename}`;
   }
 
@@ -77,7 +78,7 @@ router.put('/:id', upload.single('video'), async (req, res) => {
   
   let video_url = existing_video_url;
   if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
+    const baseUrl = process.env.VPS_URL || 'http://localhost:3001';
     video_url = `${baseUrl}/uploads/${req.file.filename}`;
   }
 

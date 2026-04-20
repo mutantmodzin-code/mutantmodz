@@ -53,8 +53,7 @@ router.post('/', upload.single('video'), async (req, res) => {
   let video_url = null;
   
   if (req.file) {
-    const baseUrl = process.env.VPS_URL || 'http://localhost:3001';
-    video_url = `${baseUrl}/uploads/${req.file.filename}`;
+    video_url = `/uploads/${req.file.filename}`;
   }
 
   try {
@@ -78,8 +77,7 @@ router.put('/:id', upload.single('video'), async (req, res) => {
   
   let video_url = existing_video_url;
   if (req.file) {
-    const baseUrl = process.env.VPS_URL || 'http://localhost:3001';
-    video_url = `${baseUrl}/uploads/${req.file.filename}`;
+    video_url = `/uploads/${req.file.filename}`;
   }
 
   try {

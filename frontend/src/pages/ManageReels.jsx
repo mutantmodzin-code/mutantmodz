@@ -194,6 +194,13 @@ const ManageReels = () => {
                                     onMouseEnter={e => e.target.play()}
                                     onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
                                 />
+                            ) : reel.instagram_url && reel.instagram_url.includes('instagram.com') ? (
+                                <iframe
+                                    src={`${reel.instagram_url.split('?')[0].endsWith('/') ? reel.instagram_url.split('?')[0] : reel.instagram_url.split('?')[0] + '/'}embed/`}
+                                    style={{ width: '100%', height: '100%', border: 'none' }}
+                                    scrolling="no"
+                                    allowTransparency={true}
+                                />
                             ) : (
                                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>
                                     <Video size={48} />

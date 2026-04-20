@@ -64,6 +64,13 @@ export default function VideoReels() {
         <div className="flex gap-3 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory -mx-4 px-4 pb-8">
           {reels.map((v) => {
             const vUrl = getMediaUrl(v.video_url);
+            const isInstagram = v.instagram_url && v.instagram_url.includes('instagram.com');
+            let embedUrl = null;
+            if (isInstagram) {
+              const base = v.instagram_url.split('?')[0];
+              embedUrl = `${base.endsWith('/') ? base : base + '/'}embed/`;
+            }
+
             return (
               <div key={v.id} className="flex-shrink-0 w-[240px] sm:w-[320px] aspect-[9/16] rounded-2xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
                  {vUrl ? (
@@ -76,6 +83,13 @@ export default function VideoReels() {
                      playsInline
                      preload="auto"
                    />
+                 ) : isInstagram ? (
+                    <iframe
+                      src={embedUrl!}
+                      className="absolute inset-0 w-full h-full border-none opacity-90 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                      scrolling="no"
+                      allowTransparency={true}
+                    />
                  ) : (
                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-zinc-700">
                      <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">File Missing</span>

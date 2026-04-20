@@ -34,6 +34,7 @@ const ManageReels = () => {
             title: reel.title, 
             display_order: reel.display_order, 
             is_active: reel.is_active,
+            instagram_url: reel.instagram_url || '',
             existing_video_url: reel.video_url 
         });
         setVideoFile(null);
@@ -45,6 +46,7 @@ const ManageReels = () => {
         formData.append('title', editForm.title);
         formData.append('display_order', editForm.display_order);
         formData.append('is_active', editForm.is_active);
+        if (editForm.instagram_url) formData.append('instagram_url', editForm.instagram_url);
         if (videoFile) formData.append('video', videoFile);
         else if (editForm.existing_video_url) formData.append('existing_video_url', editForm.existing_video_url);
 
@@ -81,6 +83,7 @@ const ManageReels = () => {
         formData.append('title', editForm.title);
         formData.append('display_order', editForm.display_order);
         formData.append('is_active', true);
+        if (editForm.instagram_url) formData.append('instagram_url', editForm.instagram_url);
         if (videoFile) formData.append('video', videoFile);
 
         try {
@@ -89,7 +92,7 @@ const ManageReels = () => {
             });
             setIsAdding(false);
             setVideoFile(null);
-            setEditForm({ title: '', display_order: reels.length + 1, is_active: true });
+            setEditForm({ title: '', display_order: reels.length + 1, is_active: true, instagram_url: '' });
             fetchReels();
         } catch (err) {
             const msg = err.response?.data?.details || err.response?.data?.error || err.message;
@@ -143,18 +146,27 @@ const ManageReels = () => {
                                 placeholder="e.g. Performance Modifications Showcase"
                             />
                         </div>
+                        <div style={{ gridColumn: 'span 2' }}>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>External Video / Instagram URL (Optional but Recommended for Large Files)</label>
+                            <input
+                                value={editForm.instagram_url || ''}
+                                onChange={e => setEditForm({ ...editForm, instagram_url: e.target.value })}
+                                style={{ width: '100%', padding: '1rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0', fontSize: '1rem' }}
+                                placeholder="https://www.instagram.com/reels/..."
+                            />
+                            <p style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.4rem' }}>If provided, this link will be used instead of the uploaded file on the frontend.</p>
+                        </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Select Video File</label>
+                            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#64748b', marginBottom: '0.5rem', textTransform: 'uppercase' }}>OR Select Video File (Max 4.5MB on Vercel)</label>
                             <div style={{ position: 'relative', border: '2px dashed #e2e8f0', borderRadius: '0.75rem', padding: '1rem', textAlign: 'center' }}>
                                 <UploadCloud size={32} color="#cbd5e1" style={{ marginBottom: '0.5rem' }} />
                                 <input
                                     type="file"
-                                    required
                                     accept="video/*"
                                     onChange={e => setVideoFile(e.target.files[0])}
                                     style={{ cursor: 'pointer' }}
                                 />
-                                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>MP4 or MOV recommended (Max 50MB)</p>
+                                <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem' }}>MP4 or MOV recommended</p>
                             </div>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>

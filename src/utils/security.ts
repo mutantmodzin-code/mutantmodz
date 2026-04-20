@@ -51,7 +51,7 @@ export const initializeSecurity = () => {
       (function(a: any) {
         if (
           (function() {
-            return !!([]);
+            return true;
           }
           .constructor("return  /\\w+/.test(" + a.toString() + ")")
           .call(false))

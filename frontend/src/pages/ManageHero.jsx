@@ -43,35 +43,43 @@ const ManageHero = () => {
         }
     };
 
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUploading(true);
-        const data = new FormData();
-        data.append('title_white', formData.title_white || '');
-        data.append('title_red', formData.title_red || '');
-        data.append('subtitle', formData.subtitle || '');
-        data.append('display_order', String(formData.display_order || 1));
-        data.append('is_active', String(formData.is_active));
         
-        if (imageFile) {
-            data.append('image', imageFile);
-        }
-
         try {
+            const payload = {
+                title_white: formData.title_white || '',
+                title_red: formData.title_red || '',
+                subtitle: formData.subtitle || '',
+                display_order: formData.display_order || 1,
+                is_active: formData.is_active
+            };
+
+            if (imageFile) {
+                const base64 = await toBase64(imageFile);
+                payload.image_base64 = base64;
+            } else if (editingSlide) {
+                payload.image_url = editingSlide.image_url;
+            }
+
             if (editingSlide) {
-                if (!imageFile) data.append('existing_image_url', editingSlide.image_url);
-                await api.put(`/hero/${editingSlide.id}`, data, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await api.put(`/hero/${editingSlide.id}`, payload);
             } else {
-                await api.post('/hero', data, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await api.post('/hero', payload);
             }
             resetForm();
             fetchSlides();
         } catch (err) {
-            alert('Failed to save slide');
+            const errorMsg = err.response?.data?.details || err.response?.data?.error || 'Failed to save slide';
+            alert(`Error: ${errorMsg}`);
         } finally {
             setUploading(false);
         }

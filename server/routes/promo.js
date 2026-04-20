@@ -45,7 +45,7 @@ router.get('/admin', async (req, res) => {
 
 // POST new promo banner
 router.post('/', upload.single('image'), async (req, res) => {
-  const { title, discount_text, price_text, bg_color, display_order, is_active } = req.body;
+  const { title, discount_text, price_text, bg_color, display_order, is_active, image_base64 } = req.body;
   const order = parseInt(display_order) || 0;
   const active = is_active === 'true' || is_active === true;
   let image_url = null;
@@ -53,6 +53,8 @@ router.post('/', upload.single('image'), async (req, res) => {
   if (req.file) {
     const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
     image_url = `${baseUrl}/uploads/${req.file.filename}`;
+  } else if (image_base64) {
+    image_url = image_base64;
   }
 
   try {
@@ -70,7 +72,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 // PUT update promo banner
 router.put('/:id', upload.single('image'), async (req, res) => {
   const { id } = req.params;
-  const { title, discount_text, price_text, bg_color, display_order, is_active, existing_image_url } = req.body;
+  const { title, discount_text, price_text, bg_color, display_order, is_active, existing_image_url, image_base64 } = req.body;
   const order = parseInt(display_order) || 0;
   const active = is_active === 'true' || is_active === true || is_active === '1';
   
@@ -78,6 +80,8 @@ router.put('/:id', upload.single('image'), async (req, res) => {
   if (req.file) {
     const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
     image_url = `${baseUrl}/uploads/${req.file.filename}`;
+  } else if (image_base64) {
+    image_url = image_base64;
   }
 
   try {

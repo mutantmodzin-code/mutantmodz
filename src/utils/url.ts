@@ -42,7 +42,7 @@ export const getMediaUrl = (url: string) => {
   }
   
   // 6. Combine base and path
-  if (!cleanUrl) return null;
+  if (!cleanUrl) return '';
   const separator = cleanUrl.startsWith('/') ? '' : '/';
   return `${base}${separator}${cleanUrl}`;
 };

@@ -1,0 +1,12 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install"
+watchPatterns = ["server/**"]
+
+[deploy]
+startCommand = "npm start"
+rootDirectory = "server"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicy = "on-failure"
+maxRestarts = 5

@@ -27,45 +27,49 @@ export const initializeSecurity = () => {
     }
   });
 
-  // 3. Console Override & Protection
-  // This effectively hides all logs and prevents normal console usage
-  const noOp = () => {};
-  const methods: (keyof Console)[] = ['log', 'debug', 'info', 'warn', 'error', 'table', 'clear'];
-  
-  methods.forEach((method) => {
-    if (typeof console[method] === 'function') {
-      (console as any)[method] = noOp;
-    }
-  });
+  /* Section 3 & 4 disabled to enable console for debugging
+31:   // 3. Console Override & Protection
+32:   // This effectively hides all logs and prevents normal console usage
+33:   const noOp = () => {};
+34:   const methods: (keyof Console)[] = ['log', 'debug', 'info', 'warn', 'error', 'table', 'clear'];
+35:   
+36:   methods.forEach((method) => {
+37:     if (typeof console[method] === 'function') {
+38:       (console as any)[method] = noOp;
+39:     }
+40:   });
+41: 
+42:   // Periodically clear the console just in case
+43:   setInterval(() => {
+44:     console.clear();
+45:   }, 1000);
+46:   */
 
-  // Periodically clear the console just in case
-  setInterval(() => {
-    console.clear();
-  }, 1000);
-
-  // 4. Anti-Debugger Loop
-  // This triggers a debugger pause if the developer tools are open,
-  // making it extremely annoying or impossible to navigate the code.
-  const antiDebugger = function() {
-    try {
-      (function(a: any) {
-        if (
-          (function() {
-            return true;
-          }
-          .constructor("return  /\\w+/.test(" + a.toString() + ")")
-          .call(false))
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-      .constructor("debugger")
-      .call("action"));
-    } catch (e) {}
-  };
-
-  // Run the anti-debugger periodically
-  setInterval(antiDebugger, 100);
+  /*
+50:   // 4. Anti-Debugger Loop
+51:   // This triggers a debugger pause if the developer tools are open,
+52:   // making it extremely annoying or impossible to navigate the code.
+53:   const antiDebugger = function() {
+54:     try {
+55:       (function(a: any) {
+56:         if (
+57:           (function() {
+58:             return true;
+59:           }
+60:           .constructor("return  /\\w+/.test(" + a.toString() + ")")
+61:           .call(false))
+62:         ) {
+63:           return true;
+64:         } else {
+65:           return false;
+66:         }
+67:       }
+68:       .constructor("debugger")
+69:       .call("action"));
+70:     } catch (e) {}
+71:   };
+72: 
+73:   // Run the anti-debugger periodically
+74:   setInterval(antiDebugger, 100);
+75:   */
 };

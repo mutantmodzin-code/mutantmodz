@@ -6,13 +6,15 @@ import './index.css';
 import { initializeSecurity } from './utils/security';
 
 // Initialize site security/protections
-initializeSecurity();
+// initializeSecurity();
 
 // Prevent copy and cut events globally
+/*
 if (typeof window !== 'undefined') {
   window.addEventListener('copy', (e) => e.preventDefault());
   window.addEventListener('cut', (e) => e.preventDefault());
 }
+*/
 
 
 createRoot(document.getElementById('root')!).render(

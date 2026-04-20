@@ -5,7 +5,7 @@ import App from './App.jsx'
 import { initializeSecurity } from './utils/security'
 
 // Initialize site security/protections
-initializeSecurity()
+// initializeSecurity()
 
 createRoot(document.getElementById('root')).render(
 

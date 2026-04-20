@@ -40,6 +40,13 @@ const ManageReels = () => {
         setVideoFile(null);
     };
 
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
     const handleSave = async (id) => {
         setUploading(true);
         const formData = new FormData();
@@ -47,8 +54,12 @@ const ManageReels = () => {
         formData.append('display_order', editForm.display_order);
         formData.append('is_active', editForm.is_active);
         if (editForm.instagram_url) formData.append('instagram_url', editForm.instagram_url);
-        if (videoFile) formData.append('video', videoFile);
-        else if (editForm.existing_video_url) formData.append('existing_video_url', editForm.existing_video_url);
+        
+        if (videoFile) {
+            formData.append('video', videoFile);
+        } else if (editForm.existing_video_url) {
+            formData.append('existing_video_url', editForm.existing_video_url);
+        }
 
         try {
             await api.put(`/reels/${id}`, formData, {

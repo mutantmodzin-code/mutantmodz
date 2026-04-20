@@ -36,16 +36,14 @@ router.get('/', async (req, res) => {
 
 // POST new slide
 router.post('/', upload.single('image'), async (req, res) => {
-  const { title_white, title_red, subtitle, display_order, is_active, image_base64 } = req.body;
+  const { title_white, title_red, subtitle, display_order, is_active } = req.body;
   const order = parseInt(display_order) || 0;
   const active = is_active === 'true' || is_active === true;
   let image_url = null;
 
   if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
+    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
     image_url = `${baseUrl}/uploads/${req.file.filename}`;
-  } else if (image_base64) {
-    image_url = image_base64; // Store Base64 directly in the DB
   }
 
   try {
@@ -63,16 +61,14 @@ router.post('/', upload.single('image'), async (req, res) => {
 // PUT update slide
 router.put('/:id', upload.single('image'), async (req, res) => {
   const { id } = req.params;
-  const { title_white, title_red, subtitle, display_order, is_active, existing_image_url, image_base64 } = req.body;
+  const { title_white, title_red, subtitle, display_order, is_active, existing_image_url } = req.body;
   const order = parseInt(display_order) || 0;
   const active = is_active === 'true' || is_active === true;
   
   let image_url = existing_image_url;
   if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
+    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
     image_url = `${baseUrl}/uploads/${req.file.filename}`;
-  } else if (image_base64) {
-    image_url = image_base64;
   }
 
   try {

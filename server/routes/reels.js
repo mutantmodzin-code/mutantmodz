@@ -8,6 +8,7 @@ const path = require('path');
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadPath = path.join(__dirname, '..', 'uploads');
+    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage,
-  limits: { fileSize: 100 * 1024 * 1024 } // Increased to 100MB
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
 // Get all reels
@@ -42,21 +43,17 @@ router.get('/admin', async (req, res) => {
   }
 });
 
-// Admin: Create a new reel (with optional upload)
+// Admin: Create a new reel
 router.post('/', upload.single('video'), async (req, res) => {
-  req.setTimeout(0); // Disable timeout for large uploads
-  console.log('REELS_POST: Body:', req.body);
-  console.log('REELS_POST: File:', req.file);
-  
+  req.setTimeout(0); 
   const { title, instagram_url, display_order, is_active } = req.body;
   const order = parseInt(display_order) || 0;
   const active = is_active === 'true' || is_active === true;
   let video_url = null;
   
   if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
+    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
     video_url = `${baseUrl}/uploads/${req.file.filename}`;
-    console.log('REELS_POST: Generated URL:', video_url);
   }
 
   try {
@@ -66,29 +63,22 @@ router.post('/', upload.single('video'), async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (err) {
-    console.error('CRITICAL: Error creating reel:', err);
-    res.status(500).json({ 
-      error: 'Internal server error', 
-      details: err.message,
-      stack: process.env.NODE_ENV === 'production' ? null : err.stack 
-    });
+    console.error('Error creating reel:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 });
 
-// Admin: Update a reel (with optional upload)
+// Admin: Update a reel
 router.put('/:id', upload.single('video'), async (req, res) => {
   const { id } = req.params;
-  console.log(`REELS_PUT: ID: ${id}, Body:`, req.body);
-  
   const { title, instagram_url, display_order, is_active, existing_video_url } = req.body;
   const order = parseInt(display_order) || 0;
   const active = is_active === 'true' || is_active === true;
   
   let video_url = existing_video_url;
   if (req.file) {
-    const baseUrl = process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001';
+    const baseUrl = process.env.NODE_ENV === 'production' && !process.env.VPS_URL ? '' : (process.env.VPS_URL || 'http://localhost:5001');
     video_url = `${baseUrl}/uploads/${req.file.filename}`;
-    console.log('REELS_PUT: New video URL generated:', video_url);
   }
 
   try {
@@ -99,12 +89,8 @@ router.put('/:id', upload.single('video'), async (req, res) => {
     if (rows.length === 0) return res.status(404).json({ error: 'Reel not found' });
     res.json(rows[0]);
   } catch (err) {
-    console.error('CRITICAL: Error updating reel:', err);
-    res.status(500).json({ 
-      error: 'Internal server error', 
-      details: err.message,
-      stack: process.env.NODE_ENV === 'production' ? null : err.stack 
-    });
+    console.error('Error updating reel:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 });
 

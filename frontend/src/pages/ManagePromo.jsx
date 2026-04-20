@@ -40,38 +40,31 @@ const ManagePromo = () => {
         }
     };
 
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setUploading(true);
+        const data = new FormData();
+        data.append('title', formData.title || '');
+        data.append('display_order', String(formData.display_order || 1));
+        data.append('is_active', String(formData.is_active));
+        data.append('discount_text', '');
+        data.append('price_text', '');
+        data.append('bg_color', '#000000');
         
+        if (imageFile) {
+            data.append('image', imageFile);
+        }
+
         try {
-            const payload = {
-                title: formData.title || '',
-                display_order: formData.display_order || 1,
-                is_active: formData.is_active,
-                discount_text: '',
-                price_text: '',
-                bg_color: '#000000'
-            };
-
-            if (imageFile) {
-                const base64 = await toBase64(imageFile);
-                payload.image_base64 = base64;
-            } else if (editingBanner) {
-                payload.image_url = editingBanner.image_url;
-            }
-
             if (editingBanner) {
-                await api.put(`/promo/${editingBanner.id}`, payload);
+                if (!imageFile) data.append('existing_image_url', editingBanner.image_url);
+                await api.put(`/promo/${editingBanner.id}`, data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             } else {
-                await api.post('/promo', payload);
+                await api.post('/promo', data, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
             }
             resetForm();
             fetchBanners();

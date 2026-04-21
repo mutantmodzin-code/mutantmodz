@@ -198,17 +198,9 @@ const ManageReels = () => {
                                             src={vUrl} 
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             muted
-                                            onError={e => {
-                                                e.target.style.display = 'none';
-                                                e.target.parentElement.innerHTML = '<div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#ef4444; background:#fef2f2;"><svg size="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alert-triangle"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg><span style="font-size:0.75rem; font-weight:700; margin-top:0.5rem;">SOURCE ERROR</span></div>';
-                                            }}
-                                            onMouseEnter={e => {
-                                                const playPromise = e.target.play();
-                                                if (playPromise !== undefined) {
-                                                    playPromise.catch(() => { /* Silence */ });
-                                                }
-                                            }}
-                                            onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
+                                            loop
+                                            autoPlay
+                                            playsInline
                                         />
                                     );
                                 } else if (isInstagram) {

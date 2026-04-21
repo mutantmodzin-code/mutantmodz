@@ -222,7 +222,7 @@ const ManageReels = () => {
                                 }
                             })()}
                             
-                            <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem' }}>
+                            <div style={{ position: 'absolute', top: '1rem', right: '1rem', display: 'flex', gap: '0.5rem', zIndex: 10 }}>
                                 <button
                                     onClick={() => handleEdit(reel)}
                                     style={{ padding: '0.5rem', backgroundColor: 'white', borderRadius: '0.5rem', border: 'none', color: '#2563eb', cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
@@ -242,19 +242,43 @@ const ManageReels = () => {
                             {isEditing === reel.id ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                     <input
+                                        placeholder="Title"
                                         style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', fontWeight: 600 }}
                                         value={editForm.title}
                                         onChange={e => setEditForm({ ...editForm, title: e.target.value })}
                                     />
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <input
+                                        placeholder="Instagram URL (Optional)"
+                                        style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', fontSize: '0.875rem' }}
+                                        value={editForm.instagram_url || ''}
+                                        onChange={e => setEditForm({ ...editForm, instagram_url: e.target.value })}
+                                    />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <input
+                                            type="file"
+                                            accept="video/*"
+                                            onChange={e => setVideoFile(e.target.files[0])}
+                                            style={{ flex: 1, fontSize: '0.75rem' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={editForm.is_active}
+                                                onChange={e => setEditForm({ ...editForm, is_active: e.target.checked })}
+                                            />
+                                            Active
+                                        </label>
                                         <input
                                             type="number"
+                                            placeholder="Order"
                                             style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', textAlign: 'center' }}
                                             value={editForm.display_order}
                                             onChange={e => setEditForm({ ...editForm, display_order: parseInt(e.target.value) })}
                                         />
-                                        <button onClick={() => setIsEditing(null)} style={{ padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '0.5rem', backgroundColor: 'transparent' }}><X size={18} /></button>
-                                        <button onClick={() => handleSave(reel.id)} style={{ padding: '0.75rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '0.5rem' }}><Save size={18} /></button>
+                                        <button disabled={uploading} onClick={() => setIsEditing(null)} style={{ padding: '0.75rem', border: '1px solid #e2e8f0', borderRadius: '0.5rem', backgroundColor: 'transparent', cursor: 'pointer' }}><X size={18} /></button>
+                                        <button disabled={uploading} onClick={() => handleSave(reel.id)} style={{ padding: '0.75rem', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: uploading ? 'not-allowed' : 'pointer' }}>{uploading ? '...' : <Save size={18} />}</button>
                                     </div>
                                 </div>
                             ) : (

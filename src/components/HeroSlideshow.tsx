@@ -24,19 +24,8 @@ interface HeroSlideshowProps {
 }
 
 export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
-    const [slides, setSlides] = useState<Slide[]>(() => {
-        try {
-            const cached = localStorage.getItem('hero_slides');
-            if (cached) return JSON.parse(cached);
-        } catch (e) {
-            console.error('Error parsing cached slides', e);
-        }
-        return [];
-    });
-    const [loading, setLoading] = useState(() => {
-        const cached = localStorage.getItem('hero_slides');
-        return !cached;
-    });
+    const [slides, setSlides] = useState<Slide[]>([]);
+    const [loading, setLoading] = useState(true);
     const [current, setCurrent] = useState(0);
     const [direction, setDirection] = useState(0);
 
@@ -52,21 +41,6 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                 const activeSlides = slidesArray.filter((s: any) => s.is_active);
                 
                 setSlides(activeSlides);
-                // Cache locally for instant loading next time
-                try {
-                    localStorage.setItem('hero_slides', JSON.stringify(activeSlides));
-                } catch (e) {
-                    console.warn('Error caching slides:', e);
-                    // If quota exceeded, clear and try once more with only recent data
-                    if (e instanceof Error && e.name === 'QuotaExceededError') {
-                        try {
-                            localStorage.clear();
-                            localStorage.setItem('hero_slides', JSON.stringify(activeSlides));
-                        } catch (innerE) {
-                            console.error('Failed to cache slides even after clearing storage');
-                        }
-                    }
-                }
 
                 // PERFORMANCE BOOST: Eagerly pre-load all hero images into browser cache instantly 
                 // after the API resolves, so they don't wait for React hydration/animations.

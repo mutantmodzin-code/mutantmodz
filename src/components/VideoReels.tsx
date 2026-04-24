@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, VideoOff } from 'lucide-react';
 
 import { getMediaUrl } from '../utils/url';
 
@@ -14,6 +14,7 @@ interface Reel {
 export default function VideoReels() {
   const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [videoErrors, setVideoErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const fetchReels = async () => {
@@ -34,6 +35,10 @@ export default function VideoReels() {
     };
     fetchReels();
   }, []);
+
+  const handleVideoError = (id: number) => {
+    setVideoErrors(prev => ({ ...prev, [id]: true }));
+  };
 
 
   if (loading) {
@@ -65,6 +70,7 @@ export default function VideoReels() {
           {reels.map((v) => {
             const isInstagram = v.instagram_url && v.instagram_url.includes('instagram.com');
             const vUrl = v.video_url ? getMediaUrl(v.video_url) : null;
+            const hasError = videoErrors[v.id];
             
             let embedUrl = null;
             if (isInstagram) {
@@ -74,7 +80,7 @@ export default function VideoReels() {
 
             return (
               <div key={v.id} className="flex-shrink-0 w-[240px] sm:w-[320px] aspect-[9/16] rounded-2xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
-                 {vUrl ? (
+                 {vUrl && !hasError ? (
                    <video
                      key={vUrl}
                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
@@ -83,10 +89,7 @@ export default function VideoReels() {
                      autoPlay
                      playsInline
                      preload="auto"
-                     onError={(e) => {
-                       console.error('Video load error:', vUrl);
-                       (e.target as HTMLVideoElement).parentElement!.style.backgroundColor = '#18181b';
-                     }}
+                     onError={() => handleVideoError(v.id)}
                    >
                      <source src={vUrl} type="video/mp4" />
                    </video>
@@ -98,8 +101,12 @@ export default function VideoReels() {
                       allowTransparency={true}
                     />
                  ) : (
-                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-zinc-700">
-                     <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">File Missing</span>
+                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 text-zinc-700 p-8 text-center gap-4">
+                     <VideoOff className="w-12 h-12 opacity-20" />
+                     <div className="space-y-1">
+                        <span className="text-[10px] font-black uppercase tracking-widest block">Video GONE</span>
+                        <span className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest block leading-tight">Server storage reset. Please re-upload.</span>
+                     </div>
                    </div>
                  )}
                  

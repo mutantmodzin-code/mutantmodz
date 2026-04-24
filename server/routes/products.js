@@ -88,15 +88,45 @@ router.get('/categories', async (req, res) => {
     }
 });
 
+const { cloudinary } = require('../utils/cloudinary');
+
 // Add Product
 router.post('/', async (req, res) => {
-    const { 
+    let { 
         name, brand, category_id, sub_category, sub_category_type, 
         price, stock, vendor_id, sku, purchase_price, image_url, 
         bike_brand, bike_model, description, discount_percent, 
         is_garage_sale, is_combo, combo_type,
         delivery_tn, delivery_south, delivery_north 
     } = req.body;
+    
+    // If it's a base64 string or an array of base64 strings, upload to Cloudinary
+    try {
+        if (image_url) {
+            let images = [];
+            try {
+                const parsed = JSON.parse(image_url);
+                images = Array.isArray(parsed) ? parsed : [image_url];
+            } catch (e) {
+                images = [image_url];
+            }
+
+            const uploadedImages = await Promise.all(images.map(async (img) => {
+                if (typeof img === 'string' && img.startsWith('data:image')) {
+                    const uploadRes = await cloudinary.uploader.upload(img, {
+                        folder: 'mutantmodz/products'
+                    });
+                    return uploadRes.secure_url;
+                }
+                return img;
+            }));
+
+            image_url = uploadedImages.length > 1 ? JSON.stringify(uploadedImages) : uploadedImages[0];
+        }
+    } catch (uploadErr) {
+        console.error('Cloudinary upload failed for product:', uploadErr);
+    }
+
     console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale, is_combo, combo_type });
 
     const finalSku = sku || `SKU-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -199,13 +229,41 @@ router.post('/', async (req, res) => {
 
 // Update Product
 router.put('/:id', async (req, res) => {
-    const { 
+    let { 
         name, brand, category_id, sub_category, sub_category_type, 
         price, stock, vendor_id, sku, purchase_price, image_url, 
         bike_brand, bike_model, description, discount_percent, 
         is_garage_sale, is_combo, combo_type,
         delivery_tn, delivery_south, delivery_north 
     } = req.body;
+
+    // If it's a base64 string or an array of base64 strings, upload to Cloudinary
+    try {
+        if (image_url) {
+            let images = [];
+            try {
+                const parsed = JSON.parse(image_url);
+                images = Array.isArray(parsed) ? parsed : [image_url];
+            } catch (e) {
+                images = [image_url];
+            }
+
+            const uploadedImages = await Promise.all(images.map(async (img) => {
+                if (typeof img === 'string' && img.startsWith('data:image')) {
+                    const uploadRes = await cloudinary.uploader.upload(img, {
+                        folder: 'mutantmodz/products'
+                    });
+                    return uploadRes.secure_url;
+                }
+                return img;
+            }));
+
+            image_url = uploadedImages.length > 1 ? JSON.stringify(uploadedImages) : uploadedImages[0];
+        }
+    } catch (uploadErr) {
+        console.error('Cloudinary upload failed for product update:', uploadErr);
+    }
+
     const { id } = req.params;
     const client = await db.pool.connect();
     try {

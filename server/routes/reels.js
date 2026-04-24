@@ -5,21 +5,11 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 
-// Configure multer for local storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'uploads');
-    if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, `reel-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
+const { reelStorage } = require('../utils/cloudinary');
 
 const upload = multer({ 
-  storage,
-  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+  storage: reelStorage,
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit for videos
 });
 
 // Get all reels
@@ -53,7 +43,7 @@ router.post('/', upload.single('video'), async (req, res) => {
   let video_url = null;
   
   if (req.file) {
-    video_url = `/uploads/${req.file.filename}`;
+    video_url = req.file.path; // This is the Cloudinary URL
   }
 
   try {
@@ -77,7 +67,7 @@ router.put('/:id', upload.single('video'), async (req, res) => {
   
   let video_url = existing_video_url;
   if (req.file) {
-    video_url = `/uploads/${req.file.filename}`;
+    video_url = req.file.path; // This is the Cloudinary URL
   }
 
   try {

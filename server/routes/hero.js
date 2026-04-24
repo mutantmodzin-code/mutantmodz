@@ -13,16 +13,28 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST new slide (Using Base64)
+const { cloudinary } = require('../utils/cloudinary');
+
+// POST new slide (Handle Base64 -> Cloudinary)
 router.post('/', async (req, res) => {
   const { title_white, title_red, subtitle, display_order, is_active, image_url } = req.body;
   const order = parseInt(display_order) || 0;
   const active = !!is_active;
 
+  let final_image_url = image_url;
+
   try {
+    // If it's a base64 string, upload to Cloudinary
+    if (image_url && image_url.startsWith('data:image')) {
+      const uploadRes = await cloudinary.uploader.upload(image_url, {
+        folder: 'mutantmodz/hero'
+      });
+      final_image_url = uploadRes.secure_url;
+    }
+
     const { rows } = await db.query(
       'INSERT INTO hero_slides (image_url, title_white, title_red, subtitle, display_order, is_active) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [image_url, title_white, title_red, subtitle, order, active]
+      [final_image_url, title_white, title_red, subtitle, order, active]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -31,17 +43,27 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT update slide (Using Base64)
+// PUT update slide (Handle Base64 -> Cloudinary)
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { title_white, title_red, subtitle, display_order, is_active, image_url } = req.body;
   const order = parseInt(display_order) || 0;
   const active = !!is_active;
 
+  let final_image_url = image_url;
+
   try {
+    // If it's a base64 string, upload to Cloudinary
+    if (image_url && image_url.startsWith('data:image')) {
+      const uploadRes = await cloudinary.uploader.upload(image_url, {
+        folder: 'mutantmodz/hero'
+      });
+      final_image_url = uploadRes.secure_url;
+    }
+
     const { rows } = await db.query(
       'UPDATE hero_slides SET image_url = $1, title_white = $2, title_red = $3, subtitle = $4, display_order = $5, is_active = $6 WHERE id = $7 RETURNING *',
-      [image_url, title_white, title_red, subtitle, order, active, id]
+      [final_image_url, title_white, title_red, subtitle, order, active, id]
     );
     if (rows.length === 0) return res.status(404).json({ error: 'Slide not found' });
     res.json(rows[0]);

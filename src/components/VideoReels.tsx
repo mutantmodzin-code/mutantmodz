@@ -76,14 +76,20 @@ export default function VideoReels() {
               <div key={v.id} className="flex-shrink-0 w-[240px] sm:w-[320px] aspect-[9/16] rounded-2xl sm:rounded-[2.5rem] overflow-hidden bg-zinc-900 border border-white/5 cursor-pointer shadow-2xl relative snap-start group">
                  {vUrl ? (
                    <video
-                     src={vUrl}
+                     key={vUrl}
                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700"
                      muted 
                      loop 
                      autoPlay
                      playsInline
                      preload="auto"
-                   />
+                     onError={(e) => {
+                       console.error('Video load error:', vUrl);
+                       (e.target as HTMLVideoElement).parentElement!.style.backgroundColor = '#18181b';
+                     }}
+                   >
+                     <source src={vUrl} type="video/mp4" />
+                   </video>
                  ) : isInstagram ? (
                     <iframe
                       src={embedUrl!}

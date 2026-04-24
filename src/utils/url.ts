@@ -7,12 +7,18 @@ export const getMediaUrl = (url: string) => {
   // 1. Force remove any local dev host strings from the database string
   cleanUrl = cleanUrl.replace(/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\/?/, '');
   
-  // 2. If it's already a full URL or a data/blob URI, return it as-is
+  // 2. If it's already a full URL or a data/blob URI, handle it
   if (
     cleanUrl.startsWith('http') || 
     cleanUrl.startsWith('data:') || 
     cleanUrl.startsWith('blob:')
-  ) return cleanUrl;
+  ) {
+    // Upgrade http to https in production if page is https
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:' && cleanUrl.startsWith('http:')) {
+      return cleanUrl.replace('http:', 'https:');
+    }
+    return cleanUrl;
+  }
   
   // 3. Get the API URL from environment variables
   const apiUrl = (import.meta as any).env?.VITE_API_URL;

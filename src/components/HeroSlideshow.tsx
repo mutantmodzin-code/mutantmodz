@@ -56,7 +56,16 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
                 try {
                     localStorage.setItem('hero_slides', JSON.stringify(activeSlides));
                 } catch (e) {
-                    console.error('Error caching slides:', e);
+                    console.warn('Error caching slides:', e);
+                    // If quota exceeded, clear and try once more with only recent data
+                    if (e instanceof Error && e.name === 'QuotaExceededError') {
+                        try {
+                            localStorage.clear();
+                            localStorage.setItem('hero_slides', JSON.stringify(activeSlides));
+                        } catch (innerE) {
+                            console.error('Failed to cache slides even after clearing storage');
+                        }
+                    }
                 }
 
                 // PERFORMANCE BOOST: Eagerly pre-load all hero images into browser cache instantly 

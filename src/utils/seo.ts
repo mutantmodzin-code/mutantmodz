@@ -116,7 +116,7 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
   },
   contact: {
     title: 'Contact Mutant Modz – Visit Our Pitshop in Singanallur, Coimbatore',
-    description: 'Find the best pit shop in Singanallur, Coimbatore at Mutant Modz. Located in Uppilipalayam, we offer genuine accessories, helmets, and expert advice. Call +91 95975 96755.',
+    description: 'Find the best pit shop in Singanallur, Coimbatore at Mutant Modz. Located in Uppilipalayam, we offer genuine accessories, helmets, and expert advice. Call +91 88077 27227.',
     keywords: 'Mutant Modz address, pitshop Coimbatore, bike shop Singanallur, motorcycle shop phone number Coimbatore, check bike parts availability Coimbatore',
     canonical: 'https://mutantmodz.in/#contact',
   },

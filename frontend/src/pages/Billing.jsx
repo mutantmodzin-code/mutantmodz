@@ -294,7 +294,10 @@ const Billing = () => {
                         <tbody>
                             {billItems.map((item, idx) => (
                                 <tr key={idx}>
-                                    <td>{item.name}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600 }}>{item.name}</div>
+                                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Inclusive of all taxes</div>
+                                    </td>
                                     <td style={{ textAlign: 'right' }}>₹{item.unit_price}</td>
                                     <td style={{ textAlign: 'center' }}>{item.discount_percent > 0 ? `${item.discount_percent}%` : '-'}</td>
                                     <td style={{ textAlign: 'center' }}>{item.quantity}</td>

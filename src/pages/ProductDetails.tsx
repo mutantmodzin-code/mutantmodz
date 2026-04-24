@@ -159,7 +159,7 @@ Quantity: ${quantity}
 Size: ${selectedSize || 'N/A'}
 Price: ${product.price}
 Link: ${window.location.href}`;
-        const whatsappUrl = `https://wa.me/919597596755?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/918807727227?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     };
 

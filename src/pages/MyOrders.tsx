@@ -219,6 +219,7 @@ export default function MyOrders() {
                                                 <div className="text-right">
                                                     <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total Amount</p>
                                                     <p className="text-4xl font-black text-white">₹{Number(order.total_amount || 0).toLocaleString('en-IN')}</p>
+                                                    <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1">(Inclusive of all taxes)</p>
                                                 </div>
                                                 <button 
                                                     onClick={() => setSelectedOrder(isExpanded ? null : order.id)}

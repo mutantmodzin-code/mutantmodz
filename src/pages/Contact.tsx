@@ -60,8 +60,8 @@ export default function Contact() {
     {
       icon: Phone,
       label: 'Call Us',
-      value: '+91 95975 96755',
-      link: 'tel:+919597596755',
+      value: '+91 88077 27227',
+      link: 'tel:+918807727227',
       sub: 'Phone Number'
     },
     {
@@ -74,8 +74,8 @@ export default function Contact() {
     {
       icon: MessageSquare,
       label: 'WhatsApp Us',
-      value: '+91 95975 96755',
-      link: 'https://wa.me/919597596755',
+      value: '+91 88077 27227',
+      link: 'https://wa.me/918807727227',
       sub: 'Message Us'
     }
   ];

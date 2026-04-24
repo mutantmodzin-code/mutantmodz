@@ -41,11 +41,16 @@ const InvoiceHistory = () => {
     };
 
     const handlePrint = async (id) => {
-        await fetchDetails(id);
-        // Short delay to ensure React has rendered the #print-area modal
-        setTimeout(() => {
-            window.print();
-        }, 800);
+        try {
+            await fetchDetails(id);
+            // Longer delay to ensure React has fully rendered the modal and all its data
+            setTimeout(() => {
+                window.print();
+            }, 1200);
+        } catch (error) {
+            console.error('Failed to fetch invoice for printing:', error);
+            alert('Failed to load invoice details.');
+        }
     };
 
     const filteredInvoices = invoices.filter(inv => {
@@ -183,7 +188,6 @@ const InvoiceHistory = () => {
                             <span>GSTIN: 33BUNPN4615A1ZX</span>
                             <div style={{ textAlign: 'right' }}>
                                 <div>CELL: 88077 27227</div>
-                                <div>95975 96755</div>
                             </div>
                         </div>
 
@@ -351,7 +355,6 @@ const InvoiceHistory = () => {
                         left: 0 !important;
                         top: 0 !important;
                         width: 100% !important;
-                        height: auto !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         background-color: white !important;
@@ -368,10 +371,7 @@ const InvoiceHistory = () => {
                         width: 100% !important; 
                         max-width: 100% !important;
                         margin: 0 !important; 
-                        padding: 2cm !important; 
-                    }
-                    body > *:not(#print-area) {
-                        display: none !important;
+                        padding: 1.5cm !important; 
                     }
                 }
             `}</style>

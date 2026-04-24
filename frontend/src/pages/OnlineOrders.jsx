@@ -140,8 +140,12 @@ const OnlineOrders = () => {
                                     }}>
                                         {order.status || 'Pending'}
                                     </div>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                                        ₹{parseFloat(order.total_amount).toLocaleString('en-IN')}
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                                            ₹{parseFloat(order.total_amount).toLocaleString('en-IN')}
+                                        </div>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>(Incl. {parseFloat(order.delivery_charge || 0).toFixed(0)} Delivery)</div>
+                                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8' }}>(Inclusive of all taxes)</div>
                                     </div>
                                 </div>
                             </div>

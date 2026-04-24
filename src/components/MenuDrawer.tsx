@@ -340,11 +340,11 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
                 <p className="text-zinc-400 text-[11px] font-bold leading-relaxed group-hover:text-white transition-colors">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
               </a>
               <a
-                href="tel:+919597596755"
+                href="tel:+918807727227"
                 className="flex items-center gap-3 group touch-manipulation active:opacity-70"
               >
                 <Phone size={16} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
-                <p className="text-zinc-400 text-[11px] font-bold group-hover:text-white transition-colors">+91 95975 96755</p>
+                <p className="text-zinc-400 text-[11px] font-bold group-hover:text-white transition-colors">+91 88077 27227</p>
               </a>
               <a
                 href="mailto:info@mutantmodz.com"

@@ -572,13 +572,13 @@ export default function Products({ onNavigate }: ProductsProps) {
 
           <div className="flex flex-col md:flex-row gap-6 justify-center pt-8">
             <a
-              href="tel:+919597596755"
+              href="tel:+918807727227"
               className="bg-white text-black px-12 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-black hover:text-white transition-all transform hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4"
             >
-              <Phone size={20} /> +91 95975 96755
+              <Phone size={20} /> +91 88077 27227
             </a>
             <a
-              href="https://wa.me/919597596755"
+              href="https://wa.me/918807727227"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-black text-white px-12 py-7 rounded-[2rem] font-black uppercase tracking-widest text-xs shadow-2xl hover:bg-white hover:text-black transition-all transform hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4"

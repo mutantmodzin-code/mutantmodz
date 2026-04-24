@@ -48,7 +48,7 @@ const KB: { patterns: RegExp[]; response: string }[] = [
     {
         patterns: [/phone|call|number|contact|reach|talk|speak/i],
         response:
-            "📞 **Contact Channels**:\n\n• **Phone**: +91 9876543210\n• **Email**: info@mutantmodz.in",
+            "📞 **Contact Channels**:\n\n• **Phone**: +91 88077 27227\n• **Email**: info@mutantmodz.com",
     },
     {
         patterns: [/thank|thanks|great|perfect|awesome|nice/i],

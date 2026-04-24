@@ -246,7 +246,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                     maxLength={10}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                    placeholder="9876543210"
+                    placeholder="8807727227"
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 px-6 text-white text-lg font-black focus:border-red-600 outline-none transition-colors placeholder:text-zinc-800 tracking-[0.2em]"
                     autoFocus
                   />

@@ -36,20 +36,29 @@ const InvoiceHistory = () => {
     };
 
     const fetchDetails = async (id) => {
-        const res = await api.get(`/invoices/${id}`);
-        setSelectedInvoice(res.data);
+        try {
+            const res = await api.get(`/invoices/${id}`);
+            if (res.data && res.data.invoice) {
+                setSelectedInvoice(res.data);
+                return res.data;
+            } else {
+                alert("Invoice details not found");
+                return null;
+            }
+        } catch (error) {
+            console.error("Fetch details failed:", error);
+            alert("Error loading invoice details");
+            return null;
+        }
     };
 
     const handlePrint = async (id) => {
-        try {
-            await fetchDetails(id);
+        const data = await fetchDetails(id);
+        if (data) {
             // Longer delay to ensure React has fully rendered the modal and all its data
             setTimeout(() => {
                 window.print();
-            }, 1200);
-        } catch (error) {
-            console.error('Failed to fetch invoice for printing:', error);
-            alert('Failed to load invoice details.');
+            }, 1500);
         }
     };
 
@@ -205,11 +214,11 @@ const InvoiceHistory = () => {
                             <div style={{ flex: 1, padding: '1rem', borderRight: '1px solid #000' }}>
                                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                                     <span style={{ fontWeight: 700 }}>To.</span>
-                                    <span>{selectedInvoice.invoice.customer_name}</span>
+                                    <span>{selectedInvoice.invoice?.customer_name || 'Walk-in'}</span>
                                 </div>
                                 <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
                                     <span style={{ fontWeight: 700 }}>Ph:</span>
-                                    <span>{selectedInvoice.invoice.customer_phone}</span>
+                                    <span>{selectedInvoice.invoice?.customer_phone || 'N/A'}</span>
                                 </div>
                             </div>
                             <div style={{ flex: 1, padding: '1rem' }}>
@@ -241,22 +250,22 @@ const InvoiceHistory = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {selectedInvoice.items.map((item, idx) => (
+                                {(selectedInvoice.items || []).map((item, idx) => (
                                     <tr key={item.id} style={{ height: '40px' }}>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{idx + 1}</td>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}>
-                                            <div style={{ fontWeight: 600 }}>{item.product_name}</div>
+                                            <div style={{ fontWeight: 600 }}>{item.product_name || item.name}</div>
                                             <div style={{ fontSize: '0.65rem', color: '#334155' }}>Inclusive of all taxes</div>
                                         </td>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{item.quantity} Nos</td>
-                                        <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{parseFloat(item.unit_price).toFixed(2)}</td>
+                                        <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{parseFloat(item.unit_price || 0).toFixed(2)}</td>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>
-                                            {parseFloat(item.discount_percent) > 0 ? 
+                                            {parseFloat(item.discount_percent || 0) > 0 ? 
                                                 `${parseFloat(item.discount_percent).toFixed(0)}%` : 
                                                 ''
                                             }
                                         </td>
-                                        <td style={{ padding: '0.5rem', textAlign: 'right' }}>{parseFloat(item.line_total).toFixed(2)}</td>
+                                        <td style={{ padding: '0.5rem', textAlign: 'right' }}>{parseFloat(item.line_total || 0).toFixed(2)}</td>
                                     </tr>
                                 ))}
                                 {/* Empty rows to maintain height like in screenshot */}
@@ -276,11 +285,11 @@ const InvoiceHistory = () => {
                                     <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}></td>
                                     <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}>Subtotal</td>
                                     <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>
-                                        {selectedInvoice.items.reduce((sum, i) => sum + i.quantity, 0)}.000
+                                        {(selectedInvoice.items || []).reduce((sum, i) => sum + (i.quantity || 0), 0)}.000
                                     </td>
                                     <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}></td>
                                     <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}></td>
-                                    <td style={{ padding: '0.5rem', textAlign: 'right' }}>{parseFloat(selectedInvoice.invoice.subtotal).toFixed(2)}</td>
+                                    <td style={{ padding: '0.5rem', textAlign: 'right' }}>{parseFloat(selectedInvoice.invoice?.subtotal || 0).toFixed(2)}</td>
                                 </tr>
                                 {((selectedInvoice.invoice.delivery_charge && parseFloat(selectedInvoice.invoice.delivery_charge) > 0) || selectedInvoice.invoice.order_type === 'Online Order') && (
                                     <tr style={{ borderTop: '1px solid #000', fontWeight: 700 }}>
@@ -289,15 +298,15 @@ const InvoiceHistory = () => {
                                         <td style={{ padding: '0.5rem', textAlign: 'right' }}>{parseFloat(selectedInvoice.invoice.delivery_charge || 0).toFixed(2)}</td>
                                     </tr>
                                 )}
-                                {selectedInvoice.items.some(i => parseFloat(i.discount_percent) > 0) && (
+                                {(selectedInvoice.items || []).some(i => parseFloat(i.discount_percent || 0) > 0) && (
                                     <tr style={{ borderTop: '1px solid #000', fontWeight: 700 }}>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}></td>
                                         <td colSpan="4" style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'right', color: '#16a34a' }}>Total Savings</td>
                                         <td style={{ padding: '0.5rem', textAlign: 'right', color: '#16a34a' }}>
-                                            ₹{selectedInvoice.items.reduce((sum, item) => {
-                                                const originalPrice = parseFloat(item.unit_price) / (1 - (parseFloat(item.discount_percent) / 100));
-                                                const savingsPerUnit = originalPrice - parseFloat(item.unit_price);
-                                                return sum + (savingsPerUnit * item.quantity);
+                                            ₹{(selectedInvoice.items || []).reduce((sum, item) => {
+                                                const originalPrice = parseFloat(item.unit_price || 0) / (1 - (parseFloat(item.discount_percent || 0) / 100));
+                                                const savingsPerUnit = isFinite(originalPrice) ? originalPrice - parseFloat(item.unit_price || 0) : 0;
+                                                return sum + (savingsPerUnit * (item.quantity || 0));
                                             }, 0).toFixed(2)}
                                         </td>
                                     </tr>
@@ -312,7 +321,7 @@ const InvoiceHistory = () => {
                                 <div style={{ textAlign: 'right' }}>
                                     <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline' }}>
                                         <span style={{ fontWeight: 700, marginRight: '1rem' }}>Net Amount:</span>
-                                        <span style={{ fontSize: '1.25rem', fontWeight: 900 }}>{parseFloat(selectedInvoice.invoice.total_amount).toFixed(2)}</span>
+                                        <span style={{ fontSize: '1.25rem', fontWeight: 900 }}>{parseFloat(selectedInvoice.invoice?.total_amount || 0).toFixed(2)}</span>
                                     </div>
                                     <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#475569', marginTop: '-2px' }}>(Inclusive of all taxes)</div>
                                 </div>
@@ -320,7 +329,7 @@ const InvoiceHistory = () => {
                         </div>
 
                         <div style={{ border: '1px solid #000', padding: '0.5rem', marginBottom: '2rem', fontWeight: 700 }}>
-                            {numberToWords(selectedInvoice.invoice.total_amount)}
+                            {numberToWords(selectedInvoice.invoice?.total_amount || 0)}
                         </div>
 
                         {/* Signature */}

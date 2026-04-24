@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { Eye, Printer, Search, FileText } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLocation } from 'react-router-dom';
 
 const InvoiceHistory = () => {
     const [invoices, setInvoices] = useState([]);
@@ -9,10 +10,17 @@ const InvoiceHistory = () => {
     const [filter, setFilter] = useState({ type: 'all', value: '' });
     const [orderTypeFilter, setOrderTypeFilter] = useState('all');
     const [selectedInvoice, setSelectedInvoice] = useState(null);
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const autoPrintId = queryParams.get('print');
 
     useEffect(() => {
         fetchInvoices();
-    }, [filter]);
+        
+        if (autoPrintId) {
+            handlePrint(autoPrintId);
+        }
+    }, [filter, autoPrintId]);
 
     const fetchInvoices = async () => {
         let url = '/invoices';
@@ -32,9 +40,12 @@ const InvoiceHistory = () => {
         setSelectedInvoice(res.data);
     };
 
-    const handlePrint = (id) => {
-        fetchDetails(id);
-        setTimeout(() => window.print(), 500);
+    const handlePrint = async (id) => {
+        await fetchDetails(id);
+        // Short delay to ensure React has rendered the #print-area modal
+        setTimeout(() => {
+            window.print();
+        }, 800);
     };
 
     const filteredInvoices = invoices.filter(inv => {
@@ -231,7 +242,7 @@ const InvoiceHistory = () => {
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{idx + 1}</td>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem' }}>
                                             <div style={{ fontWeight: 600 }}>{item.product_name}</div>
-                                            <div style={{ fontSize: '0.65rem', color: '#334155' }}>inclusive taxes</div>
+                                            <div style={{ fontSize: '0.65rem', color: '#334155' }}>Inclusive of all taxes</div>
                                         </td>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{item.quantity} Nos</td>
                                         <td style={{ borderRight: '1px solid #000', padding: '0.5rem', textAlign: 'center' }}>{parseFloat(item.unit_price).toFixed(2)}</td>
@@ -294,9 +305,12 @@ const InvoiceHistory = () => {
                         <div style={{ border: '1px solid #000', padding: '0.5rem', marginBottom: '1rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ fontSize: '0.75rem', fontStyle: 'italic' }}>E. & O.E.</span>
-                                <div>
-                                    <span style={{ fontWeight: 700, marginRight: '1rem' }}>Net Amount:</span>
-                                    <span style={{ fontSize: '1.25rem', fontWeight: 900 }}>{parseFloat(selectedInvoice.invoice.total_amount).toFixed(2)}</span>
+                                <div style={{ textAlign: 'right' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'baseline' }}>
+                                        <span style={{ fontWeight: 700, marginRight: '1rem' }}>Net Amount:</span>
+                                        <span style={{ fontSize: '1.25rem', fontWeight: 900 }}>{parseFloat(selectedInvoice.invoice.total_amount).toFixed(2)}</span>
+                                    </div>
+                                    <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#475569', marginTop: '-2px' }}>(Inclusive of all taxes)</div>
                                 </div>
                             </div>
                         </div>
@@ -320,19 +334,45 @@ const InvoiceHistory = () => {
             )}
             <style>{`
                 @media print {
-                    body * { visibility: hidden; }
-                    #print-area, #print-area * { visibility: visible; }
+                    @page {
+                        margin: 0;
+                        size: auto;
+                    }
+                    body {
+                        background-color: white !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .no-print, nav, aside, header, .sidebar, .header-actions { 
+                        display: none !important; 
+                    }
                     #print-area { 
-                        position: fixed; 
-                        left: 0; 
-                        top: 0; 
-                        width: 100%; 
-                        height: 100%;
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                         background-color: white !important;
                         display: block !important;
+                        visibility: visible !important;
+                        z-index: 9999 !important;
                     }
-                    .no-print { display: none !important; }
-                    .card { border: none !important; box-shadow: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+                    #print-area * {
+                        visibility: visible !important;
+                    }
+                    .card { 
+                        border: none !important; 
+                        box-shadow: none !important; 
+                        width: 100% !important; 
+                        max-width: 100% !important;
+                        margin: 0 !important; 
+                        padding: 2cm !important; 
+                    }
+                    body > *:not(#print-area) {
+                        display: none !important;
+                    }
                 }
             `}</style>
         </div>

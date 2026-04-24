@@ -563,7 +563,10 @@ export default function Payment() {
                                 <div className="flex justify-between items-center p-8 bg-zinc-950 rounded-[2rem] border border-zinc-900 mt-6">
                                     <div className="space-y-1">
                                         <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em]">Total Amount</span>
-                                        <p className="text-[9px] text-zinc-600 font-black uppercase">Incl. Shipping</p>
+                                        <div className="space-y-0.5">
+                                            <p className="text-[9px] text-zinc-600 font-black uppercase">Incl. Shipping</p>
+                                            <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest">(Incl. of all taxes)</p>
+                                        </div>
                                     </div>
                                     <span className="text-4xl font-black text-white tracking-tighter">{currencyFormat.format(total)}</span>
                                 </div>

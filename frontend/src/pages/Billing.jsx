@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { Plus, Trash, Printer, ShoppingCart, User, PlusCircle, MinusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Billing = () => {
     const [products, setProducts] = useState([]);
@@ -20,6 +21,8 @@ const Billing = () => {
 
     const [combos, setCombos] = useState([]);
     const [garageSaleItems, setGarageSaleItems] = useState([]);
+    const [lastInvoiceId, setLastInvoiceId] = useState(localStorage.getItem('lastInvoiceId') || null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchProducts();
@@ -175,7 +178,7 @@ const Billing = () => {
                 discount_percent: item.discount_percent || 0
             }));
 
-            await api.post('/invoices', {
+            const payload = {
                 customer_id: custId,
                 items: itemsWithGst,
                 subtotal: taxable_value,
@@ -191,7 +194,13 @@ const Billing = () => {
                 igst_amount,
                 taxable_value,
                 total_gst
-            });
+            };
+
+            const res = await api.post('/invoices', payload);
+            const newInvoiceId = res.data.id;
+            setLastInvoiceId(newInvoiceId);
+            localStorage.setItem('lastInvoiceId', newInvoiceId);
+            
             alert('Invoice created successfully!');
             setBillItems([]);
             setCustomerInfo({ name: '', phone: '', email: '', address: '' });
@@ -326,9 +335,12 @@ const Billing = () => {
                             )}
                         </div>
                         <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem' }}>
-                            <span style={{ fontWeight: 700 }}>Grand Total:</span>
-                            <span style={{ fontWeight: 700, color: '#2563eb' }}>₹{total.toFixed(2)}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                                <span style={{ fontWeight: 700, fontSize: '1.25rem' }}>Grand Total:</span>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>(Inclusive of all taxes)</div>
+                            </div>
+                            <span style={{ fontWeight: 700, fontSize: '1.25rem', color: '#2563eb' }}>₹{total.toFixed(2)}</span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
                             <div>
@@ -373,7 +385,17 @@ const Billing = () => {
                 <div className="card" style={{ backgroundColor: '#2563eb', color: 'white' }}>
                     <h3 style={{ marginBottom: '1rem' }}>Quick Print</h3>
                     <p style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '1.5rem' }}>Print the last invoice generated instantly.</p>
-                    <button className="btn" style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}>
+                    <button 
+                        className="btn" 
+                        style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', cursor: !lastInvoiceId ? 'not-allowed' : 'pointer' }}
+                        onClick={() => {
+                            if (lastInvoiceId) {
+                                navigate(`/invoices?print=${lastInvoiceId}`);
+                            } else {
+                                alert('No recent invoice found to print.');
+                            }
+                        }}
+                    >
                         <Printer size={18} /> Print Last Bill
                     </button>
                 </div>

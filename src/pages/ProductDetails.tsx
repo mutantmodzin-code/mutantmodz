@@ -12,7 +12,8 @@ import {
     RotateCcw,
     ChevronRight,
     Star,
-    AlertTriangle
+    AlertTriangle,
+    Zap
 } from 'lucide-react';
 import { getProducts, getCombos, getGarageSale } from '../utils/storage';
 import { Product } from '../types';
@@ -234,6 +235,13 @@ Link: ${window.location.href}`;
                                 <div className="inline-flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-black uppercase tracking-widest">
                                     <ShieldCheck size={14} /> Premium Authentic
                                 </div>
+                                {parseFloat(product.discount_percent?.toString() || '0') > 0 && (
+                                    <div className="w-full">
+                                        <div className="inline-flex items-center gap-2 bg-white text-red-600 border border-red-600 px-3 py-1.5 rounded-md text-xs font-black uppercase tracking-widest animate-pulse shadow-[0_0_15px_rgba(220,38,38,0.3)]">
+                                            <Zap size={14} fill="currentColor" /> {parseFloat(product.discount_percent?.toString() || '0').toFixed(0)}% OFF DISCOUNT
+                                        </div>
+                                    </div>
+                                )}
                                 {product.stock > 0 && product.stock < 10 && (
                                     <div className="inline-flex items-center gap-2 bg-red-600 border border-red-400 px-4 py-2 rounded-xl shadow-lg shadow-red-600/50">
                                         <AlertTriangle size={14} className="text-white" />
@@ -250,7 +258,19 @@ Link: ${window.location.href}`;
                             <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight uppercase">{product.name}</h1>
 
                             <div className="flex items-center gap-6">
-                                <div className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
+                                <div className="flex flex-col">
+                                    {parseFloat(product.discount_percent?.toString() || '0') > 0 && (
+                                        <div className="text-sm font-bold text-zinc-600 line-through mb-1">
+                                            ₹{(product.price_num / (1 - parseFloat(product.discount_percent?.toString() || '0') / 100)).toFixed(2)}
+                                        </div>
+                                    )}
+                                    <div className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">{product.price}</div>
+                                </div>
+                                {parseFloat(product.discount_percent?.toString() || '0') > 0 && (
+                                    <div className="bg-emerald-600/10 border border-emerald-500/20 text-emerald-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg">
+                                        You Save ₹{( (product.price_num / (1 - parseFloat(product.discount_percent?.toString() || '0') / 100)) - product.price_num ).toFixed(0)}
+                                    </div>
+                                )}
                                 <div className="flex items-center gap-1">
                                     {[1, 2, 3, 4, 5].map(s => <Star key={s} size={12} className="text-red-600 fill-red-600" />)}
                                     <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-1">VERIFIED REVIEWS</span>

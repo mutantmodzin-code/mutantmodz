@@ -7,30 +7,26 @@ const { broadcastNotification } = require('./notifications');
 // Create Invoice
 router.post('/', async (req, res) => {
     const {
-        customer_id,
-        items,
-        subtotal,
-        tax,
-        discount,
-        total_amount,
-        payment_method,
-        order_type, // 'Online Order' or 'Offline Order'
-        gst_percentage,
-        cgst_amount,
-        sgst_amount,
-        igst_amount,
-        taxable_value,
-        total_gst,
-        shipping_address,
-        delivery_charge: clientDeliveryCharge
+        customer_id, items, subtotal, tax, discount, total_amount, payment_method, order_type,
+        gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_value, total_gst,
+        shipping_address, delivery_charge: clientDeliveryCharge
     } = req.body;
 
     try {
         // Server-side delivery charge verification (prevent tampering)
-        let verifiedDeliveryCharge = 300; // default cap
-        if (clientDeliveryCharge) {
-            verifiedDeliveryCharge = Math.min(Number(clientDeliveryCharge), 300);
+        // Fallback: if clientDeliveryCharge is missing OR 0 but total implies it exists, derive it
+        let verifiedDeliveryCharge = Number(clientDeliveryCharge) || 0;
+        if (verifiedDeliveryCharge === 0) {
+            // Backup logic: difference between total and subtotal (if no taxes/discounts)
+            const calculated = Number(total_amount) - Number(subtotal) - Number(tax || 0);
+            if (!isNaN(calculated) && calculated > 0) {
+                verifiedDeliveryCharge = calculated;
+            }
         }
+        
+        // Ensure it is a valid number and cap it
+        if (isNaN(verifiedDeliveryCharge)) verifiedDeliveryCharge = 0;
+        verifiedDeliveryCharge = Math.min(verifiedDeliveryCharge, 300);
 
         const client = await db.pool.connect();
         try {
@@ -88,13 +84,14 @@ router.post('/', async (req, res) => {
             const invoiceResult = await client.query(
                 `INSERT INTO invoices (
                     customer_id, subtotal, tax, discount, total_amount, payment_method, order_type,
-                    gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_value, total_gst, status
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id`,
+                    gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_value, total_gst, status, delivery_charge
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id`,
                 [
                     customer_id, subtotal, tax, discount, total_amount, payment_method, order_type || 'Offline Order',
                     gst_percentage || 0, cgst_amount || 0, sgst_amount || 0, igst_amount || 0,
                     taxable_value || subtotal, total_gst || tax,
-                    (payment_method && payment_method.toUpperCase() === 'COD') ? 'unpaid' : 'paid'
+                    (payment_method && payment_method.toUpperCase() === 'COD') ? 'unpaid' : 'paid',
+                    verifiedDeliveryCharge
                 ]
             );
             const invoiceId = invoiceResult.rows[0].id;
@@ -110,13 +107,14 @@ router.post('/', async (req, res) => {
                     `INSERT INTO invoice_items (
                         invoice_id, product_id, combo_id, garage_sale_id, quantity, unit_price, line_total, purchase_price,
                         gst_percentage, cgst_amount, sgst_amount, igst_amount, taxable_amount,
-                        selected_size, selected_color
-                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+                        selected_size, selected_color, discount_percent
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
                     [
                         invoiceId, item.product_id || null, item.combo_id || null, item.garage_sale_id || null, item.quantity, item.unit_price, item.line_total, purchase_price || 0,
                         item.gst_percentage || 0, item.cgst_amount || 0, item.sgst_amount || 0,
                         item.igst_amount || 0, item.taxable_amount || item.line_total,
-                        item.selected_size || null, item.selected_color || null
+                        item.selected_size || null, item.selected_color || null,
+                        item.discount_percent || 0
                     ]
                 );
 

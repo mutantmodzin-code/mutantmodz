@@ -200,7 +200,8 @@ export default function Payment() {
                     line_total: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
                     gst_percentage: 0,
                     taxable_amount: parseFloat(String(item.product.price).replace(/[^0-9.]/g, '')) * item.quantity,
-                    selected_size: (item as any).size || null
+                    selected_size: (item as any).size || null,
+                    discount_percent: parseFloat(String(item.product.discount_percent || 0))
                 };
             });
 

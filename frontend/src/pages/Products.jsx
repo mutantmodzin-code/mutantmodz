@@ -215,7 +215,8 @@ const Products = () => {
             combo_type: p.combo_type || '',
             delivery_tn: p.delivery_tn || 0,
             delivery_south: p.delivery_south || 0,
-            delivery_north: p.delivery_north || 0
+            delivery_north: p.delivery_north || 0,
+            discount_percent: p.discount_percent || 0
         });
 
         setIsModalOpen(true);
@@ -282,6 +283,7 @@ const Products = () => {
                             <th>Vendor</th>
                             <th>Purchase Price</th>
                             <th>Selling Price</th>
+                            <th>Dis%</th>
                             <th>Stock</th>
                             <th>Actions</th>
                         </tr>
@@ -305,6 +307,9 @@ const Products = () => {
                                 <td>{p.vendor_name || 'N/A'}</td>
                                 <td>₹{p.purchase_price}</td>
                                 <td style={{ fontWeight: 600 }}>₹{p.price}</td>
+                                <td style={{ color: parseFloat(p.discount_percent) > 0 ? '#10b981' : '#64748b' }}>
+                                    {parseFloat(p.discount_percent) > 0 ? `${parseFloat(p.discount_percent).toFixed(0)}%` : '-'}
+                                </td>
                                 <td>
                                     <span style={{
                                         fontWeight: 600,

@@ -14,6 +14,7 @@ interface OrderItem {
     price: number;
     product_name: string;
     image_url?: string;
+    discount_percent?: number;
 }
 
 interface Order {
@@ -26,6 +27,7 @@ interface Order {
     created_at: string;
     shipped_at?: string;
     expected_delivery?: string;
+    delivery_charge?: number;
     items: OrderItem[];
 }
 
@@ -268,12 +270,21 @@ export default function MyOrders() {
                                                                 <div className="flex-1">
                                                                     <p className="text-white font-black uppercase tracking-tight leading-tight group-hover:text-red-500 transition-colors">{item.product_name}</p>
                                                                     <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-1">
-                                                                        Qty: {item.quantity} units @ ₹{Number(item.price || 0).toLocaleString('en-IN')}
+                                                                        Qty: {item.quantity} units @ ₹{Number(item.price || 0).toLocaleString('en-IN')} {Number(item.discount_percent || 0) > 0 && `(${Number(item.discount_percent).toFixed(0)}% OFF)`}
                                                                     </p>
                                                                 </div>
                                                                 <p className="text-lg font-black text-white group-hover:text-red-500 transition-colors">₹{(Number(item.quantity) * Number(item.price || 0)).toLocaleString('en-IN')}</p>
                                                             </div>
                                                         ))}
+                                                        {Number(order.delivery_charge || 0) > 0 && (
+                                                            <div className="flex items-center justify-between p-6 bg-zinc-950/30 rounded-3xl border border-dashed border-white/10">
+                                                                <div className="flex items-center gap-4 text-zinc-500">
+                                                                    <Truck size={20} />
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest">Delivery Charge</span>
+                                                                </div>
+                                                                <p className="text-lg font-black text-white">₹{Number(order.delivery_charge).toLocaleString('en-IN')}</p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 

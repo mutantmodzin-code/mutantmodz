@@ -12,28 +12,29 @@ const pool = new Pool({
 
 async function setup() {
   try {
-    console.log('--- Initializing Full Mutant Modz Database (Revised) ---');
+    console.log('--- Initializing Full Mutant Modz Database (Complete) ---');
 
     // Clean start
-    await pool.query(`
-      DROP TABLE IF EXISTS promo_banners CASCADE;
-      DROP TABLE IF EXISTS combos CASCADE;
-      DROP TABLE IF EXISTS garage_sale CASCADE;
-      DROP TABLE IF EXISTS inventory CASCADE;
-      DROP TABLE IF EXISTS invoice_items CASCADE;
-      DROP TABLE IF EXISTS invoices CASCADE;
-      DROP TABLE IF EXISTS customers CASCADE;
-      DROP TABLE IF EXISTS product_vendor_prices CASCADE;
-      DROP TABLE IF EXISTS products CASCADE;
-      DROP TABLE IF EXISTS vendors CASCADE;
-      DROP TABLE IF EXISTS categories CASCADE;
-      DROP TABLE IF EXISTS users CASCADE;
-    `);
+    await pool.query('DROP TABLE IF EXISTS promo_banners CASCADE');
+    await pool.query('DROP TABLE IF EXISTS hero_slides CASCADE');
+    await pool.query('DROP TABLE IF EXISTS reels CASCADE');
+    await pool.query('DROP TABLE IF EXISTS combos CASCADE');
+    await pool.query('DROP TABLE IF EXISTS garage_sale CASCADE');
+    await pool.query('DROP TABLE IF EXISTS inventory CASCADE');
+    await pool.query('DROP TABLE IF EXISTS invoice_items CASCADE');
+    await pool.query('DROP TABLE IF EXISTS invoices CASCADE');
+    await pool.query('DROP TABLE IF EXISTS customers CASCADE');
+    await pool.query('DROP TABLE IF EXISTS product_vendor_prices CASCADE');
+    await pool.query('DROP TABLE IF EXISTS products CASCADE');
+    await pool.query('DROP TABLE IF EXISTS vendors CASCADE');
+    await pool.query('DROP TABLE IF EXISTS categories CASCADE');
+    await pool.query('DROP TABLE IF EXISTS users CASCADE');
+    
     console.log('🗑️  Existing tables dropped for clean migration');
 
     // 1. Categories
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS categories (
+      CREATE TABLE categories (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL UNIQUE,
         description TEXT,
@@ -43,7 +44,7 @@ async function setup() {
 
     // 2. Vendors/Suppliers
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS vendors (
+      CREATE TABLE vendors (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         contact_person VARCHAR(100),
@@ -56,7 +57,7 @@ async function setup() {
 
     // 3. Products
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS products (
+      CREATE TABLE products (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         category_id INT REFERENCES categories(id) ON DELETE SET NULL,
@@ -83,9 +84,9 @@ async function setup() {
       );
     `);
 
-    // 4. Product Vendor Prices (History/Multiple Vendors)
+    // 4. Product Vendor Prices
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS product_vendor_prices (
+      CREATE TABLE product_vendor_prices (
         id SERIAL PRIMARY KEY,
         product_id INT REFERENCES products(id) ON DELETE CASCADE,
         vendor_id INT REFERENCES vendors(id) ON DELETE SET NULL,
@@ -97,7 +98,7 @@ async function setup() {
 
     // 5. Customers
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS customers (
+      CREATE TABLE customers (
         id SERIAL PRIMARY KEY,
         name VARCHAR(100) NOT NULL,
         phone VARCHAR(20) UNIQUE,
@@ -113,7 +114,7 @@ async function setup() {
 
     // 6. Invoices
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS invoices (
+      CREATE TABLE invoices (
         id SERIAL PRIMARY KEY,
         customer_id INT REFERENCES customers(id) ON DELETE SET NULL,
         subtotal DECIMAL(10, 2) NOT NULL,
@@ -138,7 +139,7 @@ async function setup() {
 
     // 7. Invoice Items
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS invoice_items (
+      CREATE TABLE invoice_items (
         id SERIAL PRIMARY KEY,
         invoice_id INT REFERENCES invoices(id) ON DELETE CASCADE,
         product_id INT REFERENCES products(id) ON DELETE SET NULL,
@@ -161,7 +162,7 @@ async function setup() {
 
     // 8. Inventory Logs
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS inventory (
+      CREATE TABLE inventory (
         id SERIAL PRIMARY KEY,
         product_id INT REFERENCES products(id) ON DELETE CASCADE,
         change_amount INT NOT NULL,
@@ -173,7 +174,7 @@ async function setup() {
 
     // 9. Users (Admin)
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username VARCHAR(50) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
@@ -188,7 +189,7 @@ async function setup() {
 
     // 10. Garage Sale Table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS garage_sale (
+      CREATE TABLE garage_sale (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         brand VARCHAR(100),
@@ -212,7 +213,7 @@ async function setup() {
 
     // 11. Combos Table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS combos (
+      CREATE TABLE combos (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         description TEXT,
@@ -237,7 +238,7 @@ async function setup() {
 
     // 12. Promo Banners Table
     await pool.query(`
-      CREATE TABLE IF NOT EXISTS promo_banners (
+      CREATE TABLE promo_banners (
         id SERIAL PRIMARY KEY,
         title VARCHAR(100),
         subtitle VARCHAR(100),
@@ -252,40 +253,58 @@ async function setup() {
       );
     `);
 
+    // 13. Reels Table
+    await pool.query(`
+      CREATE TABLE reels (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255),
+        instagram_url TEXT,
+        video_url TEXT,
+        display_order INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // 14. Hero Slides Table
+    await pool.query(`
+      CREATE TABLE hero_slides (
+        id SERIAL PRIMARY KEY,
+        image_url TEXT,
+        title_white VARCHAR(255),
+        title_red VARCHAR(255),
+        subtitle TEXT,
+        display_order INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
     // Indexing
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_invoices_order_type ON invoices(order_type)`);
-    await pool.query(`CREATE INDEX IF NOT EXISTS idx_invoices_customer_id ON invoices(customer_id)`);
+    await pool.query('CREATE INDEX idx_invoices_order_type ON invoices(order_type)');
+    await pool.query('CREATE INDEX idx_invoices_customer_id ON invoices(customer_id)');
 
     // Default Categories
-    const catCheck = await pool.query('SELECT COUNT(*) FROM categories');
-    if (parseInt(catCheck.rows[0].count) === 0) {
-      await pool.query("INSERT INTO categories (name) VALUES ('Helmets'), ('Accessories'), ('Gear'), ('Mods'), ('Luggage'), ('Lighting')");
-      console.log('✅ Categories initialized');
-    }
+    await pool.query("INSERT INTO categories (name) VALUES ('Helmets'), ('Accessories'), ('Gear'), ('Mods'), ('Luggage'), ('Lighting')");
+    console.log('✅ Categories initialized');
 
     // Default Admin User
-    const userCheck = await pool.query('SELECT COUNT(*) FROM users WHERE username = $1', ['admin']);
-    if (parseInt(userCheck.rows[0].count) === 0) {
-      const password = process.env.ADMIN_PASSWORD || '71297129';
-      const hash = await bcrypt.hash(password, 10);
-      await pool.query('INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3)', ['admin', hash, 'admin']);
-      console.log('✅ Default admin user created');
-    }
+    const password = process.env.ADMIN_PASSWORD || '71297129';
+    const hash = await bcrypt.hash(password, 10);
+    await pool.query('INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3)', ['admin', hash, 'admin']);
+    console.log('✅ Default admin user created');
 
-    // Seed initial promo banners if empty
-    const promoCheck = await pool.query('SELECT COUNT(*) FROM promo_banners');
-    if (parseInt(promoCheck.rows[0].count) === 0) {
-      await pool.query(`
-        INSERT INTO promo_banners (title, discount_text, price_text, bg_color) VALUES 
-        ('METAL PRODUCTS', '40% OFF', '₹1099', '#fbbf24'),
-        ('TOP BOX', '46% OFF', '₹2599', '#fbbf24'),
-        ('JERRY CAN', '41% OFF', '₹1599', '#fbbf24'),
-        ('COMMUNICATION', '35% OFF', '₹1099', '#fbbf24'),
-        ('FOGLIGHT', '80% OFF', '₹249', '#fbbf24'),
-        ('MIRROR', '60% OFF', '₹149', '#fbbf24')
-      `);
-      console.log('✅ Promo banners initialized');
-    }
+    // Seed initial promo banners
+    await pool.query(`
+      INSERT INTO promo_banners (title, discount_text, price_text, bg_color) VALUES 
+      ('METAL PRODUCTS', '40% OFF', '₹1099', '#fbbf24'),
+      ('TOP BOX', '46% OFF', '₹2599', '#fbbf24'),
+      ('JERRY CAN', '41% OFF', '₹1599', '#fbbf24'),
+      ('COMMUNICATION', '35% OFF', '₹1099', '#fbbf24'),
+      ('FOGLIGHT', '80% OFF', '₹249', '#fbbf24'),
+      ('MIRROR', '60% OFF', '₹149', '#fbbf24')
+    `);
+    console.log('✅ Promo banners initialized');
 
     console.log('--- Full Database Setup Success ---');
     process.exit(0);

@@ -12,7 +12,24 @@ const pool = new Pool({
 
 async function setup() {
   try {
-    console.log('--- Initializing Full Mutant Modz Database ---');
+    console.log('--- Initializing Full Mutant Modz Database (Revised) ---');
+
+    // Clean start
+    await pool.query(`
+      DROP TABLE IF EXISTS promo_banners CASCADE;
+      DROP TABLE IF EXISTS combos CASCADE;
+      DROP TABLE IF EXISTS garage_sale CASCADE;
+      DROP TABLE IF EXISTS inventory CASCADE;
+      DROP TABLE IF EXISTS invoice_items CASCADE;
+      DROP TABLE IF EXISTS invoices CASCADE;
+      DROP TABLE IF EXISTS customers CASCADE;
+      DROP TABLE IF EXISTS product_vendor_prices CASCADE;
+      DROP TABLE IF EXISTS products CASCADE;
+      DROP TABLE IF EXISTS vendors CASCADE;
+      DROP TABLE IF EXISTS categories CASCADE;
+      DROP TABLE IF EXISTS users CASCADE;
+    `);
+    console.log('🗑️  Existing tables dropped for clean migration');
 
     // 1. Categories
     await pool.query(`
@@ -24,7 +41,7 @@ async function setup() {
       );
     `);
 
-    // 2. Vendors/Suppliers (unified)
+    // 2. Vendors/Suppliers
     await pool.query(`
       CREATE TABLE IF NOT EXISTS vendors (
         id SERIAL PRIMARY KEY,
@@ -59,11 +76,26 @@ async function setup() {
         is_garage_sale BOOLEAN DEFAULT FALSE,
         is_combo BOOLEAN DEFAULT FALSE,
         combo_type VARCHAR(100),
+        delivery_tn DECIMAL(10, 2) DEFAULT 0.00,
+        delivery_south DECIMAL(10, 2) DEFAULT 0.00,
+        delivery_north DECIMAL(10, 2) DEFAULT 0.00,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // 4. Customers
+    // 4. Product Vendor Prices (History/Multiple Vendors)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS product_vendor_prices (
+        id SERIAL PRIMARY KEY,
+        product_id INT REFERENCES products(id) ON DELETE CASCADE,
+        vendor_id INT REFERENCES vendors(id) ON DELETE SET NULL,
+        purchase_price DECIMAL(10, 2) DEFAULT 0.00,
+        selling_price DECIMAL(10, 2) DEFAULT 0.00,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    // 5. Customers
     await pool.query(`
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
@@ -79,7 +111,7 @@ async function setup() {
       );
     `);
 
-    // 5. Invoices
+    // 6. Invoices
     await pool.query(`
       CREATE TABLE IF NOT EXISTS invoices (
         id SERIAL PRIMARY KEY,
@@ -104,14 +136,14 @@ async function setup() {
       );
     `);
 
-    // 6. Invoice Items
+    // 7. Invoice Items
     await pool.query(`
       CREATE TABLE IF NOT EXISTS invoice_items (
         id SERIAL PRIMARY KEY,
         invoice_id INT REFERENCES invoices(id) ON DELETE CASCADE,
         product_id INT REFERENCES products(id) ON DELETE SET NULL,
-        combo_id INT, -- Will reference combos table if needed
-        garage_sale_id INT, -- Will reference garage_sale table if needed
+        combo_id INT,
+        garage_sale_id INT,
         quantity INT NOT NULL,
         unit_price DECIMAL(10, 2) NOT NULL,
         line_total DECIMAL(10, 2) NOT NULL,
@@ -127,7 +159,7 @@ async function setup() {
       );
     `);
 
-    // 7. Inventory Logs
+    // 8. Inventory Logs
     await pool.query(`
       CREATE TABLE IF NOT EXISTS inventory (
         id SERIAL PRIMARY KEY,
@@ -139,7 +171,7 @@ async function setup() {
       );
     `);
 
-    // 8. Users (Admin)
+    // 9. Users (Admin)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -154,12 +186,13 @@ async function setup() {
       );
     `);
 
-    // 9. Garage Sale Table
+    // 10. Garage Sale Table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS garage_sale (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         brand VARCHAR(100),
+        sku VARCHAR(50),
         price DECIMAL(10, 2) NOT NULL,
         stock INT DEFAULT 0,
         image_url TEXT,
@@ -168,17 +201,23 @@ async function setup() {
         garage_sale_type VARCHAR(100),
         is_active BOOLEAN DEFAULT TRUE,
         linked_items JSONB DEFAULT '[]',
+        delivery_tn DECIMAL(10, 2) DEFAULT 0.00,
+        delivery_south DECIMAL(10, 2) DEFAULT 0.00,
+        delivery_north DECIMAL(10, 2) DEFAULT 0.00,
+        discount_percent DECIMAL(5, 2) DEFAULT 0.00,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // 10. Combos Table
+    // 11. Combos Table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS combos (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         description TEXT,
+        brand VARCHAR(100),
+        sku VARCHAR(50),
         price DECIMAL(10, 2) NOT NULL,
         stock INT DEFAULT 0,
         image_url TEXT,
@@ -187,11 +226,16 @@ async function setup() {
         is_active BOOLEAN DEFAULT TRUE,
         items JSONB DEFAULT '[]',
         linked_items JSONB DEFAULT '[]',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        delivery_tn DECIMAL(10, 2) DEFAULT 0.00,
+        delivery_south DECIMAL(10, 2) DEFAULT 0.00,
+        delivery_north DECIMAL(10, 2) DEFAULT 0.00,
+        discount_percent DECIMAL(5, 2) DEFAULT 0.00,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 
-    // 11. Promo Banners Table
+    // 12. Promo Banners Table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS promo_banners (
         id SERIAL PRIMARY KEY,

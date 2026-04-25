@@ -5,6 +5,8 @@
  */
 
 export const initSecurity = () => {
+    // Console and DevTools enabled
+    /* 
     // Disable right-click
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -39,8 +41,6 @@ export const initSecurity = () => {
         // Anti-debugging
         setInterval(() => {
             (function() {
-                // This creates a debugger break if DevTools is open
-                // but we use a try-catch to keep the app running
                 try {
                     (function a() {
                         return (function b() {
@@ -54,4 +54,5 @@ export const initSecurity = () => {
             })();
         }, 1000);
     }
+    */
 };

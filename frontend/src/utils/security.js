@@ -3,6 +3,8 @@
  */
 
 export const initSecurity = () => {
+    // Console and DevTools enabled for admin and main
+    /*
     // Check if we are in production
     const isProduction = import.meta.env.MODE === 'production';
     
@@ -62,4 +64,5 @@ export const initSecurity = () => {
             })();
         })();
     }, 1000);
+    */
 };

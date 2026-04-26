@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUserAuth } from './UserAuthContext';
 import { Product } from '../types';
+import toast from 'react-hot-toast';
 
 export interface CartItem {
     product: Product;
@@ -42,6 +43,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, [items, storageKey]);
 
     const addToCart = (product: Product, quantity: number = 1) => {
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate([100, 50, 100]);
+        }
+        
+        toast.success('Added to cart!', {
+            icon: '🔥',
+            style: { border: '1px solid #dc2626' }
+        });
+        
         setItems(prev => {
             const existing = prev.find(i => i.product.id === product.id);
             if (existing) {

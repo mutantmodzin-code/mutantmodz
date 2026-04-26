@@ -55,19 +55,11 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
     if (!isLoggedIn) {
       setPendingAction(() => () => {
         addToCart(product);
-        toast.success('Added to cart!', {
-          icon: '🔥',
-          style: { border: '1px solid #dc2626' }
-        });
       });
       setShowLoginPopup(true);
       return;
     }
     addToCart(product);
-    toast.success('Added to cart!', {
-      icon: '🔥',
-      style: { border: '1px solid #dc2626' }
-    });
   };
 
   const isNew = product.date_added ? (new Date().getTime() - new Date(product.date_added).getTime()) < 30 * 24 * 60 * 60 * 1000 : false;

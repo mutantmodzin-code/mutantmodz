@@ -166,19 +166,11 @@ export default function ProductDetails() {
         if (!isLoggedIn) {
             setPendingAction(() => () => {
                 addToCart(product, quantity);
-                toast.success('Added to cart!', {
-                    icon: '🔥',
-                    style: { border: '1px solid #dc2626' }
-                });
             });
             setShowLoginPopup(true);
             return;
         }
         addToCart(product, quantity);
-        toast.success('Added to cart!', {
-            icon: '🔥',
-            style: { border: '1px solid #dc2626' }
-        });
     };
 
     const handleWhatsAppOrder = () => {

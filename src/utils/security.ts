@@ -5,8 +5,6 @@
  */
 
 export const initSecurity = () => {
-    // Console and DevTools enabled
-    /* 
     // Disable right-click
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -54,5 +52,4 @@ export const initSecurity = () => {
             })();
         }, 1000);
     }
-    */
 };

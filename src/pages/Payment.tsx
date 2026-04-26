@@ -481,7 +481,7 @@ export default function Payment() {
 
                             <div className="animate-on-scroll">
                                 <SectionHeader title="Payment Method" icon={CreditCard} />
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
                                     {[
                                         { id: 'razorpay', label: 'RAZORPAY', image: '/Razorpay-Logo.jpg' },
                                         { id: 'upi', label: 'UPI / GPAY', image: '/UPI-apps.avif' },
@@ -491,32 +491,29 @@ export default function Payment() {
                                             key={method.id}
                                             type="button"
                                             onClick={() => setPaymentMethod(method.id)}
-                                            className={`relative flex flex-col items-center justify-center gap-4 p-8 rounded-[2rem] border transition-all duration-500 text-center group overflow-hidden
+                                            className={`relative flex flex-col items-center justify-center gap-2 sm:gap-4 p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] border transition-all duration-500 text-center group overflow-hidden
                                                 ${paymentMethod === method.id ? 'bg-red-600/5 border-red-600 shadow-[0_20px_50px_rgba(220,38,38,0.15)] scale-105' : 'bg-zinc-950/30 border-zinc-900 hover:border-zinc-800'}`}
                                         >
-                                            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center p-3 transition-all duration-700 bg-white shadow-inner ${paymentMethod === method.id ? 'scale-110 shadow-xl' : 'group-hover:scale-105'}`}>
+                                            <div className={`w-10 h-10 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl flex items-center justify-center p-2 sm:p-3 transition-all duration-700 bg-white shadow-inner ${paymentMethod === method.id ? 'scale-110 shadow-xl' : 'group-hover:scale-105'}`}>
                                                 <img 
                                                     src={method.image} 
                                                     alt={method.label} 
                                                     className="w-full h-full object-contain"
                                                 />
                                             </div>
-                                            <span className={`text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-500 ${paymentMethod === method.id ? 'text-white' : 'text-zinc-600'}`}>{method.label}</span>
+                                            <span className={`text-[8px] sm:text-[10px] font-black tracking-[0.1em] sm:tracking-[0.2em] uppercase transition-all duration-500 ${paymentMethod === method.id ? 'text-white' : 'text-zinc-600'}`}>{method.label}</span>
                                             
                                             {paymentMethod === method.id && (
                                                 <>
-                                                    <div className="absolute top-0 right-0 w-16 h-16 bg-red-600/10 blur-2xl rounded-full"></div>
-                                                    <div className="absolute top-4 right-4 bg-red-600 text-white p-1 rounded-full shadow-lg animate-in zoom-in spin-in-90 duration-500">
-                                                        <Check size={12} strokeWidth={4} />
+                                                    <div className="absolute top-0 right-0 w-8 h-8 sm:w-16 sm:h-16 bg-red-600/10 blur-xl sm:blur-2xl rounded-full"></div>
+                                                    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 bg-red-600 text-white p-0.5 sm:p-1 rounded-full shadow-lg animate-in zoom-in spin-in-90 duration-500">
+                                                        <Check size={10} className="sm:w-3 sm:h-3" strokeWidth={4} />
                                                     </div>
                                                 </>
                                             )}
                                         </button>
                                     ))}
                                 </div>
-                                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] text-center bg-zinc-900/50 py-4 rounded-xl border border-white/5">
-                                    Secure encryption active via Razorpay protocol 2.0
-                                </p>
                             </div>
                         </div>
                     </div>

@@ -190,8 +190,8 @@ const InvoiceHistory = () => {
             </div>
 
             {selectedInvoice && (
-                <div id="print-area" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-                    <div className="card" style={{ width: '800px', backgroundColor: 'white', padding: '2rem', borderRadius: 0, border: '1px solid #000', color: '#000' }}>
+                <div id="print-area" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, overflowY: 'auto', padding: '2rem 1rem' }}>
+                    <div className="card" style={{ width: '100%', maxWidth: '800px', backgroundColor: 'white', padding: '2rem', borderRadius: 0, border: '1px solid #000', color: '#000', margin: '0 auto' }}>
                         {/* Header Details */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '0.5rem' }}>
                             <span>GSTIN: 33BUNPN4615A1ZX</span>

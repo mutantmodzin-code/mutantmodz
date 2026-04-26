@@ -41,9 +41,10 @@ router.get('/latest', async (req, res) => {
             WHERE i.order_type = 'Online Order'
         `;
         const values = [];
-        if (afterId) {
+        const parsedAfterId = parseInt(afterId);
+        if (afterId && !isNaN(parsedAfterId)) {
             query += ` AND i.id > $1`;
-            values.push(parseInt(afterId));
+            values.push(parsedAfterId);
         }
         query += ` ORDER BY i.id DESC LIMIT 1`;
         const result = await db.query(query, values);

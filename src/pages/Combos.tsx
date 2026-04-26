@@ -1,4 +1,4 @@
-import { ShoppingCart, Flame, Shield, ArrowUpRight, Zap, Target } from 'lucide-react';
+import { ArrowUpRight, Target } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const combos = [

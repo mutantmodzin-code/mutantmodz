@@ -176,7 +176,10 @@ export default function Products({ onNavigate }: ProductsProps) {
         if (!isNew) return false;
       }
 
-      const matchesCategory = selectedCategory === 'all' || 
+      const isGarageProduct = p.is_garage_sale || p.category?.toLowerCase() === 'garage-sale';
+      const isGarageTypeSelected = selectedTypes.includes('garage-sale') || selectedTypes.includes('garage sale');
+
+      const matchesCategory = (selectedCategory === 'all' && (!isGarageProduct || isGarageTypeSelected)) || 
         selectedCategory === 'new' || 
         selectedCategory === 'new arrivals' ||
         p.category_name?.toLowerCase() === selectedCategory.toLowerCase() ||

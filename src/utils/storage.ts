@@ -50,7 +50,12 @@ export const getProducts = async (): Promise<Product[]> => {
                 delivery_tn: parseFloat(p.delivery_tn) || 0,
                 delivery_south: parseFloat(p.delivery_south) || 0,
                 delivery_north: parseFloat(p.delivery_north) || 0,
-                discount_percent: parseFloat(p.discount_percent) || 0
+                discount_percent: parseFloat(p.discount_percent) || 0,
+                size_stock: (() => {
+                    if (!p.size_stock) return undefined;
+                    if (typeof p.size_stock === 'object') return p.size_stock;
+                    try { return JSON.parse(p.size_stock); } catch { return undefined; }
+                })()
             };
 
         });
@@ -160,7 +165,12 @@ export const getNewArrivals = async (): Promise<Product[]> => {
                 delivery_tn: parseFloat(p.delivery_tn) || 0,
                 delivery_south: parseFloat(p.delivery_south) || 0,
                 delivery_north: parseFloat(p.delivery_north) || 0,
-                discount_percent: parseFloat(p.discount_percent) || 0
+                discount_percent: parseFloat(p.discount_percent) || 0,
+                size_stock: (() => {
+                    if (!p.size_stock) return undefined;
+                    if (typeof p.size_stock === 'object') return p.size_stock;
+                    try { return JSON.parse(p.size_stock); } catch { return undefined; }
+                })()
             };
         });
     } catch (error) {
@@ -214,6 +224,7 @@ export const getCombos = async (): Promise<Product[]> => {
         return combosArray.map((c: any) => ({
             id: c.id.toString(),
             category: 'combos',
+            category_name: c.category_name || '',
             name: c.name,
             description: c.description || '',
             price: `₹${parseFloat(c.price).toLocaleString('en-IN')}`,
@@ -222,13 +233,20 @@ export const getCombos = async (): Promise<Product[]> => {
             image: getMediaUrl(c.image_url || c.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'),
             images: (c.images || [c.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']).map((img: string) => getMediaUrl(img)),
             brand: c.brand || '',
+            sub_category: c.sub_category || '',
+            sub_category_type: c.sub_category_type || '',
             is_combo: true,
             sku: c.sku || '',
             combo_type: c.combo_type || 'General Combos',
             delivery_tn: parseFloat(c.delivery_tn) || 0,
             delivery_south: parseFloat(c.delivery_south) || 0,
             delivery_north: parseFloat(c.delivery_north) || 0,
-            discount_percent: parseFloat(c.discount_percent) || 0
+            discount_percent: parseFloat(c.discount_percent) || 0,
+            size_stock: (() => {
+                if (!c.size_stock) return undefined;
+                if (typeof c.size_stock === 'object') return c.size_stock;
+                try { return JSON.parse(c.size_stock); } catch { return undefined; }
+            })()
         }));
     } catch (error) {
         console.error('Failed to fetch combos:', error);
@@ -248,6 +266,7 @@ export const getGarageSale = async (): Promise<Product[]> => {
         return garageSaleArray.map((g: any) => ({
             id: g.id.toString(),
             category: 'garage-sale',
+            category_name: g.category_name || '',
             name: g.name,
             description: g.description || '',
             price: `₹${parseFloat(g.price).toLocaleString('en-IN')}`,
@@ -256,13 +275,20 @@ export const getGarageSale = async (): Promise<Product[]> => {
             image: getMediaUrl(g.image_url || g.images?.[0] || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600'),
             images: (g.images || [g.image_url || 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=600']).map((img: string) => getMediaUrl(img)),
             brand: g.brand || '',
+            sub_category: g.sub_category || '',
+            sub_category_type: g.sub_category_type || '',
             is_garage_sale: true,
             sku: g.sku || '',
             garage_sale_type: g.garage_sale_type || 'Clearance',
             delivery_tn: parseFloat(g.delivery_tn) || 0,
             delivery_south: parseFloat(g.delivery_south) || 0,
             delivery_north: parseFloat(g.delivery_north) || 0,
-            discount_percent: parseFloat(g.discount_percent) || 0
+            discount_percent: parseFloat(g.discount_percent) || 0,
+            size_stock: (() => {
+                if (!g.size_stock) return undefined;
+                if (typeof g.size_stock === 'object') return g.size_stock;
+                try { return JSON.parse(g.size_stock); } catch { return undefined; }
+            })()
         }));
     } catch (error) {
         console.error('Failed to fetch garage sale items:', error);

@@ -97,9 +97,25 @@ router.post('/', async (req, res) => {
         price, stock, vendor_id, sku, purchase_price, image_url, 
         bike_brand, bike_model, description, discount_percent, 
         is_garage_sale, is_combo, combo_type,
-        delivery_tn, delivery_south, delivery_north 
+        delivery_tn, delivery_south, delivery_north,
+        size_stock
     } = req.body;
-    
+
+    // Robust size_stock parsing for backend
+    let processedSizeStock = size_stock;
+    if (size_stock && typeof size_stock === 'string') {
+        try { processedSizeStock = JSON.parse(size_stock); } catch (e) { processedSizeStock = null; }
+    }
+
+    // If size_stock provided, compute total stock from it
+    if (processedSizeStock && typeof processedSizeStock === 'object' && Object.keys(processedSizeStock).length > 0) {
+        const totalFromSizes = Object.values(processedSizeStock).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0);
+        stock = totalFromSizes;
+    }
+    const sizeStockJson = (processedSizeStock && typeof processedSizeStock === 'object' && Object.keys(processedSizeStock).length > 0)
+        ? processedSizeStock
+        : null;
+
     // If it's a base64 string or an array of base64 strings, upload to Cloudinary
     try {
         if (image_url) {
@@ -136,7 +152,7 @@ router.post('/', async (req, res) => {
             await client.query('BEGIN');
 
             const result = await client.query(
-                'INSERT INTO products (name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo, combo_type, delivery_tn, delivery_south, delivery_north) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21) RETURNING *',
+                'INSERT INTO products (name, brand, category_id, sub_category, sub_category_type, price, stock, vendor_id, sku, purchase_price, image_url, bike_brand, bike_model, description, discount_percent, is_garage_sale, is_combo, combo_type, delivery_tn, delivery_south, delivery_north, size_stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22::jsonb) RETURNING *',
                 [
                     name, brand, category_id ? parseInt(category_id) : null,
                     sub_category || null, sub_category_type || null,
@@ -146,7 +162,8 @@ router.post('/', async (req, res) => {
                     bike_brand || null, bike_model || null, description || null,
                     parseFloat(discount_percent) || 0, is_garage_sale || false,
                     is_combo || false, combo_type || null,
-                    parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0
+                    parseFloat(delivery_tn) || 0, parseFloat(delivery_south) || 0, parseFloat(delivery_north) || 0,
+                    sizeStockJson ? JSON.stringify(sizeStockJson) : null
                 ]
             );
 
@@ -234,8 +251,29 @@ router.put('/:id', async (req, res) => {
         price, stock, vendor_id, sku, purchase_price, image_url, 
         bike_brand, bike_model, description, discount_percent, 
         is_garage_sale, is_combo, combo_type,
-        delivery_tn, delivery_south, delivery_north 
+        delivery_tn, delivery_south, delivery_north,
+        size_stock
     } = req.body;
+
+    const fs = require('fs');
+    fs.appendFileSync('server_debug.log', `[${new Date().toISOString()}] UPDATING PRODUCT ${req.params.id}\nBODY: ${JSON.stringify(req.body)}\n`);
+    console.log(`Updating product ${req.params.id}. Incoming stock: ${stock}, size_stock:`, size_stock);
+
+    // Robust size_stock parsing for backend
+    let processedSizeStock = size_stock;
+    if (size_stock && typeof size_stock === 'string') {
+        try { processedSizeStock = JSON.parse(size_stock); } catch (e) { processedSizeStock = null; }
+    }
+
+    // If size_stock provided, compute total stock from it
+    if (processedSizeStock && typeof processedSizeStock === 'object' && Object.keys(processedSizeStock).length > 0) {
+        const totalFromSizes = Object.values(processedSizeStock).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0);
+        stock = totalFromSizes;
+    }
+    const sizeStockJsonPut = (processedSizeStock && typeof processedSizeStock === 'object' && Object.keys(processedSizeStock).length > 0)
+        ? processedSizeStock
+        : null;
+
 
     // If it's a base64 string or an array of base64 strings, upload to Cloudinary
     try {
@@ -270,7 +308,7 @@ router.put('/:id', async (req, res) => {
         await client.query('BEGIN');
 
         const result = await client.query(
-            'UPDATE products SET name=$1, brand=$2, category_id=$3, sub_category=$4, sub_category_type=$5, price=$6, stock=$7, vendor_id=$8, sku=$9, purchase_price=$10, image_url=$11, bike_brand=$12, bike_model=$13, description=$14, discount_percent=$15, is_garage_sale=$16, is_combo=$17, combo_type=$18, delivery_tn=$19, delivery_south=$20, delivery_north=$21 WHERE id=$22 RETURNING *',
+            'UPDATE products SET name=$1, brand=$2, category_id=$3, sub_category=$4, sub_category_type=$5, price=$6, stock=$7, vendor_id=$8, sku=$9, purchase_price=$10, image_url=$11, bike_brand=$12, bike_model=$13, description=$14, discount_percent=$15, is_garage_sale=$16, is_combo=$17, combo_type=$18, delivery_tn=$19, delivery_south=$20, delivery_north=$21, size_stock=$22::jsonb WHERE id=$23 RETURNING *',
             [
                 name,
                 brand,
@@ -293,9 +331,12 @@ router.put('/:id', async (req, res) => {
                 parseFloat(delivery_tn) || 0,
                 parseFloat(delivery_south) || 0,
                 parseFloat(delivery_north) || 0,
+                sizeStockJsonPut ? JSON.stringify(sizeStockJsonPut) : null,
                 id
             ]
         );
+
+        console.log(`Product ${id} updated in DB. New stock: ${result.rows[0].stock}, size_stock:`, result.rows[0].size_stock);
 
         if (result.rows.length === 0) {
             await client.query('ROLLBACK');
@@ -309,7 +350,8 @@ router.put('/:id', async (req, res) => {
         );
 
         // AUTO-INTEGRATION: Sync with garage_sale table
-        if (is_garage_sale) {
+        const existingGs = await client.query('SELECT id FROM garage_sale WHERE sku = $1', [sku]);
+        if (existingGs.rows.length > 0 || is_garage_sale) {
             let imagesArr = [];
             let mainImage = null;
             try {
@@ -323,8 +365,6 @@ router.put('/:id', async (req, res) => {
                 imagesArr = [image_url];
             }
 
-            // Check if exists by SKU
-            const existingGs = await client.query('SELECT id FROM garage_sale WHERE sku = $1', [sku]);
             if (existingGs.rows.length > 0) {
                 await client.query(
                     'UPDATE garage_sale SET name=$1, brand=$2, price=$3, stock=$4, image_url=$5, images=$6, description=$7, delivery_tn=$8, delivery_south=$9, delivery_north=$10, discount_percent=$11, updated_at=CURRENT_TIMESTAMP WHERE sku=$12',
@@ -336,7 +376,7 @@ router.put('/:id', async (req, res) => {
                         sku
                     ]
                 );
-            } else {
+            } else if (is_garage_sale) {
                 await client.query(
                     'INSERT INTO garage_sale (name, brand, sku, price, stock, image_url, images, description, garage_sale_type, linked_items, delivery_tn, delivery_south, delivery_north, discount_percent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
                     [

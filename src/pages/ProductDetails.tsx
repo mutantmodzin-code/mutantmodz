@@ -105,29 +105,57 @@ export default function ProductDetails() {
     const lowerCat = product?.category?.toLowerCase() || '';
     const lowerName = product?.name?.toLowerCase() || '';
     const lowerType = (product as any)?.sub_category_type?.toLowerCase() || '';
+    const lowerCatName = (product as any)?.category_name?.toLowerCase() || '';
+    const lowerSubCat = (product as any)?.sub_category?.toLowerCase() || '';
 
     // Riding gear explicitly gets sizes regardless of naming
-    const isRidingGear = lowerCat.includes('riding gear') || lowerType.includes('riding gear');
+    const isRidingGear = lowerCat.includes('riding gear') || lowerType.includes('riding gear') || lowerCatName.includes('gear');
 
-    // Size selection logic: Show for helmets and riding gear (wearables)
-    const hasSizes = isRidingGear || ((lowerCat.includes('helmet') || 
-                    lowerCat.includes('helmets') || 
-                    lowerCat.includes('jacket') || 
-                    lowerCat.includes('jackets') || 
-                    lowerCat.includes('jersey') || 
-                    lowerCat.includes('jerseys')) && 
-                    !lowerName.includes('cleaner') && 
-                    !lowerName.includes('polish') && 
-                    !lowerName.includes('spray') &&
-                    !lowerName.includes('anti-fog') &&
-                    !lowerName.includes('kit'));
+    // Keywords to look for in any field
+    const wearableKeywords = ['helmet', 'jacket', 'jersey', 'jerseys', 'jackets', 'helmets'];
+    const excludeKeywords = ['cleaner', 'polish', 'spray', 'anti-fog', 'kit', 'visor'];
+
+    const hasWearableKeyword = wearableKeywords.some(kw =>
+        lowerCat.includes(kw) || lowerName.includes(kw) ||
+        lowerCatName.includes(kw) || lowerSubCat.includes(kw) || lowerType.includes(kw)
+    );
+    const hasExcludeKeyword = excludeKeywords.some(kw => lowerName.includes(kw));
+
+    // Robust size_stock handling: If admin set it, use it. 
+    // If empty but product has stock, default to size L to maintain consistency with Admin recovery logic.
+    const rawSizeStock = (product as any)?.size_stock;
+    const sizeStockObj = (() => {
+        let s = { M: 0, L: 0, XL: 0 };
+        if (rawSizeStock && typeof rawSizeStock === 'object' && Object.keys(rawSizeStock).length > 0) {
+            return { ...s, ...rawSizeStock };
+        }
+        // Recovery logic: if it's a wearable and has stock but no size data, assign to L
+        if (product && product.stock > 0 && (isRidingGear || hasWearableKeyword)) {
+            s.L = product.stock;
+            return s;
+        }
+        return rawSizeStock && typeof rawSizeStock === 'object' ? rawSizeStock : null;
+    })();
+
+    const hasSizeStockData = !!(sizeStockObj && Object.keys(sizeStockObj).length > 0);
+    const hasSizes = hasSizeStockData || isRidingGear || (hasWearableKeyword && !hasExcludeKeyword);
+
+
 
     // Set default size if applicable and not already set
     useEffect(() => {
         if (hasSizes && !selectedSize) {
-            setSelectedSize('L');
+            const sizes = ['M', 'L', 'XL'];
+            if (hasSizeStockData && sizeStockObj) {
+                // Pick first available size (qty > 0), fallback to first size
+                const firstAvailable = sizes.find(s => (sizeStockObj?.[s] ?? 0) > 0);
+                setSelectedSize(firstAvailable || sizes[0]);
+            } else {
+                setSelectedSize('M');
+            }
         }
-    }, [hasSizes, selectedSize]);
+    }, [hasSizes, hasSizeStockData, selectedSize, product]);
+
 
     if (!product) {
         return (
@@ -145,6 +173,10 @@ export default function ProductDetails() {
         : [product.image];
 
     const handleBuyNow = () => {
+        const hasSizeStockData = product.size_stock && Object.keys(product.size_stock).length > 0;
+        const effectiveStock = hasSizes && hasSizeStockData && selectedSize
+            ? (product.size_stock?.[selectedSize] ?? 0)
+            : product.stock;
         if (!isLoggedIn) {
             setPendingAction(() => () => {
                 if (hasSizes) localStorage.setItem('checkout_size', selectedSize || 'L');
@@ -159,10 +191,16 @@ export default function ProductDetails() {
         else localStorage.removeItem('checkout_size');
         localStorage.setItem('checkout_quantity', quantity.toString());
         window.location.hash = `checkout?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
+        // Store effective stock check result for UI-only use
+        void effectiveStock;
     };
 
     const handleAddToCart = () => {
-        if (product.stock <= 0) return;
+        const hasSizeStockData = product.size_stock && Object.keys(product.size_stock).length > 0;
+        const effectiveStock = hasSizes && hasSizeStockData && selectedSize
+            ? (product.size_stock?.[selectedSize] ?? 0)
+            : product.stock;
+        if (effectiveStock <= 0) return;
         if (!isLoggedIn) {
             setPendingAction(() => () => {
                 addToCart(product, quantity);
@@ -308,18 +346,53 @@ Link: ${window.location.href}`;
                                                 <p className="text-xs font-black uppercase tracking-widest text-zinc-400">Select Size</p>
                                                 <span className="text-red-500 text-xs font-black">FITMENT GUARANTEED</span>
                                             </div>
-                                            <div className="flex gap-4">
-                                                {['M', 'L', 'XL'].map(size => (
-                                                    <button
-                                                        key={size}
-                                                        onClick={() => setSelectedSize(size)}
-                                                        className={`w-14 h-14 flex items-center justify-center rounded-2xl font-black transition-all border
-                                                            ${selectedSize === size ? 'bg-red-600 border-red-600 text-white shadow-xl scale-110' : 'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-500'}`}
-                                                    >
-                                                        {size}
-                                                    </button>
-                                                ))}
+                                            <div className="flex gap-4 flex-wrap">
+                                                {['M', 'L', 'XL'].map(size => {
+                                                    const sizeQty = hasSizeStockData ? (sizeStockObj?.[size] ?? 0) : null;
+
+                                                    const sizeAvailable = sizeQty === null ? product.stock > 0 : sizeQty > 0;
+                                                    return (
+                                                        <div key={size} className={`flex flex-col items-center gap-1 ${!sizeAvailable ? 'opacity-40' : 'opacity-100'}`}>
+                                                            <button
+                                                                onClick={() => sizeAvailable && setSelectedSize(size)}
+                                                                disabled={!sizeAvailable}
+                                                                className={`w-14 h-14 flex items-center justify-center rounded-2xl font-black transition-all border
+                                                                    ${!sizeAvailable ? 'bg-zinc-900/10 border-zinc-900 text-zinc-700 cursor-not-allowed line-through' :
+                                                                      selectedSize === size ? 'bg-red-600 border-red-600 text-white shadow-xl scale-110' :
+                                                                      'bg-black/40 border-zinc-800 text-zinc-500 hover:border-zinc-500'}`}
+                                                            >
+                                                                {size}
+                                                            </button>
+                                                            {hasSizeStockData && (
+                                                                <span className={`text-[9px] font-black uppercase tracking-wider ${
+                                                                    !sizeAvailable ? 'text-zinc-600' : 
+                                                                    sizeQty !== null && sizeQty < 5 ? 'text-orange-400' : 'text-green-500'
+                                                                }`}>
+                                                                    {!sizeAvailable ? 'N/A' : `${sizeQty} left`}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    );
+
+                                                })}
                                             </div>
+                                            {selectedSize && (() => {
+                                                const sizeQty = hasSizeStockData ? (sizeStockObj?.[selectedSize] ?? 0) : null;
+                                                const sizeAvailable = sizeQty === null ? product.stock > 0 : sizeQty > 0;
+                                                if (!sizeAvailable) return (
+                                                    <div className="flex items-center gap-2 bg-red-600/10 border border-red-600/30 px-4 py-2 rounded-xl">
+                                                        <AlertTriangle size={14} className="text-red-500" />
+                                                        <span className="text-red-500 text-xs font-black uppercase tracking-widest">Size {selectedSize} Not Available</span>
+                                                    </div>
+                                                );
+                                                if (hasSizeStockData && sizeQty !== null && sizeQty < 5) return (
+                                                    <div className="flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 px-4 py-2 rounded-xl">
+                                                        <AlertTriangle size={14} className="text-orange-400" />
+                                                        <span className="text-orange-400 text-xs font-black uppercase tracking-widest">Only {sizeQty} left in size {selectedSize}!</span>
+                                                    </div>
+                                                );
+                                                return null;
+                                            })()}
                                         </div>
                                     </div>
                                 )}
@@ -336,28 +409,46 @@ Link: ${window.location.href}`;
                                                 <Plus size={14} />
                                             </button>
                                         </div>
-                                        <button
-                                            onClick={handleBuyNow}
-                                            disabled={product.stock <= 0}
-                                            className={`flex-1 ${product.stock > 0 ? 'bg-red-600 hover:bg-white hover:text-red-600 text-white text-xs' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed text-xs'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3`}
-                                        >
-                                            <span>{product.stock > 0 ? 'Buy Now' : 'Sold Out'}</span> <ArrowRight size={16} />
-                                        </button>
+                                        {(() => {
+                                            const effectiveStock = hasSizeStockData && selectedSize
+                                                ? (sizeStockObj?.[selectedSize] ?? 0)
+                                                : product.stock;
+                                            const isEffectivelyAvailable = effectiveStock > 0;
+                                            return (
+                                                <button
+                                                    onClick={handleBuyNow}
+                                                    disabled={!isEffectivelyAvailable}
+                                                    className={`flex-1 ${isEffectivelyAvailable ? 'bg-red-600 hover:bg-white hover:text-red-600 text-white text-xs' : 'bg-zinc-800 text-zinc-500 cursor-not-allowed text-xs'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3`}
+                                                >
+                                                    <span>{isEffectivelyAvailable ? 'Buy Now' : (hasSizeStockData && selectedSize ? `Size ${selectedSize} Sold Out` : 'Sold Out')}</span> <ArrowRight size={16} />
+                                                </button>
+                                            );
+                                        })()}
                                     </div>
-                                    <button 
-                                        onClick={handleAddToCart}
-                                        disabled={product.stock <= 0} 
-                                        className={`w-full ${product.stock > 0 ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 border`}
-                                    >
-                                        <ShoppingCart size={16} /> Add to Cart
-                                    </button>
-                                    <button 
-                                        onClick={handleWhatsAppOrder}
-                                        disabled={product.stock <= 0} 
-                                        className={`w-full ${product.stock > 0 ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 border`}
-                                    >
-                                        <Phone size={16} /> WhatsApp Direct Purchase
-                                    </button>
+                                    {(() => {
+                                        const effectiveStock = hasSizeStockData && selectedSize
+                                            ? (sizeStockObj?.[selectedSize] ?? 0)
+                                            : product.stock;
+                                        const isEffectivelyAvailable = effectiveStock > 0;
+                                        return (
+                                            <>
+                                                <button 
+                                                    onClick={handleAddToCart}
+                                                    disabled={!isEffectivelyAvailable} 
+                                                    className={`w-full ${isEffectivelyAvailable ? 'bg-zinc-900 border-zinc-800 hover:border-zinc-600 text-zinc-400 hover:text-white' : 'bg-zinc-900 border-zinc-900 text-zinc-700 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 border`}
+                                                >
+                                                    <ShoppingCart size={16} /> Add to Cart
+                                                </button>
+                                                <button 
+                                                    onClick={handleWhatsAppOrder}
+                                                    disabled={!isEffectivelyAvailable} 
+                                                    className={`w-full ${isEffectivelyAvailable ? 'bg-[#1ebe5d]/10 text-[#1ebe5d] hover:bg-[#1ebe5d] hover:text-white border-[#1ebe5d]/20' : 'bg-zinc-900 text-zinc-700 border-zinc-900 cursor-not-allowed'} py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs transition-all flex items-center justify-center gap-3 border`}
+                                                >
+                                                    <Phone size={16} /> WhatsApp Direct Purchase
+                                                </button>
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </div>
 

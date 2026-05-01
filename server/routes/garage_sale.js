@@ -5,7 +5,19 @@ const db = require('../db');
 // Get all garage sale items
 router.get('/', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM garage_sale ORDER BY created_at DESC');
+        const result = await db.query(`
+            SELECT 
+                gs.*,
+                COALESCE(p.discount_percent, gs.discount_percent) as discount_percent,
+                p.size_stock,
+                p.sub_category,
+                p.sub_category_type,
+                c.name as category_name
+            FROM garage_sale gs
+            LEFT JOIN products p ON p.sku = gs.sku
+            LEFT JOIN categories c ON p.category_id = c.id
+            ORDER BY gs.created_at DESC
+        `);
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -28,6 +40,8 @@ router.post('/', async (req, res) => {
 
 // Update a garage sale item
 router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    console.log('UPDATING GARAGE SALE ITEM:', id);
     const { name, brand, sku, price, stock, image_url, images, description, garage_sale_type, is_active, linked_items, delivery_tn, delivery_south, delivery_north, discount_percent } = req.body;
     try {
         const result = await db.query(

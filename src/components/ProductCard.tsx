@@ -90,7 +90,7 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
     >
       {/* Visual Interface */}
       <div
-        className="h-44 sm:h-56 overflow-hidden relative cursor-pointer"
+        className="h-48 sm:h-64 lg:h-72 xl:h-80 overflow-hidden relative cursor-pointer"
         onClick={() => {
           const typeParam = product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : '';
           onNavigate(`productDetails?productId=${product.id}${typeParam}`);

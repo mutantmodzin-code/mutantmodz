@@ -182,7 +182,7 @@ export default function ComboProducts({ onNavigate }: ComboProductsProps) {
 
         <div
           ref={scrollRef}
-          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 justify-start md:justify-center"
+          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 px-1"
         >
           {products.map((p) => (
             <ComboProductCard key={p.id} product={p} onNavigate={onNavigate} />

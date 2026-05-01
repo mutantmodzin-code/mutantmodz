@@ -58,7 +58,7 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
         <div className="absolute top-2.5 left-2.5 z-20 bg-orange-600 text-white text-[8px] sm:text-[10px] font-black px-2 py-1 rounded-lg shadow-lg uppercase tracking-wider flex items-center gap-1.5 backdrop-blur-md border border-orange-400/30">
           <Zap size={10} className="fill-current" /> Today Sales
         </div>
-        {product.discount_percent && (
+        {product.discount_percent !== undefined && product.discount_percent > 0 && (
             <div className="absolute top-4 right-4 z-20 bg-white text-black text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg uppercase tracking-wider">
                 -{product.discount_percent}%
             </div>
@@ -188,7 +188,7 @@ export default function GarageSaleSection({ onNavigate }: GarageSaleSectionProps
 
         <div
           ref={scrollRef}
-          className="flex gap-4 sm:gap-8 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 justify-start md:justify-center lg:justify-center"
+          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 px-1"
         >
           {products.map((p) => (
             <ProductCard key={p.id} product={p} onNavigate={onNavigate} />

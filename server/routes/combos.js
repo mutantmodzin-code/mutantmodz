@@ -5,7 +5,18 @@ const db = require('../db');
 // Get all combos
 router.get('/', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM combos ORDER BY created_at DESC');
+        const result = await db.query(`
+            SELECT 
+                co.*,
+                p.size_stock,
+                p.sub_category,
+                p.sub_category_type,
+                c.name as category_name
+            FROM combos co
+            LEFT JOIN products p ON p.sku = co.sku
+            LEFT JOIN categories c ON p.category_id = c.id
+            ORDER BY co.created_at DESC
+        `);
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });

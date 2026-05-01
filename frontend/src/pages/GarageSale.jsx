@@ -17,7 +17,8 @@ const GarageSale = () => {
         images: ['', '', '', ''],
         description: '',
         linked_items: [],
-        delivery_tn: 0, delivery_south: 0, delivery_north: 0
+        delivery_tn: 0, delivery_south: 0, delivery_north: 0,
+        discount_percent: 0
     });
     const [allInventory, setAllInventory] = useState([]);
     const [skuSearch, setSkuSearch] = useState('');
@@ -68,15 +69,43 @@ const GarageSale = () => {
             images: ['', '', '', ''],
             description: '', sku: '',
             linked_items: [],
-            delivery_tn: 0, delivery_south: 0, delivery_north: 0
+            delivery_tn: 0, delivery_south: 0, delivery_north: 0,
+            discount_percent: 0
         });
     };
 
     const addLinkedItem = (prod) => {
-        if (formData.linked_items.some(item => item.sku === prod.sku)) return;
+        // Safe image parsing helper
+        const parseImages = (input) => {
+            if (Array.isArray(input)) return input;
+            if (typeof input === 'string') {
+                try {
+                    const parsed = JSON.parse(input);
+                    return Array.isArray(parsed) ? parsed : [input];
+                } catch (e) {
+                    return [input];
+                }
+            }
+            return [];
+        };
+
+        const prodImages = parseImages(prod.images || prod.image_url);
+        
+        // When a product is selected, we auto-populate the main fields
         setFormData({
             ...formData,
-            linked_items: [...formData.linked_items, { sku: prod.sku, quantity: 1, name: prod.name }]
+            name: prod.name,
+            brand: prod.brand || '',
+            price: prod.price,
+            stock: prod.stock,
+            sku: prod.sku,
+            image_url: prodImages[0] || '',
+            images: [...prodImages, '', '', ''].slice(0, 4),
+            delivery_tn: prod.delivery_tn || 0,
+            delivery_south: prod.delivery_south || 0,
+            delivery_north: prod.delivery_north || 0,
+            discount_percent: prod.discount_percent || 0,
+            linked_items: [{ sku: prod.sku, quantity: 1, name: prod.name }]
         });
         setSkuSearch('');
     };
@@ -156,7 +185,8 @@ const GarageSale = () => {
             linked_items: Array.isArray(item.linked_items) ? item.linked_items : [],
             delivery_tn: item.delivery_tn || 0,
             delivery_south: item.delivery_south || 0,
-            delivery_north: item.delivery_north || 0
+            delivery_north: item.delivery_north || 0,
+            discount_percent: item.discount_percent || 0
         });
         setIsModalOpen(true);
     };
@@ -188,6 +218,7 @@ const GarageSale = () => {
                             <th>Item Name</th>
                             <th>Brand</th>
                             <th>Sale Price</th>
+                            <th>Discount</th>
                             <th>Stock</th>
                             <th>Actions</th>
                         </tr>
@@ -196,11 +227,32 @@ const GarageSale = () => {
                         {items.map(item => (
                             <tr key={item.id}>
                                 <td>
-                                    <img src={getMediaUrl(item.images?.[0] || item.image_url) || 'https://via.placeholder.com/50'} style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} />
+                                    <img 
+                                        src={getMediaUrl(
+                                            (() => {
+                                                const raw = item.images || item.image_url;
+                                                if (Array.isArray(raw)) return raw[0];
+                                                if (typeof raw === 'string' && raw.startsWith('[')) {
+                                                    try { return JSON.parse(raw)[0]; } catch (e) { return raw; }
+                                                }
+                                                return raw;
+                                            })()
+                                        ) || 'https://via.placeholder.com/50'} 
+                                        style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '0.5rem' }} 
+                                    />
                                 </td>
                                 <td style={{ fontWeight: 600 }}>{item.name}</td>
                                 <td>{item.brand}</td>
                                 <td style={{ fontWeight: 600 }}>₹{item.price}</td>
+                                <td>
+                                    {item.discount_percent > 0 ? (
+                                        <span style={{ backgroundColor: '#fee2e2', color: '#ef4444', padding: '0.25rem 0.5rem', borderRadius: '0.5rem', fontWeight: 800, fontSize: '0.75rem' }}>
+                                            -{item.discount_percent}%
+                                        </span>
+                                    ) : (
+                                        <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>No Discount</span>
+                                    )}
+                                </td>
                                 <td>
                                     <span style={{
                                         fontWeight: 600,
@@ -233,129 +285,74 @@ const GarageSale = () => {
                             <button onClick={() => setIsModalOpen(false)}>✕</button>
                         </div>
                         
-                        <form onSubmit={handleSave} style={{ padding: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', overflowY: 'auto' }}>
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label className="label">Item Name</label>
-                                <input className="input" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                            </div>
-
-                            <div>
-                                <label className="label">Brand</label>
-                                <input className="input" value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
-                            </div>
-
-                            <div>
-                                <label className="label">Item SKU</label>
-                                <input className="input" value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} placeholder="UNIQUE-SALE-ID" />
-                            </div>
-
-
-
-                            <div>
-                                <label className="label">Sale Price</label>
-                                <input className="input" type="number" step="0.01" required value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
-                            </div>
-
-                            <div>
-                                <label className="label">Available Stock</label>
-                                <input className="input" type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
-                            </div>
-
-                            <div style={{ gridColumn: 'span 2', backgroundColor: '#fcf8ff', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #d8b4fe' }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#7e22ce', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span>🚚 Delivery Charges (Region Wise)</span>
-                                    <div style={{ height: '1px', flex: 1, backgroundColor: '#d8b4fe' }}></div>
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
-                                    <div>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>TAMIL NADU</label>
-                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_tn} onChange={(e) => setFormData({ ...formData, delivery_tn: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>SOUTH INDIA</label>
-                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_south} onChange={(e) => setFormData({ ...formData, delivery_south: e.target.value })} />
-                                    </div>
-                                    <div>
-                                        <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9333ea', marginBottom: '0.35rem', display: 'block' }}>NORTH INDIA</label>
-                                        <input className="input" style={{ borderRadius: '0.6rem', borderColor: '#e9d5ff' }} type="number" value={formData.delivery_north} onChange={(e) => setFormData({ ...formData, delivery_north: e.target.value })} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style={{ gridColumn: 'span 2', backgroundColor: '#fff7ed', padding: '1.5rem', borderRadius: '1.5rem', border: '1px solid #ffedd5' }}>
+                        <form onSubmit={handleSave} style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', overflowY: 'auto' }}>
+                            {/* NEW SKU SEARCH AT TOP */}
+                            <div style={{ backgroundColor: '#fff7ed', padding: '1.5rem', borderRadius: '1.5rem', border: '1px solid #ffedd5' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                                    <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#9a3412' }}>📦 Link to Core Inventory SKU</h3>
-                                    {formData.linked_items.length > 0 && (
-                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#f97316', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '2rem' }}>
-                                            Available: {Math.min(...formData.linked_items.map(li => {
-                                                const inv = allInventory.find(p => p.sku === li.sku);
-                                                return inv ? Math.floor(inv.stock / (li.quantity || 1)) : 0;
-                                            }))} Units
+                                    <h3 style={{ fontSize: '1rem', fontWeight: 800, color: '#9a3412' }}>🔍 Search Product by SKU</h3>
+                                    {formData.sku && (
+                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, backgroundColor: '#10b981', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '2rem' }}>
+                                            Selected: {formData.sku}
                                         </div>
                                     )}
                                 </div>
-                                <p style={{ fontSize: '0.75rem', color: '#9a3412', marginBottom: '1rem', opacity: 0.8 }}>Linking to an SKU ensures that selling this item will automatically reduce the stock of the original product.</p>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <div style={{ position: 'relative' }}>
-                                        <input 
-                                            className="input" 
-                                            placeholder="Search product by SKU..." 
-                                            value={skuSearch}
-                                            onChange={(e) => setSkuSearch(e.target.value.toUpperCase())}
-                                        />
-                                        {skuSearch && (
-                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '0.75rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', maxHeight: '200px', overflowY: 'auto' }}>
-                                                {allInventory.filter(p => (p.sku && p.sku.includes(skuSearch)) || p.name.toLowerCase().includes(skuSearch.toLowerCase())).map(p => (
-                                                    <div 
-                                                        key={p.id} 
-                                                        onClick={() => addLinkedItem(p)}
-                                                        style={{ padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}
-                                                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                                                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                                                    >
-                                                        <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{p.sku} - {p.name}</div>
-                                                        <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Stock: {p.stock} | Price: ₹{p.price}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
+                                <div style={{ position: 'relative' }}>
+                                    <input 
+                                        className="input" 
+                                        placeholder="Enter SKU or Product Name..." 
+                                        value={skuSearch}
+                                        onChange={(e) => setSkuSearch(e.target.value.toUpperCase())}
+                                    />
+                                    {skuSearch && (
+                                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50, backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '0.75rem', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', maxHeight: '200px', overflowY: 'auto' }}>
+                                            {allInventory.filter(p => (p.sku && p.sku.includes(skuSearch)) || p.name.toLowerCase().includes(skuSearch.toLowerCase())).map(p => (
+                                                <div 
+                                                    key={p.id} 
+                                                    onClick={() => addLinkedItem(p)}
+                                                    style={{ padding: '0.75rem 1rem', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}
+                                                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                                                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                                >
+                                                    <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{p.sku} - {p.name}</div>
+                                                    <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Stock: {p.stock} | Price: ₹{p.price}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                    {formData.linked_items.map(item => (
-                                        <div key={item.sku} style={{ display: 'flex', alignItems: 'center', gap: '1rem', backgroundColor: 'white', padding: '0.75rem', borderRadius: '0.75rem', border: '1px solid #e2e8f0' }}>
-                                            <div style={{ flex: 1 }}>
-                                                <div style={{ fontWeight: 800, fontSize: '0.8rem', color: '#9a3412' }}>{item.sku}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{item.name}</div>
-                                                <div style={{ fontSize: '0.65rem', color: '#f97316' }}>Component Stock: {allInventory.find(p => p.sku === item.sku)?.stock || 0}</div>
+                                {formData.sku && (
+                                    <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'white', borderRadius: '1rem', border: '1px solid #fed7aa' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                                            <div>
+                                                <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1e293b' }}>{formData.name}</div>
+                                                <div style={{ fontSize: '0.875rem', color: '#64748b' }}>{formData.brand}</div>
                                             </div>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>QTY:</span>
-                                                <input 
-                                                    type="number" 
-                                                    className="input" 
-                                                    style={{ width: '60px', padding: '0.25rem 0.5rem' }} 
-                                                    value={item.quantity} 
-                                                    onChange={(e) => updateItemQuantity(item.sku, e.target.value)}
-                                                />
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontWeight: 800, fontSize: '1.125rem', color: '#059669' }}>₹{formData.price}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Stock: {formData.stock}</div>
                                             </div>
-                                            <button 
-                                                type="button" 
-                                                onClick={() => removeLinkedItem(item.sku)}
-                                                style={{ padding: '0.25rem', color: '#ef4444' }}
-                                            >
-                                                <Trash size={16} />
-                                            </button>
                                         </div>
-                                    ))}
-                                    {formData.linked_items.length === 0 && (
-                                        <div style={{ textAlign: 'center', padding: '1rem', color: '#94a3b8', fontSize: '0.75rem', fontStyle: 'italic' }}>
-                                            No inventory items linked yet.
-                                        </div>
-                                    )}
-                                </div>
+                                        <button 
+                                            type="button" 
+                                            onClick={() => resetForm()}
+                                            style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: '#ef4444', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                                        >
+                                            <Trash size={14} /> Clear Selection
+                                        </button>
+                                    </div>
+                                )}
                             </div>
+
+
+                            {formData.discount_percent > 0 && (
+                                <div style={{ backgroundColor: '#fff7ed', padding: '1rem', borderRadius: '1rem', border: '1px solid #ffedd5', marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#9a3412', fontWeight: 700 }}>
+                                        <Zap size={16} /> Discount from Inventory: {formData.discount_percent}%
+                                    </div>
+                                    <p style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '0.25rem' }}>This discount is synced from the main product inventory.</p>
+                                </div>
+                            )}
 
                             <div style={{ gridColumn: 'span 2' }}>
                                 <label className="label">Description</label>

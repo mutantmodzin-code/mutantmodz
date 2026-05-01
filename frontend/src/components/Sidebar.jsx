@@ -60,7 +60,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.5rem 0.5rem 2rem 0.5rem', borderBottom: '1px solid #f1f5f9', marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div style={{ backgroundColor: 'white', padding: '0.25rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src="/mutant-modz-logo.png" alt="Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                        <img src="/favicon-192x192.jpg" alt="Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
                     </div>
                     <div>
                         <h1 style={{ fontSize: '1.125rem', fontWeight: 800, letterSpacing: '-0.025em', color: '#0f172a' }}>MUTANT MODZ</h1>

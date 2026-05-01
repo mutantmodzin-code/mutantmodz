@@ -27,6 +27,7 @@ export interface Product {
     delivery_tn?: number;
     delivery_south?: number;
     delivery_north?: number;
+    size_stock?: Record<string, number>;
 }
 
 

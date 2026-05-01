@@ -73,7 +73,8 @@ const Products = () => {
     const [editingProduct, setEditingProduct] = useState(null);
 
     const getSelectedCategoryName = () => {
-        return categories.find(c => c.id.toString() === formData.category_id.toString())?.name;
+        if (!formData.category_id) return '';
+        return categories.find(c => c.id.toString() === formData.category_id.toString())?.name || '';
     };
 
     const [formData, setFormData] = useState({
@@ -82,7 +83,8 @@ const Products = () => {
         image_urls: ['', '', '', ''],
         bike_brand: '', bike_model: '',
         description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
-        delivery_tn: 0, delivery_south: 0, delivery_north: 0
+        delivery_tn: 0, delivery_south: 0, delivery_north: 0,
+        size_stock: { M: 0, L: 0, XL: 0 }
     });
 
 
@@ -110,12 +112,41 @@ const Products = () => {
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            // Save as JSON string in the database column
-            const dataToSave = { ...formData, image_url: JSON.stringify(formData.image_urls) };
-            if (editingProduct) {
-                await api.put(`/products/${editingProduct.id}`, dataToSave);
+            // Use the same detection as the UI's needsSizeStock 
+            const catName = getSelectedCategoryName();
+            const needsSizes = (catName && (catName.toLowerCase() === 'helmets' || 
+                catName.toLowerCase() === 'riding gear' || 
+                catName.toLowerCase() === 'gear')) || 
+                (catName && catName.toLowerCase() === 'accessories' && (formData.sub_category_type === 'Riding Gear' || formData.sub_category_type === 'Jackets')) ||
+                // Also save if size_stock already has valid data (preserve existing)
+                Object.values(formData.size_stock || {}).some(v => parseInt(v) > 0);
+
+            let dataToSave = { ...formData, image_url: JSON.stringify(formData.image_urls) };
+            if (needsSizes) {
+                const sizeStock = formData.size_stock || { M: 0, L: 0, XL: 0 };
+                const totalStock = Object.values(sizeStock).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0);
+                dataToSave.stock = totalStock;
+                dataToSave.size_stock = sizeStock;
             } else {
-                await api.post('/products', dataToSave);
+                dataToSave.size_stock = null;
+            }
+
+            console.log('--- SAVE DEBUG ---');
+
+            console.log('Category ID:', formData.category_id);
+            console.log('Category Name found:', catName);
+            console.log('needsSizes detected:', needsSizes);
+            console.log('size_stock state:', formData.size_stock);
+            console.log('dataToSave object:', dataToSave);
+            console.log('------------------');
+
+            if (editingProduct) {
+
+                const response = await api.put(`/products/${editingProduct.id}`, dataToSave);
+                console.log('Update response:', response.data);
+            } else {
+                const response = await api.post('/products', dataToSave);
+                console.log('Create response:', response.data);
             }
             setIsModalOpen(false);
             fetchProducts();
@@ -126,7 +157,8 @@ const Products = () => {
                 image_urls: ['', '', '', ''],
                 bike_brand: '', bike_model: '',
                 description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
-                delivery_tn: 0, delivery_south: 0, delivery_north: 0
+                delivery_tn: 0, delivery_south: 0, delivery_north: 0,
+                size_stock: { M: 0, L: 0, XL: 0 }
             });
 
         } catch (error) {
@@ -134,6 +166,7 @@ const Products = () => {
             alert('Error saving product: ' + (error.response?.data?.error || error.message));
         }
     };
+
 
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure?')) return;
@@ -195,16 +228,40 @@ const Products = () => {
             urls = [p.image_url || '', '', '', ''];
         }
 
+        let sStock = { M: 0, L: 0, XL: 0 };
+        let wasRecovered = false;
+        try {
+            if (p.size_stock) {
+                let parsed = p.size_stock;
+                if (typeof p.size_stock === 'string') {
+                    parsed = JSON.parse(p.size_stock);
+                }
+                if (parsed && typeof parsed === 'object') {
+                    sStock = { ...sStock, ...parsed };
+                }
+            }
+            
+            // If size_stock was empty but product has stock, default it to size L
+            const currentTotal = Object.values(sStock).reduce((a, b) => a + (parseInt(b) || 0), 0);
+            if (currentTotal === 0 && p.stock > 0) {
+                sStock.L = parseInt(p.stock) || 0;
+                wasRecovered = true;
+            }
+        } catch (e) {
+            console.error('Error parsing size_stock:', e);
+        }
+
         setEditingProduct(p);
         setFormData({
+            ...formData, // Spread existing defaults
             name: p.name,
             brand: p.brand || '',
-            category_id: p.category_id,
+            category_id: p.category_id || '',
             sub_category: p.sub_category || '',
-            sub_category_type: p.sub_category_type || '', // We might need to derive this or store it
+            sub_category_type: p.sub_category_type || '', 
             price: p.price,
             stock: p.stock,
-            vendor_id: p.vendor_id,
+            vendor_id: p.vendor_id || '',
             sku: p.sku || '',
             purchase_price: p.purchase_price || '',
             image_urls: urls,
@@ -216,8 +273,13 @@ const Products = () => {
             delivery_tn: p.delivery_tn || 0,
             delivery_south: p.delivery_south || 0,
             delivery_north: p.delivery_north || 0,
-            discount_percent: p.discount_percent || 0
+            discount_percent: p.discount_percent || 0,
+            size_stock: sStock,
+            was_recovered: wasRecovered
         });
+
+
+
 
         setIsModalOpen(true);
     };
@@ -233,6 +295,19 @@ const Products = () => {
 
     const isCompatibilityNeeded = categoryName === 'Accessories' || categoryName === 'Bike Parts' || categoryName === 'Performance Parts';
 
+    // Check if current category+type combo needs per-size stock
+    // Also show if product already has size_stock data set (preserve on edit)
+    const hasExistingSizeData = Object.values(formData.size_stock || {}).some(v => parseInt(v) > 0);
+    const needsSizeStock = (categoryName && (categoryName.toLowerCase() === 'helmets' || 
+        categoryName.toLowerCase() === 'riding gear' || 
+        categoryName.toLowerCase() === 'gear')) || 
+        hasExistingSizeData ||
+        (categoryName && categoryName.toLowerCase() === 'accessories' && (formData.sub_category_type === 'Riding Gear' || formData.sub_category_type === 'Jackets'));
+    
+    const totalSizeStock = needsSizeStock 
+        ? Object.values(formData.size_stock || {}).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0)
+        : formData.stock;
+
 
     return (
         <div>
@@ -246,7 +321,8 @@ const Products = () => {
                         image_urls: ['', '', '', ''],
                         bike_brand: '', bike_model: '',
                         description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
-                        delivery_tn: 0, delivery_south: 0, delivery_north: 0
+                        delivery_tn: 0, delivery_south: 0, delivery_north: 0,
+                        size_stock: { M: 0, L: 0, XL: 0 }
                     });
 
                     setIsModalOpen(true);
@@ -277,6 +353,7 @@ const Products = () => {
                 <table className="table">
                     <thead>
                         <tr>
+                            <th>Image</th>
                             <th>SKU</th>
                             <th>Product Name</th>
                             <th>Category</th>
@@ -291,6 +368,15 @@ const Products = () => {
                     <tbody>
                         {products.map(p => (
                             <tr key={p.id}>
+                                <td>
+                                    <img 
+                                        src={getMediaUrl(
+                                            Array.isArray(p.image_url) ? p.image_url[0] : 
+                                            (typeof p.image_url === 'string' && p.image_url.startsWith('[') ? JSON.parse(p.image_url)[0] : p.image_url)
+                                        ) || 'https://via.placeholder.com/50'} 
+                                        style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '0.5rem' }} 
+                                    />
+                                </td>
                                 <td style={{ fontWeight: 600, color: '#2563eb' }}>{p.sku || 'N/A'}</td>
                                 <td>
                                     <div>{p.name}</div>
@@ -359,7 +445,7 @@ const Products = () => {
 
                             <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Category</label>
-                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} required value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value, sub_category_type: '', sub_category: '' })}>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} required value={formData.category_id || ''} onChange={(e) => setFormData({ ...formData, category_id: e.target.value, sub_category_type: '', sub_category: '' })}>
                                     <option value="">Select Category</option>
                                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
@@ -368,7 +454,7 @@ const Products = () => {
                             {isNested && (
                                 <div style={{ gridColumn: 'span 3' }}>
                                     <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Type</label>
-                                    <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.sub_category_type} onChange={(e) => setFormData({ ...formData, sub_category_type: e.target.value, sub_category: '' })}>
+                                    <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.sub_category_type || ''} onChange={(e) => setFormData({ ...formData, sub_category_type: e.target.value, sub_category: '' })}>
                                         <option value="">Select Type</option>
                                         {subCategoryTypes.map(t => <option key={t} value={t}>{t}</option>)}
                                     </select>
@@ -377,7 +463,7 @@ const Products = () => {
 
                             <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>{isNested ? 'Item' : 'Sub Category'}</label>
-                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.sub_category} onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })} disabled={!subCategories.length}>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.sub_category || ''} onChange={(e) => setFormData({ ...formData, sub_category: e.target.value })} disabled={!subCategories.length}>
                                     <option value="">{subCategories.length ? 'Select' : 'N/A'}</option>
                                     {subCategories.map(sc => <option key={sc} value={sc}>{sc}</option>)}
                                 </select>
@@ -385,7 +471,7 @@ const Products = () => {
 
                             <div style={{ gridColumn: isNested ? 'span 3' : 'span 4' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Partner Brand</label>
-                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })}>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.brand || ''} onChange={(e) => setFormData({ ...formData, brand: e.target.value })}>
                                     <option value="">Select Brand</option>
                                     {PARTNER_BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                                 </select>
@@ -393,7 +479,7 @@ const Products = () => {
 
                             <div style={{ gridColumn: 'span 12' }}>
                                 <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Vendor / Supplier</label>
-                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.vendor_id} onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}>
+                                <select className="input" style={{ borderRadius: '0.75rem', padding: '0.75rem' }} value={formData.vendor_id || ''} onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}>
                                     <option value="">Select Vendor</option>
                                     {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                                 </select>
@@ -407,14 +493,14 @@ const Products = () => {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                     <div>
                                         <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.35rem', display: 'block' }}>BRAND</label>
-                                        <select className="input" style={{ borderRadius: '0.6rem' }} value={formData.bike_brand} onChange={(e) => setFormData({ ...formData, bike_brand: e.target.value, bike_model: '' })}>
+                                        <select className="input" style={{ borderRadius: '0.6rem' }} value={formData.bike_brand || ''} onChange={(e) => setFormData({ ...formData, bike_brand: e.target.value, bike_model: '' })}>
                                             <option value="">Universal / No Brand</option>
                                             {BIKE_DATA.map(b => <option key={b.name} value={b.name}>{b.name}</option>)}
                                         </select>
                                     </div>
                                     <div>
                                         <label style={{ fontSize: '0.7rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.35rem', display: 'block' }}>MODEL</label>
-                                        <select className="input" style={{ borderRadius: '0.6rem' }} disabled={!formData.bike_brand} value={formData.bike_model} onChange={(e) => setFormData({ ...formData, bike_model: e.target.value })}>
+                                        <select className="input" style={{ borderRadius: '0.6rem' }} disabled={!formData.bike_brand} value={formData.bike_model || ''} onChange={(e) => setFormData({ ...formData, bike_model: e.target.value })}>
                                             <option value="">All Models</option>
                                             {BIKE_DATA.find(b => b.name === formData.bike_brand)?.models.map(m => <option key={m} value={m}>{m}</option>)}
                                         </select>
@@ -443,10 +529,64 @@ const Products = () => {
                                 <input className="input" style={{ borderRadius: '0.75rem' }} type="number" value={formData.discount_percent} onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })} />
                             </div>
 
-                            <div style={{ gridColumn: 'span 2' }}>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Stock</label>
-                                <input className="input" style={{ borderRadius: '0.75rem' }} type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
-                            </div>
+                            {needsSizeStock ? (
+                                <div style={{ gridColumn: 'span 12', backgroundColor: '#f0fdf4', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #86efac' }}>
+                                    <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span>📦 Size-wise Stock Quantity</span>
+                                        <div style={{ height: '1px', flex: 1, backgroundColor: '#86efac' }}></div>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) auto', gap: '1rem', alignItems: 'end' }}>
+                                        {['M', 'L', 'XL'].map(size => (
+                                            <div key={size}>
+                                                <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#15803d', marginBottom: '0.35rem', display: 'block' }}>SIZE {size}</label>
+                                                <input
+                                                    className="input"
+                                                    style={{ borderRadius: '0.6rem', borderColor: '#86efac', backgroundColor: '#f0fdf4' }}
+                                                    type="number"
+                                                    min="0"
+                                                    value={formData.size_stock?.[size] ?? 0}
+                                                    onChange={(e) => setFormData({ ...formData, size_stock: { ...formData.size_stock, [size]: parseInt(e.target.value) || 0 } })}
+                                                />
+                                            </div>
+                                        ))}
+                                        <div style={{ backgroundColor: '#dcfce7', borderRadius: '0.6rem', padding: '0.5rem 1rem', border: '1px solid #86efac', textAlign: 'center' }}>
+                                            <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase' }}>Total Stock</div>
+                                            <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#166534' }}>{totalSizeStock}</div>
+                                        </div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}>
+                                        {formData.was_recovered && (
+                                            <div style={{ backgroundColor: '#fff7ed', border: '1px solid #ffedd5', padding: '0.75rem', borderRadius: '0.75rem', marginBottom: '0.5rem' }}>
+                                                <p style={{ fontSize: '0.7rem', color: '#9a3412', fontWeight: 800, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                    ⚠️ Stock Auto-Recovered
+                                                </p>
+                                                <p style={{ fontSize: '0.65rem', color: '#c2410c' }}>
+                                                    Found {formData.stock} items in legacy stock. Assigned to **Size L** by default. Click "Reset All Sizes" to re-distribute.
+                                                </p>
+                                            </div>
+                                        )}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <p style={{ fontSize: '0.65rem', color: '#15803d', fontStyle: 'italic' }}>
+                                                Note: Total stock is automatically calculated from sizes.
+                                            </p>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setFormData({ ...formData, size_stock: { M: 0, L: 0, XL: 0 }, was_recovered: false })}
+                                                style={{ fontSize: '0.65rem', fontWeight: 800, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', textDecoration: 'underline' }}
+                                            >
+                                                Reset All Sizes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            ) : (
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Stock</label>
+                                    <input className="input" style={{ borderRadius: '0.75rem' }} type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: e.target.value })} />
+                                </div>
+                            )}
 
                             <div style={{ gridColumn: 'span 12', backgroundColor: '#fcf8ff', padding: '1.25rem', borderRadius: '1rem', border: '1px solid #d8b4fe' }}>
                                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#7e22ce', textTransform: 'uppercase', marginBottom: '1rem', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

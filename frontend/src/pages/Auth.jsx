@@ -23,8 +23,8 @@ const Login = () => {
     return (
         <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9' }}>
             <div className="card" style={{ width: '400px', padding: '3rem', position: 'relative' }}>
-                <div style={{ position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#2563eb', padding: '1rem', borderRadius: '1.5rem', color: 'white' }}>
-                    <Bike size={48} />
+                <div style={{ position: 'absolute', top: '-40px', left: '50%', transform: 'translateX(-50%)', backgroundColor: 'white', padding: '0.75rem', borderRadius: '1.5rem', border: '1px solid #e2e8f0', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                    <img src="/logo.png" alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
                 </div>
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem', marginTop: '1.5rem' }}>
                     <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a' }}>Pitshop Inventory & Billing</h2>

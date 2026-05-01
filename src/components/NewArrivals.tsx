@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowUpRight, ShoppingCart } from 'lucide-react';
-import { getProducts } from '../utils/storage';
+import { getProducts, getCombos, getGarageSale } from '../utils/storage';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
@@ -47,11 +47,10 @@ function CompactMobileCard({ product, onNavigate }: { product: Product; onNaviga
         <button
           onClick={handleAddToCart}
           disabled={product.stock <= 0}
-          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 touch-manipulation mt-auto min-h-[44px] ${
-            product.stock > 0
+          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-black uppercase tracking-wider transition-all active:scale-95 touch-manipulation mt-auto min-h-[44px] ${product.stock > 0
               ? 'bg-zinc-800 text-white hover:bg-red-600 shadow-lg'
               : 'bg-zinc-900 text-zinc-600 cursor-not-allowed'
-          }`}
+            }`}
         >
           <ShoppingCart size={14} />
           {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
@@ -67,17 +66,27 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
 
   useEffect(() => {
     const fetch = async () => {
-      const all = await getProducts();
-      
-      const tenDaysAgo = new Date();
-      tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+      try {
+        const [all, combos, garage] = await Promise.all([
+          getProducts(),
+          getCombos(),
+          getGarageSale()
+        ]);
 
-      const sorted = [...all]
-        .filter(p => p.isNew || (p.created_at && new Date(p.created_at) >= tenDaysAgo))
-        .sort((a, b) => b.id.localeCompare(a.id))
-        .slice(0, 10);
-      
-      setProducts(sorted.map(p => ({ ...p, isNew: true })));
+        const combined = [...all, ...combos, ...garage];
+
+        const tenDaysAgo = new Date();
+        tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+        const sorted = combined
+          .filter(p => p.isNew || (p.created_at && new Date(p.created_at) >= tenDaysAgo))
+          .sort((a, b) => b.id.localeCompare(a.id))
+          .slice(0, 10);
+
+        setProducts(sorted.map(p => ({ ...p, isNew: true })));
+      } catch (error) {
+        console.error('Failed to fetch new arrivals:', error);
+      }
     };
     fetch();
   }, []);
@@ -108,14 +117,14 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
             </p>
           </div>
           <div className="hidden sm:flex gap-2">
-            <button 
-              onClick={() => scroll('left')} 
+            <button
+              onClick={() => scroll('left')}
               className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
             >
               <ChevronLeft size={20} />
             </button>
-            <button 
-              onClick={() => scroll('right')} 
+            <button
+              onClick={() => scroll('right')}
               className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
             >
               <ChevronRight size={20} />
@@ -123,7 +132,7 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
           </div>
         </div>
 
-        <div 
+        <div
           ref={scrollRef}
           className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar scroll-smooth-x snap-x snap-mandatory pb-6 -mx-1 px-1"
         >
@@ -133,7 +142,7 @@ export default function NewArrivals({ onNavigate }: { onNavigate: (page: string,
         </div>
 
         <div className="flex justify-center mt-4">
-          <button 
+          <button
             onClick={() => onNavigate('products', '?cat=new')}
             className="group flex items-center gap-3 px-8 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-red-600 hover:text-white transition-all transform active:scale-95 shadow-xl"
           >

@@ -64,7 +64,7 @@ function AppContent() {
       case 'contact':
         return <Contact />;
       case 'productDetails':
-        return <ProductDetails />;
+        return <ProductDetails onNavigate={navigate} />;
       case 'blog':
         return <Blog />;
       case 'combos':

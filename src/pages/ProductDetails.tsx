@@ -23,7 +23,7 @@ import toast from 'react-hot-toast';
 import { updatePageSEO, getProductDetailSEO } from '../utils/seo';
 import { getMediaUrl } from '../utils/url';
 
-export default function ProductDetails() {
+export default function ProductDetails({ onNavigate }: { onNavigate: (page: string, params?: string) => void }) {
     const [product, setProduct] = useState<Product | null>(null);
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -177,12 +177,19 @@ export default function ProductDetails() {
         const effectiveStock = hasSizes && hasSizeStockData && selectedSize
             ? (product.size_stock?.[selectedSize] ?? 0)
             : product.stock;
+
+        // Get type from URL as fallback
+        const params = new URLSearchParams(window.location.hash.split('?')[1]);
+        const typeFromUrl = params.get('type');
+        const productType = product.is_combo ? 'combo' : (product.is_garage_sale ? 'garage' : (typeFromUrl || ''));
+        const checkoutParams = `?productId=${product.id}${productType ? `&type=${productType}` : ''}`;
+
         if (!isLoggedIn) {
             setPendingAction(() => () => {
                 if (hasSizes) localStorage.setItem('checkout_size', selectedSize || 'L');
                 else localStorage.removeItem('checkout_size');
                 localStorage.setItem('checkout_quantity', quantity.toString());
-                window.location.hash = `checkout?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
+                onNavigate('checkout', checkoutParams);
             });
             setShowLoginPopup(true);
             return;
@@ -190,7 +197,7 @@ export default function ProductDetails() {
         if (hasSizes) localStorage.setItem('checkout_size', selectedSize || 'L');
         else localStorage.removeItem('checkout_size');
         localStorage.setItem('checkout_quantity', quantity.toString());
-        window.location.hash = `checkout?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
+        onNavigate('checkout', checkoutParams);
         // Store effective stock check result for UI-only use
         void effectiveStock;
     };

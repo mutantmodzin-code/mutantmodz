@@ -62,11 +62,23 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
     addToCart(product);
   };
 
+  const handleBuyNow = () => {
+    if (product.stock <= 0) return;
+    const checkoutParams = `?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
+    if (!isLoggedIn) {
+      setPendingAction(() => () => {
+        onNavigate('checkout', checkoutParams);
+      });
+      setShowLoginPopup(true);
+      return;
+    }
+    onNavigate('checkout', checkoutParams);
+  };
+
   const isNew = product.date_added ? (new Date().getTime() - new Date(product.date_added).getTime()) < 30 * 24 * 60 * 60 * 1000 : false;
   // Fallback for demo if no date_added exists
   const showNewBadge = isNew || (product as any).isNew;
   const isBestSeller = (product as any).isBestSeller;
-  const hasFreeShipping = product.price_num > 999 || (product as any).freeShipping;
 
   const stockStatus = () => {
     if (product.stock === 0) return { label: 'Out of Stock', color: 'bg-zinc-800 text-red-500 border-zinc-700', icon: null };
@@ -104,12 +116,6 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
             <div className={`border ${status.color} px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg`}>
               {status.icon && <status.icon size={10} className="text-white sm:w-[12px]" />}
               {status.label}
-            </div>
-          )}
-          {hasFreeShipping && (
-            <div className="bg-emerald-600 border border-emerald-400 text-white px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 shadow-lg">
-              <Truck size={10} className="sm:w-[12px]" />
-              Free Shipping
             </div>
           )}
           {discount > 0 && (
@@ -200,24 +206,36 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-white/5">
+        <div className="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleAddToCart();
             }}
             disabled={product.stock <= 0}
-            className={`w-full relative h-[44px] group/btn overflow-hidden rounded-xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-red-600' : 'bg-zinc-900/50 cursor-not-allowed opacity-50'}`}
+            className={`relative h-[44px] group/btn overflow-hidden rounded-xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-zinc-800 border border-white/5 hover:border-zinc-700' : 'bg-zinc-900/50 cursor-not-allowed opacity-50'}`}
           >
-            <div className={`absolute inset-0 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[11px] transition-all duration-500 ${product.stock > 0 ? 'sm:group-hover/btn:-translate-y-full' : ''}`}>
-              <ShoppingCart size={16} className="text-white" />
-              {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
+            <div className={`absolute inset-0 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[9px] transition-all duration-500 ${product.stock > 0 ? 'sm:group-hover/btn:-translate-y-full' : ''}`}>
+              <ShoppingCart size={14} className="text-zinc-400" />
+              {product.stock > 0 ? 'Cart' : 'Sold Out'}
             </div>
             {product.stock > 0 && (
-              <div className="absolute inset-0 bg-zinc-800 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[11px] -translate-y-full sm:group-hover/btn:translate-y-0 transition-all duration-500">
-                Add to Cart <ArrowUpRight size={16} />
+              <div className="absolute inset-0 bg-zinc-700 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[9px] -translate-y-full sm:group-hover/btn:translate-y-0 transition-all duration-500">
+                Add <ArrowUpRight size={14} />
               </div>
             )}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleBuyNow();
+            }}
+            disabled={product.stock <= 0}
+            className={`relative h-[44px] group/buy overflow-hidden rounded-xl transition-all duration-500 active:scale-95 ${product.stock > 0 ? 'bg-red-600 shadow-lg shadow-red-600/20' : 'bg-zinc-900/50 cursor-not-allowed opacity-50'}`}
+          >
+            <div className="absolute inset-0 flex items-center justify-center gap-2 text-white font-black uppercase tracking-widest text-[9px]">
+               Buy Now
+            </div>
           </button>
         </div>
       </div>

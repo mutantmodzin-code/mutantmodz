@@ -63,31 +63,31 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
   home: {
     title: 'Mutant Modz – Best Pitshop & Bike Accessories in Coimbatore',
     description: 'Looking for the best Pit Stop in Coimbatore? Mutant Modz is your #1 pitshop for premium bike accessories, helmets, riding gear, and custom modifications in Singanallur. Shop Royal Enfield accessories & more.',
-    keywords: 'pitshop Coimbatore, pit shop in Coimbatore, Mutant Modz Coimbatore, bike accessories Singanallur, premium helmets Coimbatore, Royal Enfield accessories, bike modding shop Tamil Nadu, mutantmodz, mutant modz',
+    keywords: 'mutant modz, motorcycle accessories shop near me, helmet shop near me, bike accessories near me, helmet shop coimbatore, garage in periyar nagar coimbatore, helmet repair shop near me, helmet shop in coimbatore, bike accessories nearby, mutant, bike accessories shop near me, near by bike accessories shop, local helmet shop near me',
     canonical: 'https://www.mutantmodz.in/',
   },
   products: {
     title: 'Premium Bike Accessories Online – Royal Enfield, KTM & more | Mutant Modz',
     description: 'Shop top-rated bike accessories in Coimbatore. Huge selection of Royal Enfield accessories, crash guards, LED lights and performance parts with fast delivery across Tamil Nadu.',
-    keywords: 'bike accessories Coimbatore, buy bike accessories online, Royal Enfield accessories shop, KTM parts Coimbatore, buy aftermarket bike parts Tamil Nadu',
+    keywords: 'motor bike accessories shop near me, bike accessories store near me, nearby bike accessories, bike spare parts shop near me, bike gear accessories shop near me, bike protection accessories, top rated helmet shop near me',
     canonical: 'https://www.mutantmodz.in/shop',
   },
   helmets: {
     title: 'Premium Helmets Coimbatore – AGV, Axor, Steelbird & more | Mutant Modz',
     description: 'Find the best premium helmets in Coimbatore. ISI and DOT certified helmets for ultimate safety and performance. Full face, modular & motocross helmets at Mutant Modz.',
-    keywords: 'premium helmets Coimbatore, buy helmet Coimbatore, best helmet shop Coimbatore, Axor helmets Coimbatore, motorbike helmet price Tamil Nadu',
+    keywords: 'helmet shop near me, helmet shop coimbatore, helmet shop in coimbatore, helmet repair shop near me, helmet repairing shop, helmets for kids near me, helmet shop.near me, helmet light, top rated helmet shop near me, helmet shops near me, helmet, helmet spare parts shop near me, helmet store near me, helmet parts shop near me, helmet repair shop coimbatore, local helmet shop near me, steelbird helmet near me',
     canonical: 'https://www.mutantmodz.in/helmets',
   },
   accessories: {
     title: 'Custom Bike Modding & Accessories Coimbatore | Mutant Modz',
     description: 'Transform your ride with the best bike modding shop in Tamil Nadu. We offer premium crash guards, LED lights, and custom modifications for all major motorcycle brands.',
-    keywords: 'bike modification shop Tamil Nadu, bike modding Coimbatore, performance accessories Coimbatore, bike customization shop near me',
+    keywords: 'bike accessories near me, bike accessories nearby, bike accessories shop near me, bike accessories, near by bike accessories shop, nearby bike accessories, nearby bike accessories shop, bike accessory shop near me, bike accessories coimbatore, coimbatore bike accessories shop, near me bike accessories shop, tail tidy shop near me, bike mods shop near me, bike accessories fitting near me',
     canonical: 'https://www.mutantmodz.in/accessories',
   },
   gear: {
     title: 'Riding Gear & Jackets Coimbatore – Protective & Stylish | Mutant Modz',
     description: 'Professional motorcycle riding gear in Coimbatore. CE-armoured jackets, gloves, and protective boots for serious riders. Shop the collection at Mutant Modz.',
-    keywords: 'riding gear Coimbatore, riding jacket Tamil Nadu, motorcycle protective gear Coimbatore, buy riding gloves Coimbatore',
+    keywords: 'bike gears shop near me, bike gear accessories shop near me, studs shop near me, riding gear Coimbatore, riding jacket Tamil Nadu',
     canonical: 'https://www.mutantmodz.in/gear',
   },
   luggage: {
@@ -129,7 +129,7 @@ export const PAGE_SEO: Record<string, SEOConfig> = {
   'garage-sale': {
     title: 'Garage Sale – Bike Accessories Clearance | Mutant Modz Coimbatore',
     description: 'Unbeatable prices on clearance bike accessories, helmets, and gear. Top-quality parts at garage sale prices in Coimbatore. Shop while stocks last.',
-    keywords: 'discounted bike accessories Coimbatore, cheap bike parts Tamil Nadu, bike gear clearance Coimbatore, helmet sale Tamil Nadu',
+    keywords: 'two spares, bike spare parts shop near me, bike spare part shop near me, garage in neelikonampalayam coimbatore, bike scratch guard shop near me, muzzleloader',
     canonical: 'https://www.mutantmodz.in/garage-sale',
   },
   blog: {

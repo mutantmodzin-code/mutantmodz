@@ -27,7 +27,18 @@ export default function Category({ onNavigate }: CategoryProps) {
       const hash = window.location.hash;
       const catMatch = hash.match(/[?&]cat=([^&]+)/);
       const typeMatch = hash.match(/[?&]type=([^&]+)/);
-      const catValue = catMatch ? decodeURIComponent(catMatch[1]) : (typeMatch ? decodeURIComponent(typeMatch[1]) : '');
+      let catValue = catMatch ? decodeURIComponent(catMatch[1]) : (typeMatch ? decodeURIComponent(typeMatch[1]) : '');
+      
+      // Fallback for direct SEO paths (e.g. /helmets)
+      if (!catValue && window.location.pathname && window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+        const path = window.location.pathname.slice(1).replace(/\/$/, '');
+        if (path.includes('helmets')) catValue = 'helmets';
+        else if (path.includes('accessories')) catValue = 'accessories';
+        else if (path.includes('gear')) catValue = 'gear';
+        else if (path.includes('luggage')) catValue = 'luggage';
+        else if (path.includes('super')) catValue = 'super';
+      }
+
       setCategoryName(catValue);
 
       // Dynamic SEO for category type

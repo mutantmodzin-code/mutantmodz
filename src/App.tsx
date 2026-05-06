@@ -32,16 +32,35 @@ function AppContent() {
   const [isMenuDrawerOpen, setIsMenuDrawerOpen] = useState(false);
   const { showLoginPopup, setShowLoginPopup } = useUserAuth();
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.slice(1).split('?')[0] || 'home';
-      setCurrentPage(hash);
+    const handleNavigation = () => {
+      // First check hash (for existing SPA behavior)
+      let hash = window.location.hash.slice(1);
+      
+      // If no hash, check path (for SEO / direct links like /about or /category?type=helmets)
+      if (!hash && window.location.pathname && window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+        const path = window.location.pathname.slice(1).replace(/\/$/, ''); // Remove leading and trailing slash
+        
+        // Map clean paths to internal routing state
+        if (path === 'helmets') hash = 'category?type=helmets';
+        else if (path === 'accessories' || path === 'accessories/lights' || path === 'accessories/jacket') hash = 'category?type=accessories';
+        else if (path === 'shop') hash = 'products';
+        else if (path === 'about-us') hash = 'about';
+        else hash = path; // Default mapping (e.g., /contact -> contact)
+      }
+
+      const page = hash.split('?')[0] || 'home';
+      setCurrentPage(page);
       window.scrollTo(0, 0); // Scroll to top on navigation
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
+    window.addEventListener('hashchange', handleNavigation);
+    window.addEventListener('popstate', handleNavigation); // Handle path changes too
+    handleNavigation();
 
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleNavigation);
+      window.removeEventListener('popstate', handleNavigation);
+    };
   }, []);
 
   const navigate = (page: string, params?: string) => {

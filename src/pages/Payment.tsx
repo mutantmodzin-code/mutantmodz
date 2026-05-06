@@ -60,17 +60,18 @@ export default function Payment() {
                     let product: Product | undefined;
                     if (type === 'combo') {
                         const combos = await getCombos();
-                        product = combos.find(c => c.id === productId);
+                        product = combos.find(c => String(c.id) === productId);
                     } else if (type === 'garage') {
                         const garage = await getGarageSale();
-                        product = garage.find(g => g.id === productId);
+                        product = garage.find(g => String(g.id) === productId);
                     } else {
                         const products = await getProducts();
-                        product = products.find(p => p.id === productId);
+                        product = products.find(p => String(p.id) === productId);
                     }
 
                     if (product) {
-                        setBuyNowProduct({ product, quantity });
+                        const size = localStorage.getItem('checkout_size');
+                        setBuyNowProduct({ product, quantity, ...(size ? { size } : {}) } as any);
                     }
                 } catch (error) {
                     console.error('Error fetching buy now product:', error);

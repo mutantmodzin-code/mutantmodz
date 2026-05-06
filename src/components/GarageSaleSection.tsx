@@ -31,6 +31,9 @@ function ProductCard({ product, onNavigate }: { product: Product; onNavigate: (p
     
     const checkoutParams = `?productId=${product.id}&type=garage`;
     
+    localStorage.removeItem('checkout_size');
+    localStorage.setItem('checkout_quantity', '1');
+
     if (!isLoggedIn) {
       setPendingAction(() => () => onNavigate('checkout', checkoutParams));
       setShowLoginPopup(true);

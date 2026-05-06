@@ -69,6 +69,17 @@ export default function Payment() {
                         product = products.find(p => String(p.id) === productId);
                     }
 
+                    // Robust Fallback: If not found in the specified type pool, search all pools
+                    if (!product) {
+                        const [allProducts, allCombos, allGarage] = await Promise.all([
+                            getProducts(),
+                            getCombos(),
+                            getGarageSale()
+                        ]);
+                        const allFetched = [...allProducts, ...allCombos, ...allGarage];
+                        product = allFetched.find(p => String(p.id) === productId);
+                    }
+
                     if (product) {
                         const size = localStorage.getItem('checkout_size');
                         setBuyNowProduct({ product, quantity, ...(size ? { size } : {}) } as any);

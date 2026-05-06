@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { getMediaUrl } from '../utils/url';
-import { ShoppingCart, ShoppingBag, ArrowUpRight, CheckCircle, Zap, Flame, Truck, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, ShoppingBag, ArrowUpRight, CheckCircle, Zap, Flame, AlertTriangle } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
-import toast from 'react-hot-toast';
 
 interface ProductCardProps {
   product: Product;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: string) => void;
    className?: string;
  }
  
@@ -65,6 +64,11 @@ export default function ProductCard({ product, onNavigate, className = '' }: Pro
   const handleBuyNow = () => {
     if (product.stock <= 0) return;
     const checkoutParams = `?productId=${product.id}${product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : ''}`;
+    
+    // Reset checkout state so we don't accidentally buy multiple or wrong size from previous views
+    localStorage.removeItem('checkout_size');
+    localStorage.setItem('checkout_quantity', '1');
+
     if (!isLoggedIn) {
       setPendingAction(() => () => {
         onNavigate('checkout', checkoutParams);

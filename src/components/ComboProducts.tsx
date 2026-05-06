@@ -28,6 +28,10 @@ function ComboProductCard({ product, onNavigate }: { product: Product; onNavigat
     e.stopPropagation();
     if (product.stock <= 0) return;
     const checkoutParams = `?productId=${product.id}&type=combo`;
+
+    localStorage.removeItem('checkout_size');
+    localStorage.setItem('checkout_quantity', '1');
+
     if (!isLoggedIn) {
       setPendingAction(() => () => onNavigate('checkout', checkoutParams));
       setShowLoginPopup(true);

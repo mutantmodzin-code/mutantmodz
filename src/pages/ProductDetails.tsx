@@ -125,7 +125,7 @@ export default function ProductDetails({ onNavigate }: { onNavigate: (page: stri
     // If empty but product has stock, default to size L to maintain consistency with Admin recovery logic.
     const rawSizeStock = (product as any)?.size_stock;
     const sizeStockObj = (() => {
-        let s = { M: 0, L: 0, XL: 0 };
+        let s = { S: 0, M: 0, L: 0, XL: 0, XXL: 0 };
         if (rawSizeStock && typeof rawSizeStock === 'object' && Object.keys(rawSizeStock).length > 0) {
             return { ...s, ...rawSizeStock };
         }
@@ -145,7 +145,7 @@ export default function ProductDetails({ onNavigate }: { onNavigate: (page: stri
     // Set default size if applicable and not already set
     useEffect(() => {
         if (hasSizes && !selectedSize) {
-            const sizes = ['M', 'L', 'XL'];
+            const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
             if (hasSizeStockData && sizeStockObj) {
                 // Pick first available size (qty > 0), fallback to first size
                 const firstAvailable = sizes.find(s => (sizeStockObj?.[s] ?? 0) > 0);
@@ -354,7 +354,7 @@ Link: ${window.location.href}`;
                                                 <span className="text-red-500 text-xs font-black">FITMENT GUARANTEED</span>
                                             </div>
                                             <div className="flex gap-4 flex-wrap">
-                                                {['M', 'L', 'XL'].map(size => {
+                                                {['S', 'M', 'L', 'XL', 'XXL'].map(size => {
                                                     const sizeQty = hasSizeStockData ? (sizeStockObj?.[size] ?? 0) : null;
 
                                                     const sizeAvailable = sizeQty === null ? product.stock > 0 : sizeQty > 0;

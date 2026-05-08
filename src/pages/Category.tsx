@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Filter, ArrowLeft } from 'lucide-react';
+import { Search, Filter } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';

@@ -72,6 +72,8 @@ const Products = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
 
+    const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+
     const getSelectedCategoryName = () => {
         if (!formData.category_id) return '';
         return categories.find(c => c.id.toString() === formData.category_id.toString())?.name || '';
@@ -84,7 +86,7 @@ const Products = () => {
         bike_brand: '', bike_model: '',
         description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
         delivery_tn: 0, delivery_south: 0, delivery_north: 0,
-        size_stock: { M: 0, L: 0, XL: 0 }
+        size_stock: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
     });
 
 
@@ -123,8 +125,8 @@ const Products = () => {
 
             let dataToSave = { ...formData, image_url: JSON.stringify(formData.image_urls) };
             if (needsSizes) {
-                const sizeStock = formData.size_stock || { M: 0, L: 0, XL: 0 };
-                const totalStock = Object.values(sizeStock).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0);
+                const sizeStock = { S: 0, M: 0, L: 0, XL: 0, XXL: 0, ...(formData.size_stock || {}) };
+                const totalStock = SIZES.reduce((sum, s) => sum + (parseInt(sizeStock[s]) || 0), 0);
                 dataToSave.stock = totalStock;
                 dataToSave.size_stock = sizeStock;
             } else {
@@ -158,7 +160,7 @@ const Products = () => {
                 bike_brand: '', bike_model: '',
                 description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
                 delivery_tn: 0, delivery_south: 0, delivery_north: 0,
-                size_stock: { M: 0, L: 0, XL: 0 }
+                size_stock: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
             });
 
         } catch (error) {
@@ -228,7 +230,7 @@ const Products = () => {
             urls = [p.image_url || '', '', '', ''];
         }
 
-        let sStock = { M: 0, L: 0, XL: 0 };
+        let sStock = { S: 0, M: 0, L: 0, XL: 0, XXL: 0 };
         let wasRecovered = false;
         try {
             if (p.size_stock) {
@@ -305,7 +307,7 @@ const Products = () => {
         (categoryName && categoryName.toLowerCase() === 'accessories' && (formData.sub_category_type === 'Riding Gear' || formData.sub_category_type === 'Jackets'));
     
     const totalSizeStock = needsSizeStock 
-        ? Object.values(formData.size_stock || {}).reduce((sum, qty) => sum + (parseInt(qty) || 0), 0)
+        ? SIZES.reduce((sum, s) => sum + (parseInt(formData.size_stock?.[s]) || 0), 0)
         : formData.stock;
 
 
@@ -322,7 +324,7 @@ const Products = () => {
                         bike_brand: '', bike_model: '',
                         description: '', discount_percent: 0, is_garage_sale: false, is_combo: false, combo_type: '',
                         delivery_tn: 0, delivery_south: 0, delivery_north: 0,
-                        size_stock: { M: 0, L: 0, XL: 0 }
+                        size_stock: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 }
                     });
 
                     setIsModalOpen(true);
@@ -535,8 +537,8 @@ const Products = () => {
                                         <span>📦 Size-wise Stock Quantity</span>
                                         <div style={{ height: '1px', flex: 1, backgroundColor: '#86efac' }}></div>
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) auto', gap: '1rem', alignItems: 'end' }}>
-                                        {['M', 'L', 'XL'].map(size => (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr) auto', gap: '1rem', alignItems: 'end' }}>
+                                        {SIZES.map(size => (
                                             <div key={size}>
                                                 <label style={{ fontSize: '0.7rem', fontWeight: 800, color: '#15803d', marginBottom: '0.35rem', display: 'block' }}>SIZE {size}</label>
                                                 <input
@@ -544,8 +546,17 @@ const Products = () => {
                                                     style={{ borderRadius: '0.6rem', borderColor: '#86efac', backgroundColor: '#f0fdf4' }}
                                                     type="number"
                                                     min="0"
-                                                    value={formData.size_stock?.[size] ?? 0}
-                                                    onChange={(e) => setFormData({ ...formData, size_stock: { ...formData.size_stock, [size]: parseInt(e.target.value) || 0 } })}
+                                                    value={formData.size_stock?.[size] === undefined ? '' : formData.size_stock[size]}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setFormData({ 
+                                                            ...formData, 
+                                                            size_stock: { 
+                                                                ...formData.size_stock, 
+                                                                [size]: val === '' ? '' : parseInt(val, 10) 
+                                                            } 
+                                                        });
+                                                    }}
                                                 />
                                             </div>
                                         ))}
@@ -571,7 +582,7 @@ const Products = () => {
                                             </p>
                                             <button 
                                                 type="button"
-                                                onClick={() => setFormData({ ...formData, size_stock: { M: 0, L: 0, XL: 0 }, was_recovered: false })}
+                                                onClick={() => setFormData({ ...formData, size_stock: { S: 0, M: 0, L: 0, XL: 0, XXL: 0 }, was_recovered: false })}
                                                 style={{ fontSize: '0.65rem', fontWeight: 800, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', textDecoration: 'underline' }}
                                             >
                                                 Reset All Sizes

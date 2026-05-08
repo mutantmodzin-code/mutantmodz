@@ -145,6 +145,18 @@ router.post('/', async (req, res) => {
 
     console.log('DEBUG: Attempting to add product:', { name, sku, price, is_garage_sale, is_combo, combo_type });
 
+    // Duplicate check for Name and SKU
+    try {
+        const duplicateCheck = await db.query('SELECT name, sku FROM products WHERE LOWER(name) = LOWER($1) OR (sku = $2 AND $2 IS NOT NULL AND $2 != \'\')', [name, sku]);
+        if (duplicateCheck.rows.length > 0) {
+            const dup = duplicateCheck.rows[0];
+            const field = dup.name.toLowerCase() === name.toLowerCase() ? 'Name' : 'SKU';
+            return res.status(400).json({ error: `Duplicate detected: A product with this ${field} already exists.` });
+        }
+    } catch (err) {
+        console.error('Duplicate check failed:', err);
+    }
+
     const finalSku = sku || `SKU-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     try {
         const client = await db.pool.connect();
@@ -303,6 +315,19 @@ router.put('/:id', async (req, res) => {
     }
 
     const { id } = req.params;
+
+    // Duplicate check for Name and SKU (excluding current product)
+    try {
+        const duplicateCheck = await db.query('SELECT name, sku FROM products WHERE (LOWER(name) = LOWER($1) OR (sku = $2 AND $2 IS NOT NULL AND $2 != \'\')) AND id != $3', [name, sku, id]);
+        if (duplicateCheck.rows.length > 0) {
+            const dup = duplicateCheck.rows[0];
+            const field = dup.name.toLowerCase() === name.toLowerCase() ? 'Name' : 'SKU';
+            return res.status(400).json({ error: `Duplicate detected: Another product with this ${field} already exists.` });
+        }
+    } catch (err) {
+        console.error('Duplicate check failed:', err);
+    }
+
     const client = await db.pool.connect();
     try {
         await client.query('BEGIN');

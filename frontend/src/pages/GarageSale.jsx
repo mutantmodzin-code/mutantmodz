@@ -67,7 +67,7 @@ const GarageSale = () => {
         setFormData({
             name: '', brand: '', price: '', stock: 0, sku: '', image_url: '',
             images: ['', '', '', ''],
-            description: '', sku: '',
+            description: '',
             linked_items: [],
             delivery_tn: 0, delivery_south: 0, delivery_north: 0,
             discount_percent: 0

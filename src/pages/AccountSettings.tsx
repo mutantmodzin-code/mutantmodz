@@ -53,8 +53,19 @@ export default function AccountSettings() {
         body: JSON.stringify({ name, phone })
       });
 
+      if (!response.ok) {
+        const text = await response.text();
+        let errorMessage = 'Failed to update profile';
+        try {
+          const data = JSON.parse(text);
+          errorMessage = data.error || errorMessage;
+        } catch (e) {
+          errorMessage = text || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to update profile');
 
       // Update local context
       login({

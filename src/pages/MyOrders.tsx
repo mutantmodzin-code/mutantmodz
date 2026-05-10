@@ -54,7 +54,13 @@ export default function MyOrders() {
             setLoading(true);
             setError('');
             const token = localStorage.getItem('auth_token');
-            if (!token || !user?.uid) return;
+            
+            // Robust token check
+            if (!token || token === 'undefined' || token === 'null' || !user?.uid) {
+                if (!isLoggedIn) setError('Please login to view your orders');
+                setLoading(false);
+                return;
+            }
 
             const response = await fetch(`${API_URL}/invoices/customer/${user.uid}`, {
                 method: 'GET',
@@ -64,9 +70,25 @@ export default function MyOrders() {
                 }
             });
 
+            // Handle non-JSON responses (like "Forbidden")
+            if (!response.ok) {
+                const text = await response.text();
+                let errorMessage = 'Failed to load orders';
+                
+                if (response.status === 403 || response.status === 401) {
+                    errorMessage = 'Session expired or unauthorized. Please log out and sign in again.';
+                } else {
+                    try {
+                        const data = JSON.parse(text);
+                        errorMessage = data.error || errorMessage;
+                    } catch (e) {
+                        errorMessage = text || errorMessage;
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Failed to load orders');
-            
             setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Database connection error');
@@ -144,7 +166,22 @@ export default function MyOrders() {
                     <div className="bg-red-600/5 border border-red-600/20 rounded-[2rem] p-12 text-center max-w-2xl mx-auto backdrop-blur-3xl">
                         <AlertCircle className="text-red-600 mx-auto mb-6" size={48} />
                         <p className="text-white font-black uppercase tracking-widest mb-6">{error}</p>
-                        <button onClick={fetchOrders} className="px-8 py-3 bg-red-600 text-white font-black uppercase rounded-xl hover:bg-red-700 transition-all text-xs">Retry Connection</button>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <button onClick={fetchOrders} className="w-full sm:w-auto px-8 py-3 bg-red-600 text-white font-black uppercase rounded-xl hover:bg-red-700 transition-all text-xs">
+                                Retry Connection
+                            </button>
+                            {(error.includes('Session') || error.includes('unauthorized')) && (
+                                <button 
+                                    onClick={() => {
+                                        localStorage.removeItem('auth_token');
+                                        window.location.reload();
+                                    }} 
+                                    className="w-full sm:w-auto px-8 py-3 bg-white/5 border border-white/10 text-white font-black uppercase rounded-xl hover:bg-white/10 transition-all text-xs"
+                                >
+                                    Re-Login
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 

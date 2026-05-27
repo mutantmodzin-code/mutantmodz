@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Loader2, VideoOff } from 'lucide-react';
 
-import { getMediaUrl } from '../utils/url';
+import { getMediaUrl, getApiUrl } from '../utils/url';
 
 interface Reel {
   id: number;
@@ -19,7 +19,7 @@ export default function VideoReels() {
   useEffect(() => {
     const fetchReels = async () => {
       try {
-        const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+        const apiUrl = getApiUrl();
         const res = await fetch(`${apiUrl}/reels`);
         const data = await res.json();
         

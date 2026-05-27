@@ -4,7 +4,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-import { getMediaUrl } from '../utils/url';
+import { getMediaUrl, getApiUrl } from '../utils/url';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -32,7 +32,7 @@ export default function HeroSlideshow({ onNavigate }: HeroSlideshowProps) {
     useEffect(() => {
         const fetchSlides = async () => {
             try {
-                const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+                const apiUrl = getApiUrl();
                 const res = await fetch(`${apiUrl}/hero`);
                 const data = await res.json();
                 

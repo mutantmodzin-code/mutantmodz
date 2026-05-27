@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare, Zap, Target } from 'lucide-react';
 import { updatePageSEO, PAGE_SEO } from '../utils/seo';
+import { getApiUrl } from '../utils/url';
 
 export default function Contact() {
   useEffect(() => {
@@ -22,7 +23,7 @@ export default function Contact() {
     setIsLoading(true);
     setError('');
     try {
-      const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+      const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

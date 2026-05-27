@@ -5,7 +5,7 @@ import {
   CheckCircle2, Truck, Package, ArrowRight,
   TrendingUp, MapPin, Receipt, ShieldCheck
 } from 'lucide-react';
-import { getMediaUrl } from '../utils/url';
+import { getMediaUrl, getApiUrl } from '../utils/url';
 
 interface OrderItem {
     id: number;
@@ -31,7 +31,7 @@ interface Order {
     items: OrderItem[];
 }
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = getApiUrl();
 
 export default function MyOrders() {
     const { user, isLoggedIn } = useUserAuth();

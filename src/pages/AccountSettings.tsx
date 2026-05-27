@@ -3,7 +3,8 @@ import { User, Mail, Phone, ShieldCheck, ArrowLeft, Save, Loader2, KeyRound, Che
 import { useUserAuth } from '../context/UserAuthContext';
 import toast from 'react-hot-toast';
 
-const API_URL = import.meta.env.VITE_API_URL;
+import { getApiUrl } from '../utils/url';
+const API_URL = getApiUrl();
 
 export default function AccountSettings() {
   const { user, login } = useUserAuth();

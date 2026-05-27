@@ -21,7 +21,10 @@ export const getMediaUrl = (url: string) => {
   }
   
   // 3. Get the API URL from environment variables
-  const apiUrl = (import.meta as any).env?.VITE_API_URL;
+  let apiUrl = (import.meta as any).env?.VITE_API_URL || '';
+  if (apiUrl) {
+    apiUrl = apiUrl.trim().replace(/\/$/, '');
+  }
   
   // 4. Resolve the base path (remove /api if present)
   let base = '';
@@ -51,4 +54,15 @@ export const getMediaUrl = (url: string) => {
   if (!cleanUrl) return '';
   const separator = cleanUrl.startsWith('/') ? '' : '/';
   return `${base}${separator}${cleanUrl}`;
+};
+
+export const getApiUrl = (): string => {
+  let url = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+  if (url) {
+    url = url.trim().replace(/\/$/, '');
+    if (!url.endsWith('/api')) {
+      url = `${url}/api`;
+    }
+  }
+  return url;
 };

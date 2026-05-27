@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { X, ArrowRight, ShieldCheck, Loader2, CheckCircle, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 
-const API_URL = import.meta.env.VITE_API_URL;
+import { getApiUrl } from '../utils/url';
+const API_URL = getApiUrl();
 
 interface LoginPopupProps {
   isOpen: boolean;

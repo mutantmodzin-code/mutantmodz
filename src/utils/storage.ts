@@ -1,8 +1,8 @@
 import { Product } from '../types';
-import { getMediaUrl } from './url';
+import { getMediaUrl, getApiUrl } from './url';
 
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = getApiUrl();
 
 export const getProducts = async (): Promise<Product[]> => {
     try {

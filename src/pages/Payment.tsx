@@ -13,6 +13,7 @@ import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
 import { getProducts, getCombos, getGarageSale } from '../utils/storage';
 import { Product } from '../types';
+import { getApiUrl } from '../utils/url';
 
 const SectionHeader = ({ title, icon: Icon }: { title: string, icon?: any }) => (
     <div className="flex items-center gap-3 mb-8 pb-4 border-b border-zinc-800/50">
@@ -219,7 +220,7 @@ export default function Payment() {
 
             // Create invoice using API
             const authToken = localStorage.getItem('auth_token');
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+            const apiUrl = getApiUrl();
             const invoiceResponse = await fetch(`${apiUrl}/invoices`, {
                 method: 'POST',
                 headers: {

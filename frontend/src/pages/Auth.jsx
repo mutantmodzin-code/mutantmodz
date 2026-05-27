@@ -16,7 +16,11 @@ const Login = () => {
             await login(username, password);
             navigate('/');
         } catch (err) {
-            setError('Invalid credentials. Please try again.');
+            if (err.response && (err.response.status === 400 || err.response.status === 401)) {
+                setError('Invalid credentials. Please try again.');
+            } else {
+                setError('Server connection error. Please verify your backend server status and API configuration.');
+            }
         }
     };
 

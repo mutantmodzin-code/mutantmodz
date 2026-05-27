@@ -1,7 +1,16 @@
 import axios from 'axios';
 
+let baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+if (baseUrl) {
+    baseUrl = baseUrl.trim().replace(/\/$/, '');
+    if (!baseUrl.endsWith('/api')) {
+        baseUrl = `${baseUrl}/api`;
+    }
+}
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+    baseURL: baseUrl,
 });
 
 // Request interceptor: attach token

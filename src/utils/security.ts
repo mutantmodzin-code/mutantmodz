@@ -5,6 +5,8 @@
  */
 
 export const initSecurity = () => {
+    console.log("Console & DevTools protection is disabled on the main page.");
+    /*
     // Disable right-click
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -52,4 +54,5 @@ export const initSecurity = () => {
             })();
         }, 1000);
     }
+    */
 };

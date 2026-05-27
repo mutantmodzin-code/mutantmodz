@@ -86,7 +86,13 @@ const Navbar = ({ onToggleSidebar, isMobile }) => {
         // Use a ref so it persists across renders but resets each session
         const lastOrderIdRef = { current: null };
 
-        const API_BASE = import.meta.env.VITE_API_URL;
+        let API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        if (API_BASE) {
+            API_BASE = API_BASE.trim().replace(/\/$/, '');
+            if (!API_BASE.endsWith('/api')) {
+                API_BASE = `${API_BASE}/api`;
+            }
+        }
 
         // Format a raw DB row / SSE payload into a notification object
         const buildNotification = (data) => ({

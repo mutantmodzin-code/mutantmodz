@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Calendar, ArrowRight } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 const posts = [
   {
@@ -28,6 +30,10 @@ const posts = [
 ];
 
 export default function Blog() {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.blog);
+  }, []);
+
   return (
     <div className="min-h-screen bg-zinc-950 pt-20">
       <section className="py-32 px-6 sm:px-12">

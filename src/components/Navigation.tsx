@@ -22,7 +22,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
   const [isSearchCatOpen, setIsSearchCatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileSearch, setShowMobileSearch] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<any>(null);
   const [activeBrand, setActiveBrand] = useState<string | null>('Royal Enfield');
   const { totalCount } = useCart();
   const { isLoggedIn, user, setShowLoginPopup, logout } = useUserAuth();
@@ -113,12 +113,12 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       icon: Package,
       columns: [
         {
-          title: 'Specialty Combos',
-          links: ['General Combos', 'Riding Combo Kit', 'Monsoon Combo']
+          title: 'Combo Collections',
+          links: ['General Combos', 'Riding Combo Kit', 'Monsoon Combo', 'Service Combo', 'Touring Combo']
         }
       ],
       featured: [
-        { title: 'Monsoon Sale: Up to 30% Off', image: 'https://images.pexels.com/photos/1119796/pexels-photo-1119796.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Offer' }
+        { title: 'Best Value Bundles', image: 'https://images.pexels.com/photos/2116475/pexels-photo-2116475.jpeg?auto=compress&cs=tinysrgb&w=300', badge: 'Popular' }
       ]
     },
     {
@@ -148,12 +148,57 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
       icon: ChevronDown,
       columns: [
         {
-          title: 'Mechanical & Lighting',
-          links: ['MOTORCYCLE ACCESSORIES', 'Lighting', 'Lubricants', 'Performance Parts']
+          title: 'MOTORCYCLE ACCESSORIES',
+          links: [
+            'Bike Protection',
+            'Handlebar',
+            'Electronic',
+            'Essentials',
+            'Rain Cover',
+            'Cameras'
+          ]
         },
         {
-          title: 'Apparel & Storage',
-          links: ['Riding Gear', 'Luggage', 'Apparels', 'Wholesale']
+          title: 'Lighting',
+          links: [
+            'Auxiliary Light',
+            'Headlight',
+            'Hazards',
+            'Light Accessories'
+          ]
+        },
+        {
+          title: 'Riding Gear ',
+          links: [
+            'Jackets',
+            'Jerseys',
+            'Pants',
+            'Gloves',
+            'Boots'
+          ]
+        },
+        {
+          title: 'Luggage',
+          links: [
+            'Racks',
+            'Bag and panniers',
+            'Jerry can',
+            'GPS mount',
+            'Air seat'
+          ]
+        },
+        {
+          title: 'Performance Parts',
+          links: [
+            'Air Filter',
+            'Brake Pads',
+            'Bendpipe',
+            'Chain Sprocket',
+            'Exhaust',
+            'ECU',
+            'Spark Plug',
+            'Oil Filter'
+          ]
         }
       ],
       featured: [
@@ -226,22 +271,22 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
             <button
                onClick={() => onOpenMenu?.()}
                aria-label="Open Navigation Menu"
-               className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-white active:scale-95 touch-manipulation transition-all"
+               className="h-[48px] w-[48px] flex items-center justify-center rounded-xl text-white active:scale-90 touch-manipulation transition-all bg-white/5 border border-white/5"
              >
-              <Menu size={24} strokeWidth={2} />
+              <Menu size={26} strokeWidth={2.5} />
             </button>
 
             <div
               className="flex items-center cursor-pointer group"
               onClick={() => handleNavClick('home')}
             >
-              <div className="font-extrabold tracking-tighter text-xl">
+              <div className="font-extrabold tracking-tight text-lg">
                 <span className="text-white">MUTANT</span>
                 <span className="text-red-600 ml-0.5 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]">MODZ</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-3 pr-1">
                <button
                  onClick={() => setShowMobileSearch(true)}
                  aria-label="Open Search"
@@ -249,27 +294,56 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                >
                 <Search size={20} />
               </button>
-              <button
-                onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
-                aria-label="Account"
-              >
-                {isLoggedIn ? (
-                  <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-[10px] font-black text-white">
-                    {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+              <div className="relative">
+                <button
+                  onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                  className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation"
+                  aria-label="Account"
+                >
+                  {isLoggedIn ? (
+                    <div className="w-8 h-8 sm:w-6 sm:h-6 bg-red-600 rounded-full flex items-center justify-center text-[12px] font-black text-white">
+                      {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                  ) : (
+                    <User size={20} />
+                  )}
+                </button>
+                {/* Mobile User Menu */}
+                {isLoggedIn && showUserMenu && (
+                  <div className="absolute top-full mt-2 right-0 w-48 bg-zinc-950 border border-zinc-800 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] py-2 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-4 py-3 border-b border-zinc-800">
+                      <p className="text-white text-xs font-bold truncate">{user?.displayName}</p>
+                      <p className="text-zinc-500 text-[10px] truncate">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNavigate('settings'); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-zinc-300 hover:text-white transition-all text-xs font-bold"
+                    >
+                      <User size={14} /> Profile Settings
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onNavigate('orders'); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-zinc-300 hover:text-white transition-all text-xs font-bold"
+                    >
+                      <Package size={14} /> My Orders
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); logout(); setShowUserMenu(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-600/10 transition-all text-xs font-black border-t border-zinc-800 mt-1"
+                    >
+                      <LogOut size={14} /> Logout
+                    </button>
                   </div>
-                ) : (
-                  <User size={20} />
                 )}
-              </button>
+              </div>
               <button
                 onClick={onOpenCart}
                 className="min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white transition-colors touch-manipulation relative"
                 aria-label="Open Cart"
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={18} />
                 {totalCount > 0 && (
-                  <span className="absolute top-1 right-0.5 bg-red-600 text-white text-[9px] font-bold w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
+                  <span className="absolute top-1 right-1 bg-red-600 text-white text-[9px] font-black w-[16px] h-[16px] rounded-full flex items-center justify-center shadow-[0_0_10px_rgba(220,38,38,0.6)]">
                     {totalCount}
                   </span>
                 )}
@@ -286,7 +360,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                 className="flex items-center cursor-pointer group shrink-0"
                 onClick={() => handleNavClick('home')}
               >
-                <div className={`font-extrabold tracking-tighter transition-all duration-500 ${isScrolled ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'}`}>
+                <div className={`font-extrabold tracking-tighter transition-all duration-500 ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
                   <span className="text-white group-hover:text-red-500 transition-colors duration-300 drop-shadow-md">MUTANT</span>
                   <span className="text-red-600 group-hover:text-white transition-colors duration-300 ml-1 drop-shadow-[0_0_8px_rgba(220,38,38,0.5)]">MODZ</span>
                 </div>
@@ -344,12 +418,13 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               </div>
 
               <div className="hidden lg:flex items-center space-x-5 shrink-0">
-                <button 
-                  onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
-                  aria-label="Account Menu"
+                <div 
                   className="flex flex-col items-center gap-1 text-zinc-400 hover:text-white transition-colors duration-300 group cursor-pointer relative"
                 >
-                  <div className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1">
+                  <div 
+                    onClick={() => isLoggedIn ? setShowUserMenu(!showUserMenu) : setShowLoginPopup(true)}
+                    className="relative p-2 bg-zinc-900/50 rounded-full group-hover:bg-zinc-800 border border-transparent group-hover:border-zinc-700 transition-all duration-300 group-hover:-translate-y-1"
+                  >
                     {isLoggedIn ? (
                       <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-[9px] font-black text-white">
                         {user?.displayName?.charAt(0)?.toUpperCase() || 'U'}
@@ -369,14 +444,26 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                         <p className="text-zinc-500 text-[10px] truncate">{user?.email}</p>
                       </div>
                       <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate('settings'); setShowUserMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-xs font-bold"
+                      >
+                        <User size={14} /> Profile Settings
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onNavigate('orders'); setShowUserMenu(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-white/5 transition-all text-xs font-bold"
+                      >
+                        <Package size={14} /> My Orders
+                      </button>
+                      <button
                         onClick={(e) => { e.stopPropagation(); logout(); setShowUserMenu(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-red-500 hover:bg-red-600/10 transition-all text-xs font-bold"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-red-500 hover:bg-red-600/10 transition-all text-xs font-bold border-t border-zinc-800 mt-1"
                       >
                         <LogOut size={14} /> Logout
                       </button>
                     </div>
                   )}
-                </button>
+                </div>
                 <div className="w-px h-8 bg-zinc-800"></div>
                 <button
                   onClick={onOpenCart}
@@ -410,7 +497,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
           <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className={`flex justify-between items-center transition-all duration-500 ${isScrolled ? 'h-0 opacity-0 overflow-hidden' : 'h-[52px] opacity-100'}`}>
 
-              <div className="flex items-center space-x-2 flex-1 justify-center xl:justify-start">
+              <div className="flex items-center space-x-2 flex-1 justify-center xl:justify-start overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap px-4">
                 {categoriesData.map((cat) => (
                   <div
                     key={cat.id}
@@ -441,6 +528,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                     <button
                                       key={brand.name}
                                       onMouseEnter={() => setActiveBrand(brand.name)}
+                                      onClick={() => handleNavClick('products', `?brand=${encodeURIComponent(brand.name)}`)}
                                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all font-black uppercase text-[12px] tracking-widest ${activeBrand === brand.name ? 'bg-red-600 text-white shadow-lg shadow-red-600/30' : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
                                     >
                                       {brand.name} <ChevronRight size={14} className={activeBrand === brand.name ? 'translate-x-1 opacity-100' : 'opacity-0'} />
@@ -475,7 +563,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                   {col.links.map((link, lIdx) => (
                                     <li key={link} className={`transition-all duration-500 transform ${activeDropdown === cat.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} style={{ transitionDelay: `${(idx * 50) + (lIdx * 30)}ms` }}>
                                       <button
-                                        onClick={() => handleNavClick('products', `?cat=${encodeURIComponent(link)}`)}
+                                        onClick={() => handleNavClick('products', cat.id === 'combos' ? `?cat=combos&comboType=${encodeURIComponent(link)}` : `?cat=${encodeURIComponent(link)}`)}
                                         className="text-zinc-400 hover:text-white text-[15px] font-bold transition-all duration-300 hover:translate-x-3 flex items-center gap-3 group/link"
                                       >
                                         <div className="w-1.5 h-1.5 rounded-full bg-red-600 opacity-0 group-hover/link:opacity-100 transition-all duration-300 shadow-[0_0_8px_rgba(220,38,38,1)]"></div>
@@ -485,7 +573,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                                   ))}
                                 </ul>
                                 {idx === 0 && (
-                                  <button onClick={() => handleNavClick('products')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
+                                  <button onClick={() => handleNavClick('products', cat.id === 'combos' ? '?cat=combos' : '')} className="mt-6 text-sm font-bold text-white hover:text-red-500 flex items-center gap-1 group/all transition-colors">
                                     View all <ArrowRight size={14} className="group-hover/all:translate-x-1 transition-transform" />
                                   </button>
                                 )}
@@ -521,7 +609,7 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
               </div>
 
               <button
-                onClick={() => handleNavClick('products')}
+                onClick={() => handleNavClick('products', '?cat=garage-sale')}
                 className="group relative inline-flex items-center justify-center shrink-0 ml-4 font-bold hidden xl:flex"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-red-600 via-orange-500 to-red-600 rounded-md opacity-70 group-hover:opacity-100 blur transition-opacity duration-500"></div>
@@ -531,11 +619,12 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
                   <span className="text-xs uppercase tracking-widest text-white z-10">Garage Sale</span>
                 </div>
               </button>
-
             </div>
           </div>
         </div>
-        <AnnouncementBar />
+        <div className="hidden lg:block">
+          <AnnouncementBar />
+        </div>
       </nav>
 
       {showMobileSearch && (
@@ -581,7 +670,8 @@ export default function Navigation({ currentPage, onNavigate, onOpenCart, onOpen
 
       {/* Spacer to prevent content from going under the fixed nav */}
       <div className="h-[56px] lg:hidden"></div>
-      <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[70px] sm:h-[68px]' : 'h-[130px] sm:h-[156px]'}`}></div>
+      <div className={`hidden lg:block transition-all duration-400 ${isScrolled ? 'h-[50px]' : 'h-[90px]'}`}></div>
+      
     </>
   );
 }

@@ -40,15 +40,19 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const data = await response.json();
 
       if (response.ok && data.exists) {
-        // Existing user - send OTP
+        // User exists, initiate OTP verification via email
         setUserData(data.user);
-        setEmail(data.user.email);
-        await handleSendOTP(data.user.email);
-        setStep('otp');
+        try {
+          await handleSendOTP(data.user.email);
+          setStep('otp');
+        } catch (otpErr) {
+          // Error already set by handleSendOTP
+        }
       } else {
         // New user - go to registration
         setStep('register');
       }
+
     } catch (err: any) {
       console.error('Login error:', err);
       setError('Unable to connect to security server');
@@ -121,15 +125,24 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         body: JSON.stringify({
           name: displayName,
           phone: phoneNumber,
-          email: email
+          email: email,
+          is_verified: true
         })
       });
 
       if (!response.ok) throw new Error('Failed to create account');
       
-      // After registration, send OTP to verify email
-      await handleSendOTP(email);
-      setStep('otp');
+      const data = await response.json();
+      setUserData(data.user);
+      
+      // After registration, trigger OTP for email verification
+      try {
+        await handleSendOTP(email);
+        setStep('otp');
+      } catch (otpErr) {
+        // Error handling in handleSendOTP
+      }
+
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -138,15 +151,25 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   };
 
   const completeLogin = (data: any) => {
+    // Determine where the user data is
+    const user = data.user || data;
+    
     // Store JWT token for API authentication
     if (data.token) {
       localStorage.setItem('auth_token', data.token);
     }
+    
+    if (!user || (!user.id && !user.uid)) {
+      console.error('Invalid auth data structure:', data);
+      setError('System Error: Authentication Protocol Mismatch');
+      return;
+    }
+
     login({
-      uid: data.user.id.toString(),
-      phone: phoneNumber,
-      email: data.user.email,
-      displayName: data.user.name
+      uid: (user.id || user.uid).toString(),
+      phone: phoneNumber || user.phone || '',
+      email: user.email || '',
+      displayName: user.name || user.displayName || user.username || 'User'
     });
     setStep('success');
     setTimeout(() => {
@@ -183,11 +206,11 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         <div className="flex items-center justify-between px-8 py-6 border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-center">
-              <ShieldCheck size={20} className="text-red-500" />
+              <KeyRound size={20} className="text-red-500" />
             </div>
             <div>
-              <h2 className="text-white font-black uppercase tracking-widest text-sm">Auth Access</h2>
-              <p className="text-zinc-600 text-[9px] font-bold uppercase tracking-widest">Protocol secure</p>
+              <h2 className="text-white font-black text-sm">Login or Sign Up</h2>
+              <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-wider">Fast & Secure Access</p>
             </div>
           </div>
           <button
@@ -210,12 +233,12 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
           {step === 'phone' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Enter Identity</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Input your primary mobile number</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-black text-white tracking-tighter">Welcome back</h3>
+                <p className="text-zinc-500 text-sm font-medium">Please enter your mobile number to continue.</p>
               </div>
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Mobile Number</label>
                 <div className="flex items-center gap-3">
                   <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-4 text-white text-sm font-bold shrink-0">+91</div>
                   <input
@@ -223,7 +246,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                     maxLength={10}
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
-                    placeholder="9876543210"
+                    placeholder="8807727227"
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-4 px-6 text-white text-lg font-black focus:border-red-600 outline-none transition-colors placeholder:text-zinc-800 tracking-[0.2em]"
                     autoFocus
                   />
@@ -232,11 +255,11 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               <button
                 onClick={handleSubmitPhone}
                 disabled={isLoading}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all group"
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-black uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all group shadow-xl shadow-red-600/20"
               >
                 {isLoading ? <Loader2 className="animate-spin" size={24} /> : (
                   <>
-                    <span className="tracking-[0.2em] text-sm">Verify Identity</span>
+                    <span className="tracking-widest text-sm">Continue</span>
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
@@ -246,19 +269,19 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
           {step === 'otp' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Verification</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Code sent to {userData?.email || email}</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-black text-white tracking-tighter">Enter OTP</h3>
+                <p className="text-zinc-500 text-sm font-medium">Verification code sent to {userData?.email || email}</p>
               </div>
               
-              <div className="p-4 bg-red-600/10 border border-red-600/30 rounded-2xl">
-                <p className="text-red-400 text-sm font-bold text-center">
-                  Check your Gmail and enter the code below (or '000000' for Dev Mode)
+              <div className="p-4 bg-zinc-900 border border-white/5 rounded-2xl">
+                <p className="text-zinc-400 text-xs leading-relaxed text-center">
+                  We've sent a 6-digit verification code to your email. Please enter it below to verify your account.
                 </p>
               </div>
               
               <div className="space-y-4">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">6-Digit Code</label>
+                <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">6-Digit Code</label>
                 <div className="relative">
                   <KeyRound className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
                   <input
@@ -270,26 +293,35 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-5 pl-16 pr-6 text-white text-2xl font-black focus:border-red-600 outline-none transition-colors tracking-[0.5em]"
                   />
                 </div>
+                <div className="flex justify-end">
+                  <button 
+                    onClick={() => handleSendOTP(userData?.email || email)}
+                    disabled={isLoading}
+                    className="text-[10px] font-bold text-zinc-500 hover:text-red-500 uppercase tracking-widest transition-colors mr-2"
+                  >
+                    Resend Code
+                  </button>
+                </div>
               </div>
               <button
                 onClick={handleVerifyOTP}
                 disabled={isLoading}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all"
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 text-white font-bold uppercase py-5 rounded-2xl flex items-center justify-center gap-4 transition-all shadow-xl shadow-red-600/20"
               >
-                {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Finalize Authentication"}
+                {isLoading ? <Loader2 className="animate-spin" size={24} /> : "Verify & Login"}
               </button>
             </div>
           )}
 
           {step === 'register' && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tighter">Initialize User</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Setup your protocol profile</p>
+              <div className="space-y-3">
+                <h3 className="text-3xl font-black text-white tracking-tighter">Create Account</h3>
+                <p className="text-zinc-500 text-sm font-medium">Join the Mutant Mods community today.</p>
               </div>
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Full Name</label>
+                  <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Full Name</label>
                   <input
                     type="text"
                     value={displayName}
@@ -298,7 +330,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                   />
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Email Address</label>
+                  <label className="text-xs font-black text-zinc-500 uppercase tracking-widest">Email Address</label>
                   <input
                     type="email"
                     value={email}
@@ -323,8 +355,8 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                 <CheckCircle size={48} className="animate-bounce" />
               </div>
               <div className="text-center space-y-2">
-                <h3 className="text-3xl font-black text-white uppercase tracking-tight">Access Granted</h3>
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">Redirecting to Interface...</p>
+                <h3 className="text-3xl font-black text-white tracking-tight">Access Granted</h3>
+                <p className="text-zinc-500 text-xs font-black uppercase tracking-wider">Welcome to Mutant Mods</p>
               </div>
             </div>
           )}
@@ -333,9 +365,9 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         {/* Footer */}
         <div className="p-8 border-t border-white/5 bg-black/50">
           <div className="flex items-center gap-4 opacity-50">
-            <ShieldCheck size={16} className="text-red-500" />
-            <p className="text-[8px] font-black text-zinc-500 uppercase tracking-[0.1em]">
-              Encrypted session. 256-bit AES protection active.
+            <ShieldCheck size={16} className="text-zinc-500" />
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+              Secure 256-bit SSL Encryption
             </p>
           </div>
         </div>
@@ -343,4 +375,3 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     </>
   );
 }
-

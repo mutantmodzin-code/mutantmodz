@@ -1,6 +1,9 @@
 export interface Product {
     id: string;
+    sku?: string;
     category: string;
+    category_id?: number | string;
+    category_name?: string;
     name: string;
     description: string;
     price: string;
@@ -12,10 +15,22 @@ export interface Product {
     brand?: string;
     bike_brand?: string;
     bike_model?: string;
-    isBestSeller?: boolean;
+    sub_category?: string;
+    sub_category_type?: string;
     isNew?: boolean;
+    created_at?: string;
     freeShipping?: boolean;
+    discount_percent?: number;
+    is_garage_sale?: boolean;
+    is_combo?: boolean;
+    combo_type?: string;
+    garage_sale_type?: string;
+    delivery_tn?: number;
+    delivery_south?: number;
+    delivery_north?: number;
+    size_stock?: Record<string, number>;
 }
+
 
 export type Category = {
     id: string;

@@ -8,14 +8,33 @@
     --accent-glow: 220 38 38 / 0.5;
   }
   
-  html {
+  html, body {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    /* Disable text selection site-wide */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* Prevent callout (iOS long-press menu) */
+    -webkit-touch-callout: none;
   }
 
   body {
-    @apply bg-zinc-950 text-zinc-100 antialiased selection:bg-red-600/30 selection:text-white;
+    @apply bg-zinc-950 text-zinc-100 antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Allow selection only inside input fields and textareas */
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
   }
 }
 

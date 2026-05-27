@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
 import { Plus, Trash, Printer, ShoppingCart, User, PlusCircle, MinusCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Billing = () => {
     const [products, setProducts] = useState([]);
@@ -10,14 +11,23 @@ const Billing = () => {
     const [billItems, setBillItems] = useState([]);
     const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '', address: '' });
     const [isNewCustomer, setIsNewCustomer] = useState(false);
-    const [selectedCustomer, setSelectedCustomer] = useState(null);
+    const [selectedCustomer, setSelectedCustomer] = useState('');
 
     const [skuSearch, setSkuSearch] = useState('');
     const [orderType, setOrderType] = useState('Offline Order');
     const [paymentMethod, setPaymentMethod] = useState('Cash');
+    const [deliveryRegion, setDeliveryRegion] = useState('Tamil Nadu');
+    const [deliveryCharge, setDeliveryCharge] = useState(0);
+
+    const [combos, setCombos] = useState([]);
+    const [garageSaleItems, setGarageSaleItems] = useState([]);
+    const [lastInvoiceId, setLastInvoiceId] = useState(localStorage.getItem('lastInvoiceId') || null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchProducts();
+        fetchCombos();
+        fetchGarageSale();
         fetchCustomers();
     }, []);
 
@@ -26,32 +36,73 @@ const Billing = () => {
         setProducts(res.data);
     };
 
+    const fetchCombos = async () => {
+        const res = await api.get('/combos');
+        setCombos(res.data);
+    };
+
+    const fetchGarageSale = async () => {
+        const res = await api.get('/garage-sale');
+        setGarageSaleItems(res.data);
+    };
+
     const handleSkuSearch = async (e) => {
         const value = e.target.value;
         setSkuSearch(value);
-        if (value.length >= 3) {
+        if (value.length >= 2) {
+            // Check products
             const prod = products.find(p => p.sku === value);
             if (prod && prod.stock > 0) {
-                addItemToBillDirect(prod);
+                addItemToBillDirect(prod, 1, 'product');
                 setSkuSearch('');
+                return;
+            }
+            // Check combos
+            const combo = combos.find(c => c.sku === value);
+            if (combo) {
+                addItemToBillDirect(combo, 1, 'combo');
+                setSkuSearch('');
+                return;
+            }
+            // Check garage sale
+            const gs = garageSaleItems.find(g => g.sku === value);
+            if (gs) {
+                addItemToBillDirect(gs, 1, 'garage_sale');
+                setSkuSearch('');
+                return;
             }
         }
     };
 
-    const addItemToBillDirect = (prod, qty = 1) => {
-        const existingItem = billItems.find(item => item.product_id === prod.id);
+    const addItemToBillDirect = (item, qty = 1, type = 'product') => {
+        let itemKey = `prod_${item.id}`;
+        if (type === 'combo') itemKey = `combo_${item.id}`;
+        if (type === 'garage_sale') itemKey = `gs_${item.id}`;
+        const existingItem = billItems.find(bi => bi.key === itemKey);
+        
         if (existingItem) {
-            setBillItems(billItems.map(item =>
-                item.product_id === prod.id ? { ...item, quantity: item.quantity + qty, line_total: (item.quantity + qty) * item.unit_price } : item
+            setBillItems(billItems.map(bi =>
+                bi.key === itemKey ? { 
+                    ...bi, 
+                    quantity: bi.quantity + qty, 
+                    line_total: bi.unit_price * (bi.quantity + qty)
+                } : bi
             ));
         } else {
             setBillItems([...billItems, {
-                product_id: prod.id,
-                name: prod.name,
+                key: itemKey,
+                product_id: type === 'product' ? item.id : null,
+                combo_id: type === 'combo' ? item.id : null,
+                garage_sale_id: type === 'garage_sale' ? item.id : null,
+                name: (type === 'combo' ? '[COMBO] ' : type === 'garage_sale' ? '[SALE] ' : '') + item.name,
                 quantity: qty,
-                unit_price: prod.price,
-                purchase_price: prod.purchase_price,
-                line_total: prod.price * qty
+                unit_price: parseFloat(item.price),
+                purchase_price: item.purchase_price || 0,
+                discount_percent: item.discount_percent || 0,
+                delivery_tn: parseFloat(item.delivery_tn) || 0,
+                delivery_south: parseFloat(item.delivery_south) || 0,
+                delivery_north: parseFloat(item.delivery_north) || 0,
+                line_total: parseFloat(item.price) * qty
             }]);
         }
     };
@@ -63,18 +114,26 @@ const Billing = () => {
 
     const addItemToBill = () => {
         if (!selectedProduct) return;
-        const prod = products.find(p => p.id === parseInt(selectedProduct));
-        if (!prod) return;
+        
+        const isCombo = selectedProduct.startsWith('combo_');
+        const isGarageSale = selectedProduct.startsWith('gs_');
+        const id = parseInt(selectedProduct.replace('prod_', '').replace('combo_', '').replace('gs_', ''));
+        
+        let item;
+        let type = 'product';
+        if (isCombo) {
+            item = combos.find(c => c.id === id);
+            type = 'combo';
+        } else if (isGarageSale) {
+            item = garageSaleItems.find(g => g.id === id);
+            type = 'garage_sale';
+        } else {
+            item = products.find(p => p.id === id);
+        }
+        if (!item) return;
 
         const qty = parseInt(selectedQty);
-        const existing = billItems.find(item => item.product_id === prod.id);
-        const totalRequested = (existing ? existing.quantity : 0) + qty;
-
-        if (totalRequested > prod.stock) {
-            return alert(`Not enough stock available for ${prod.name}. Max available: ${prod.stock}`);
-        }
-
-        addItemToBillDirect(prod, qty);
+        addItemToBillDirect(item, qty, type);
         setSelectedProduct('');
         setSelectedQty(1);
     };
@@ -84,12 +143,20 @@ const Billing = () => {
     };
 
     const taxable_value = billItems.reduce((sum, item) => sum + item.line_total, 0);
-    const gst_rate = 18; // 18% GST default
-    const total_gst = taxable_value * (gst_rate / 100);
-    const cgst_amount = total_gst / 2;
-    const sgst_amount = total_gst / 2;
-    const igst_amount = 0; // Assuming local sales for now
-    const total = taxable_value + total_gst;
+    const gst_rate = 0; // GST removed as per user request
+    const total_gst = 0;
+    const cgst_amount = 0;
+    const sgst_amount = 0;
+    const igst_amount = 0;
+
+    // Calculate delivery charge based on items and region
+    const calculatedDeliveryCharge = orderType === 'Online Order' ? billItems.reduce((sum, item) => {
+        if (deliveryRegion === 'Tamil Nadu') return sum + (item.delivery_tn * item.quantity);
+        if (deliveryRegion === 'South India') return sum + (item.delivery_south * item.quantity);
+        return sum + (item.delivery_north * item.quantity);
+    }, 0) : Number(deliveryCharge || 0);
+
+    const total = taxable_value + calculatedDeliveryCharge;
 
     const handleCreateBill = async () => {
         if (billItems.length === 0) return alert('Add items to bill');
@@ -107,10 +174,11 @@ const Billing = () => {
                 cgst_amount: item.line_total * (gst_rate / 200),
                 sgst_amount: item.line_total * (gst_rate / 200),
                 igst_amount: 0,
-                taxable_amount: item.line_total
+                taxable_amount: item.line_total,
+                discount_percent: item.discount_percent || 0
             }));
 
-            await api.post('/invoices', {
+            const payload = {
                 customer_id: custId,
                 items: itemsWithGst,
                 subtotal: taxable_value,
@@ -119,13 +187,20 @@ const Billing = () => {
                 total_amount: total,
                 payment_method: paymentMethod,
                 order_type: orderType,
+                delivery_charge: calculatedDeliveryCharge,
                 gst_percentage: gst_rate,
                 cgst_amount,
                 sgst_amount,
                 igst_amount,
                 taxable_value,
                 total_gst
-            });
+            };
+
+            const res = await api.post('/invoices', payload);
+            const newInvoiceId = res.data.id;
+            setLastInvoiceId(newInvoiceId);
+            localStorage.setItem('lastInvoiceId', newInvoiceId);
+            
             alert('Invoice created successfully!');
             setBillItems([]);
             setCustomerInfo({ name: '', phone: '', email: '', address: '' });
@@ -145,9 +220,9 @@ const Billing = () => {
                     <h3 style={{ marginBottom: '1rem' }}>Customer Details</h3>
                     {!isNewCustomer ? (
                         <div style={{ display: 'grid', gap: '1rem' }}>
-                            <select className="input" onChange={(e) => {
+                            <select className="input" value={selectedCustomer?.id || ''} onChange={(e) => {
                                 const c = customers.find(cust => cust.id === parseInt(e.target.value));
-                                setSelectedCustomer(c);
+                                setSelectedCustomer(c || '');
                             }}>
                                 <option value="">Select Existing Customer</option>
                                 {customers.map(c => <option key={c.id} value={c.id}>{c.name} - {c.phone}</option>)}
@@ -174,12 +249,28 @@ const Billing = () => {
                         <div>
                             <label style={{ fontSize: '0.75rem', marginBottom: '0.25rem', display: 'block', fontWeight: 600 }}>Manual Product Search</label>
                             <select className="input" value={selectedProduct} onChange={(e) => setSelectedProduct(e.target.value)}>
-                                <option value="">Choose Product</option>
-                                {products.filter(p => p.stock > 0).map(p => (
-                                    <option key={p.id} value={p.id} style={{ color: p.stock < 10 ? '#ef4444' : 'inherit' }}>
-                                        {p.name} - {p.sku || 'N/A'} (Stock: {p.stock}) (₹{p.price})
-                                    </option>
-                                ))}
+                                <option value="">Choose Item</option>
+                                <optgroup label="Stand-alone Products">
+                                    {products.filter(p => p.stock > 0).map(p => (
+                                        <option key={`prod_${p.id}`} value={`prod_${p.id}`} style={{ color: p.stock < 10 ? '#ef4444' : 'inherit' }}>
+                                            {p.name} - {p.sku || 'N/A'} (Stock: {p.stock}) (₹{p.price}) {parseFloat(p.discount_percent) > 0 ? `[${parseFloat(p.discount_percent).toFixed(0)}% OFF]` : ''}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Curated Combos">
+                                    {combos.map(c => (
+                                        <option key={`combo_${c.id}`} value={`combo_${c.id}`}>
+                                            {c.name} - {c.sku || 'N/A'} (₹{c.price}) {parseFloat(c.discount_percent) > 0 ? `[${parseFloat(c.discount_percent).toFixed(0)}% OFF]` : ''}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="Garage Sale Items">
+                                    {garageSaleItems.map(g => (
+                                        <option key={`gs_${g.id}`} value={`gs_${g.id}`}>
+                                            {g.name} - {g.sku || 'N/A'} (₹{g.price}) {parseFloat(g.discount_percent) > 0 ? `[${parseFloat(g.discount_percent).toFixed(0)}% OFF]` : ''}
+                                        </option>
+                                    ))}
+                                </optgroup>
                             </select>
                         </div>
                         <div>
@@ -194,6 +285,7 @@ const Billing = () => {
                             <tr>
                                 <th>Items</th>
                                 <th style={{ textAlign: 'right' }}>Price</th>
+                                <th style={{ textAlign: 'center' }}>Dis%</th>
                                 <th style={{ textAlign: 'center' }}>Qty</th>
                                 <th style={{ textAlign: 'right' }}>Total</th>
                                 <th></th>
@@ -202,8 +294,12 @@ const Billing = () => {
                         <tbody>
                             {billItems.map((item, idx) => (
                                 <tr key={idx}>
-                                    <td>{item.name}</td>
+                                    <td>
+                                        <div style={{ fontWeight: 600 }}>{item.name}</div>
+                                        <div style={{ fontSize: '0.65rem', color: '#64748b' }}>Inclusive of all taxes</div>
+                                    </td>
                                     <td style={{ textAlign: 'right' }}>₹{item.unit_price}</td>
+                                    <td style={{ textAlign: 'center' }}>{item.discount_percent > 0 ? `${item.discount_percent}%` : '-'}</td>
                                     <td style={{ textAlign: 'center' }}>{item.quantity}</td>
                                     <td style={{ textAlign: 'right' }}>₹{item.line_total.toFixed(2)}</td>
                                     <td><button onClick={() => removeItem(idx)} style={{ color: '#ef4444', border: 'none', background: 'none', cursor: 'pointer' }}><PlusCircle style={{ transform: 'rotate(45deg)' }} size={16} /></button></td>
@@ -221,25 +317,33 @@ const Billing = () => {
                     </h3>
                     <div style={{ display: 'grid', gap: '1rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Subtotal (Taxable):</span>
+                            <span>Subtotal:</span>
                             <span style={{ fontWeight: 600 }}>₹{taxable_value.toFixed(2)}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#64748b' }}>
-                            <span>CGST (9%):</span>
-                            <span>₹{cgst_amount.toFixed(2)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: '#64748b' }}>
-                            <span>SGST (9%):</span>
-                            <span>₹{sgst_amount.toFixed(2)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Total GST (18%):</span>
-                            <span style={{ fontWeight: 600 }}>₹{total_gst.toFixed(2)}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>Delivery Charges:</span>
+                            {orderType === 'Online Order' ? (
+                                <span style={{ fontWeight: 600 }}>₹{calculatedDeliveryCharge.toFixed(2)}</span>
+                            ) : (
+                                <div style={{ position: 'relative', width: '120px' }}>
+                                    <span style={{ position: 'absolute', left: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.875rem' }}>₹</span>
+                                    <input 
+                                        type="number" 
+                                        className="input" 
+                                        style={{ paddingLeft: '1.5rem', height: '32px', fontSize: '0.875rem' }}
+                                        value={deliveryCharge}
+                                        onChange={(e) => setDeliveryCharge(e.target.value)}
+                                    />
+                                </div>
+                            )}
                         </div>
                         <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0' }} />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.25rem' }}>
-                            <span style={{ fontWeight: 700 }}>Grand Total:</span>
-                            <span style={{ fontWeight: 700, color: '#2563eb' }}>₹{total.toFixed(2)}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div>
+                                <span style={{ fontWeight: 700, fontSize: '1.25rem' }}>Grand Total:</span>
+                                <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>(Inclusive of all taxes)</div>
+                            </div>
+                            <span style={{ fontWeight: 700, fontSize: '1.25rem', color: '#2563eb' }}>₹{total.toFixed(2)}</span>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
                             <div>
@@ -258,7 +362,23 @@ const Billing = () => {
                                     <option value="COD">COD</option>
                                 </select>
                             </div>
+                            {orderType === 'Online Order' && (
+                                <div style={{ gridColumn: 'span 2' }}>
+                                    <label style={{ fontSize: '0.875rem', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>Delivery Region</label>
+                                    <select className="input" value={deliveryRegion} onChange={(e) => setDeliveryRegion(e.target.value)}>
+                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                        <option value="South India">South India</option>
+                                        <option value="Rest of India">Rest of India</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
+                        {orderType === 'Online Order' && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                                <span>Delivery Charge:</span>
+                                <span style={{ fontWeight: 600 }}>₹{calculatedDeliveryCharge.toFixed(2)}</span>
+                            </div>
+                        )}
                     </div>
                     <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem', padding: '1rem' }} onClick={handleCreateBill}>
                         Confirm and Generate Invoice
@@ -268,7 +388,17 @@ const Billing = () => {
                 <div className="card" style={{ backgroundColor: '#2563eb', color: 'white' }}>
                     <h3 style={{ marginBottom: '1rem' }}>Quick Print</h3>
                     <p style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '1.5rem' }}>Print the last invoice generated instantly.</p>
-                    <button className="btn" style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}>
+                    <button 
+                        className="btn" 
+                        style={{ width: '100%', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', cursor: !lastInvoiceId ? 'not-allowed' : 'pointer' }}
+                        onClick={() => {
+                            if (lastInvoiceId) {
+                                navigate(`/invoices?print=${lastInvoiceId}`);
+                            } else {
+                                alert('No recent invoice found to print.');
+                            }
+                        }}
+                    >
                         <Printer size={18} /> Print Last Bill
                     </button>
                 </div>

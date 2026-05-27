@@ -13,57 +13,57 @@ const KB: { patterns: RegExp[]; response: string }[] = [
     {
         patterns: [/hello|hi|hey|good\s*(morning|afternoon|evening)|namaste|howdy/i],
         response:
-            "👋 Welcome to **Mutant Modz** Customer Support. I'm your support agent. State your objective: products, location, or technical support. 🏍️",
+            "👋 Welcome to **Mutant Modz** Customer Support. How can I help you today? You can ask about our products, location, or store hours. 🏍️",
     },
     {
         patterns: [/product|sell|stock|availabl|what.*have|what.*offer|catalog/i],
         response:
-            "🛒 **Hardware Manifest**:\n\n• **Elite Helmets** – MT, SMK, Axor (₹2,499 – ₹7,999)\n• **Riding Hardware** – Jackets, Gloves, Armor\n• **Direct Mods** – LED Hub, Performance Exhaust, Carbon Panels\n\nAccess the **Products** sector for full sequence.",
+            "🛒 **Our Products**:\n\n• **Elite Helmets** – MT, SMK, Axor (₹2,499 – ₹7,999)\n• **Riding Gear** – Jackets, Gloves, Armor\n• **Modifications** – LED Hub, Performance Exhaust, Carbon Panels\n\nAccess the **Products** page for full details.",
     },
     {
         patterns: [/helmet/i],
         response:
-            "🪖 **Ballistic Protection**:\n\n• **MT Revenge 2** – ₹4,999 (Elite Tier)\n• **SMK Twister** – ₹3,499 (Industrial Standard)\n• **Axor Apex** – ₹5,499 (Dual Visor Array)\n\nAll items are DOT/ISI validated.",
+            "🪖 **Helmets**:\n\n• **MT Revenge 2** – ₹4,999 (Premium)\n• **SMK Twister** – ₹3,499 (Standard)\n• **Axor Apex** – ₹5,499 (Dual Visor)\n\nAll items are DOT/ISI certified.",
     },
     {
         patterns: [/gear|glove|jacket|guard|suit|riding wear/i],
         response:
-            "🧤 **Tactical Gear**:\n\n• **Pro Gloves** – ₹899 (Haptic Ready)\n• **Command Jacket** – ₹4,499 (Weatherproof)\n• **Impact Guards** – ₹1,299 (Adjustable)",
+            "🧤 **Riding Gear**:\n\n• **Pro Gloves** – ₹899\n• **Riding Jacket** – ₹4,499\n• **Guards** – ₹1,299",
     },
     {
         patterns: [/modif|custom|mod|exhaust|led|light|strip|carbon|air filter|performance/i],
         response:
-            "🔧 **Modification Protocols**:\n\n• **LED Matrix** – ₹1,999 (6000K)\n• **High-Flow Exhaust** – ₹3,999\n• **Performance Filtration** – ₹1,799\n• **Carbon Accents** – ₹699",
+            "🔧 **Modifications**:\n\n• **LED Matrix** – ₹1,999\n• **High-Flow Exhaust** – ₹3,999\n• **Performance Filter** – ₹1,799\n• **Carbon Accents** – ₹699",
     },
     {
         patterns: [/location|address|where|find|directions?|map|reach|place|shop|store/i],
         response:
-            "📍 **Base Coordinates**:\n\n**Mutant Modz HQ**\nOpposite Vibgyor School, Uppilipalayam\nCoimbatore, Tamil Nadu\n\nNavigation data available on **Contact** page.",
+            "📍 **Location**:\n\n**Mutant Modz HQ**\nOpposite Vibgyor School, Uppilipalayam\nCoimbatore, Tamil Nadu\n\nSee the **Contact** page for directions.",
     },
     {
         patterns: [/time|hour|open|close|timing|when.*open|schedule|day/i],
         response:
-            "🕐 **Operational Window**:\n\n• **Mon – Sat**: 1000 - 2000 HRS\n• **Sunday**: 1000 - 1800 HRS",
+            "🕐 **Store Hours**:\n\n• **Mon – Sat**: 10:00 AM - 8:00 PM\n• **Sunday**: 10:00 AM - 6:00 PM",
     },
     {
         patterns: [/phone|call|number|contact|reach|talk|speak/i],
         response:
-            "📞 **Comms Channel**:\n\n• **Direct Line**: +91 93426 37975\n• **Encryption**: info@mutantmodz.com",
+            "📞 **Contact Channels**:\n\n• **Phone**: +91 88077 27227\n• **Email**: info@mutantmodz.com",
     },
     {
         patterns: [/thank|thanks|great|perfect|awesome|nice/i],
-        response: "🦾 Objective complete. Happy riding, user. Protocol ending. 🔥"
+        response: "Happy to help! Ride safe. 🔥"
     }
 ];
 
 const FALLBACK =
-    "🤖 Search parameters not recognized. Try querying:\n• \"Hardware list\"\n• \"Base coordinates\"\n• \"Operational hours\"\n• \"Comms channel\"";
+    "🤖 I didn't quite catch that. Try asking about:\n• \"Products\"\n• \"Location\"\n• \"Timing\"\n• \"Contact\"";
 
 const QUICK_PROMPTS = [
-    'Hardware list?',
-    'Base coordinates?',
-    'Operational hours?',
-    'Comms channel?',
+    'Products?',
+    'Store Location?',
+    'Store Timing?',
+    'Contact Info?',
 ];
 
 function getBotResponse(input: string): string {
@@ -92,7 +92,7 @@ export default function ChatBot() {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: 0,
-            text: "👋 AI Logistic Officer online. Ready to decode your inquiries about Mutant Modz hardware and operations.",
+            text: "👋 Hello! Welcome to Mutant Modz. How can I help you today?",
             sender: 'bot',
             timestamp: new Date(),
         },
@@ -157,7 +157,7 @@ export default function ChatBot() {
 
             {/* Chat Interface */}
             <div
-                className={`fixed bottom-28 right-6 z-50 w-[400px] max-w-[calc(100vw-48px)] flex flex-col rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] border border-white/5 transition-all duration-700 origin-bottom-right glass-card ${isOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-90 opacity-0 pointer-events-none translate-y-20'
+                className={`fixed bottom-28 sm:bottom-28 right-6 z-50 w-[400px] max-w-[calc(100vw-48px)] flex flex-col rounded-[2.5rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)] border border-white/5 transition-all duration-700 origin-bottom-right glass-card ${isOpen ? 'scale-100 opacity-100 pointer-events-auto' : 'scale-90 opacity-0 pointer-events-none translate-y-20'
                     }`}
                 style={{ height: '600px' }}
             >
@@ -167,10 +167,10 @@ export default function ChatBot() {
                         <Bot size={24} className="text-white" />
                     </div>
                     <div className="flex-1">
-                        <p className="text-white font-black text-xs uppercase tracking-widest">LOGISTICS AI</p>
+                        <p className="text-white font-black text-xs uppercase tracking-widest">MUTANT MODZ</p>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Protocol Active</p>
+                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">ONLINE</p>
                         </div>
                     </div>
                     <button onClick={() => setIsOpen(false)} className="text-zinc-600 hover:text-white transition-colors">

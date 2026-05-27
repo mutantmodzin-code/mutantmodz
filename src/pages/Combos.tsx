@@ -1,4 +1,4 @@
-import { ShoppingCart, Flame, Shield, ArrowUpRight, Zap, Target } from 'lucide-react';
+import { ArrowUpRight, Target } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const combos = [
@@ -52,7 +52,7 @@ export default function Combos() {
   const { addToCart } = useCart();
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-20">
+    <div className="min-h-screen bg-zinc-950 pt-44 pb-20 px-6 sm:px-12">
       <section className="py-32 px-6 sm:px-12">
         <div className="max-w-7xl mx-auto space-y-24">
           <div className="text-center space-y-6">

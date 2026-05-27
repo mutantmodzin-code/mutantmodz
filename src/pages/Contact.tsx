@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, MessageSquare, Zap, Target } from 'lucide-react';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function Contact() {
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO.contact);
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -9,14 +14,32 @@ export default function Contact() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({ name: '', email: '', phone: '', message: '' });
-    }, 3000);
+    setIsLoading(true);
+    setError('');
+    try {
+      const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send message');
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      }, 4000);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -30,15 +53,15 @@ export default function Contact() {
     {
       icon: MapPin,
       label: 'Address',
-      value: 'Opposite Vibgyor School, Uppilipalayam, Coimbatore',
-      link: 'https://maps.google.com',
-      sub: 'Our Location'
+      value: 'Singanallur, Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015',
+      link: 'https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7',
+      sub: 'Our Location (Singanallur)'
     },
     {
       icon: Phone,
       label: 'Call Us',
-      value: '+91 93426 37975',
-      link: 'tel:+919342637975',
+      value: '+91 88077 27227',
+      link: 'tel:+918807727227',
       sub: 'Phone Number'
     },
     {
@@ -51,8 +74,8 @@ export default function Contact() {
     {
       icon: MessageSquare,
       label: 'WhatsApp Us',
-      value: '+91 93426 37975',
-      link: 'https://wa.me/919342637975',
+      value: '+91 88077 27227',
+      link: 'https://wa.me/918807727227',
       sub: 'Message Us'
     }
   ];
@@ -61,7 +84,7 @@ export default function Contact() {
     <div className={`min-h-screen bg-zinc-950 transition-opacity duration-1000`}>
 
       {/* Communication Hub Header */}
-      <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[40vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-black">
           <img
             src="https://images.pexels.com/photos/1715184/pexels-photo-1715184.jpeg"
@@ -72,15 +95,15 @@ export default function Contact() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-950/60 to-zinc-950"></div>
 
         <div className="max-w-5xl mx-auto relative z-10 px-6 text-center pt-20">
-          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-4 py-2 rounded-full mb-8">
-            <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 px-3 py-1.5 rounded-full mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.4em]">Ready to Contact</span>
           </div>
-          <h1 className="text-7xl sm:text-9xl font-black text-white tracking-tighter leading-none uppercase mb-6">
+          <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter leading-tight uppercase mb-4">
             GET IN <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">TOUCH</span>
           </h1>
-          <p className="text-lg text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] text-[12px] opacity-80">
+          <p className="text-sm text-zinc-500 font-bold max-w-2xl mx-auto uppercase tracking-[0.3em] opacity-80 leading-relaxed">
             Get in touch with the Mutant Modz support team.
           </p>
         </div>
@@ -91,11 +114,11 @@ export default function Contact() {
         <div className="max-w-[1700px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-20">
 
           {/* Methods Array (Left Side) */}
-          <div className="lg:col-span-5 space-y-8 sm:space-y-10">
-            <div className="space-y-4 mb-8 sm:mb-16">
-              <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">CONTACT <span className="text-red-600">OPTIONS</span></h2>
-              <div className="w-16 h-1 bg-red-600"></div>
-              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Choose how you want to contact us</p>
+          <div className="lg:col-span-5 space-y-6 sm:space-y-8">
+            <div className="space-y-3 mb-6 sm:mb-10">
+              <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">CONTACT <span className="text-red-600">OPTIONS</span></h2>
+              <div className="w-12 h-1 bg-red-600"></div>
+              <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[10px]">Choose how you want to contact us</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 sm:gap-6">
@@ -109,9 +132,9 @@ export default function Contact() {
                     <method.icon size={24} />
                   </div>
                   <div className="space-y-0.5 sm:space-y-1 min-w-0">
-                    <div className="text-[10px] sm:text-[10px] font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
+                    <div className="text-xs font-black text-red-500 uppercase tracking-widest">{method.sub}</div>
                     <div className="text-white font-black text-base sm:text-lg uppercase tracking-tight group-hover:text-red-600 transition-colors line-clamp-1">{method.label}</div>
-                    <div className="text-zinc-500 text-[12px] sm:text-[13px] font-medium uppercase truncate max-w-xs">{method.value}</div>
+                    <div className="text-zinc-500 text-[12px] sm:text-[13px] font-medium uppercase break-words leading-snug">{method.value}</div>
                   </div>
                 </a>
               ))}
@@ -124,7 +147,7 @@ export default function Contact() {
               <div className="relative z-10 space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-3">
                   <Clock size={24} className="animate-pulse" />
-                  <h4 className="font-black uppercase tracking-widest text-sm">WORKING HOURS</h4>
+                  <h4 className="font-black uppercase tracking-widest text-base">WORKING HOURS</h4>
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between border-b border-white/20 pb-2">
@@ -142,19 +165,19 @@ export default function Contact() {
 
           {/* Contact Form (Right Side) */}
           <div className="lg:col-span-7">
-            <div className="bg-zinc-900/40 backdrop-blur-3xl p-6 sm:p-20 rounded-2xl sm:rounded-[4rem] border border-white/5 shadow-2xl relative overflow-hidden">
+            <div className="bg-zinc-900/40 backdrop-blur-3xl p-6 sm:p-12 md:p-16 rounded-2xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-transparent"></div>
 
-              <div className="relative z-10 space-y-8 sm:space-y-12">
-                <div className="space-y-3 sm:space-y-4">
-                  <h3 className="text-3xl sm:text-5xl font-black text-white leading-none uppercase tracking-tighter">CONTACT <br /><span className="text-red-600">US</span></h3>
-                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[11px] sm:text-[12px]">Fill the form below and we will contact you</p>
+              <div className="relative z-10 space-y-6 sm:space-y-10">
+                <div className="space-y-2 sm:space-y-3">
+                  <h3 className="text-2xl sm:text-4xl font-black text-white leading-none uppercase tracking-tighter">CONTACT <br /><span className="text-red-600">US</span></h3>
+                  <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[10px]">Fill the form below and we will contact you</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
                     <div className="space-y-2 sm:space-y-3">
-                      <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Your Name</label>
+                      <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Your Name</label>
                       <input
                         type="text"
                         name="name"
@@ -166,7 +189,7 @@ export default function Contact() {
                       />
                     </div>
                     <div className="space-y-2 sm:space-y-3">
-                      <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Email</label>
+                      <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Email</label>
                       <input
                         type="email"
                         name="email"
@@ -180,7 +203,7 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Phone Number</label>
+                    <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Phone Number</label>
                     <input
                       type="tel"
                       name="phone"
@@ -193,7 +216,7 @@ export default function Contact() {
                   </div>
 
                   <div className="space-y-2 sm:space-y-3">
-                    <label className="text-zinc-400 font-black uppercase text-[10px] sm:text-[10px] tracking-widest ml-2 sm:ml-4">Your Message</label>
+                    <label className="text-zinc-400 font-black uppercase text-xs tracking-widest ml-2 sm:ml-4">Your Message</label>
                     <textarea
                       name="message"
                       value={formData.message}
@@ -205,18 +228,27 @@ export default function Contact() {
                     />
                   </div>
 
+                  {error && (
+                    <p className="text-red-500 text-xs font-bold text-center uppercase tracking-wider">{error}</p>
+                  )}
                   <button
                     type="submit"
-                    className={`w-full h-16 sm:h-20 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-xs transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden ${submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
-                      }`}
+                    disabled={isLoading || submitted}
+                    className={`relative w-full h-14 sm:h-16 rounded-xl sm:rounded-2xl font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-[11px] transition-all flex items-center justify-center gap-4 active:scale-95 group overflow-hidden disabled:opacity-80 ${
+                      submitted ? 'bg-green-600 text-white' : 'bg-white text-black hover:bg-red-600 hover:text-white'
+                    }`}
                   >
-                    <div className={`flex items-center gap-4 transition-all duration-500 ${submitted ? '-translate-y-20' : 'translate-y-0'}`}>
+                    <div className={`flex items-center gap-4 transition-all duration-500 ${submitted || isLoading ? '-translate-y-20 opacity-0' : 'translate-y-0 opacity-100'}`}>
                       <Send size={20} className="group-hover:rotate-12 transition-transform" />
                       Send Message
                     </div>
-                    <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${submitted ? 'translate-y-0' : 'translate-y-20'}`}>
+                    <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${submitted ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
                       <Zap size={20} />
-                      Message Sent
+                      Message Sent!
+                    </div>
+                    <div className={`absolute inset-0 flex items-center justify-center gap-4 transition-all duration-500 ${isLoading && !submitted ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+                      <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Sending...
                     </div>
                   </button>
                 </form>
@@ -229,25 +261,47 @@ export default function Contact() {
       {/* Map Section */}
       <section className="py-12 sm:py-24 px-4 sm:px-12 bg-black border-t border-white/5">
         <div className="max-w-[1700px] mx-auto text-center space-y-8 sm:space-y-12">
-          <div className="space-y-4">
-            <Target size={40} className="text-red-600 mx-auto" />
-            <h2 className="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
-            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[11px] sm:text-[12px]">Find us in Coimbatore</p>
+          <div className="space-y-3">
+            <Target size={32} className="text-red-600 mx-auto" />
+            <h2 className="text-2xl sm:text-3xl font-black text-white uppercase tracking-tighter">OUR <span className="text-red-600">LOCATION</span></h2>
+            <p className="text-zinc-500 font-medium uppercase tracking-[0.2em] text-[10px]">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
           </div>
 
-          <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 grayscale contrast-125 brightness-75 hover:grayscale-0 transition-all duration-1000 shadow-2xl">
+          <div className="w-full h-[350px] sm:h-[600px] bg-zinc-900 rounded-2xl sm:rounded-[4rem] overflow-hidden border border-white/5 shadow-2xl relative group">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3916.3947444885!2d76.999000!3d11.016800!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDAxJzAwLjUiTiA3NsKwNTknNTYuNCJF!5e0!3m2!1sen!2sin!4v1234567890"
+              src="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
-              title="Mutant Modz Location"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Mutant Modz Location – Opposite Vibgyor School, Uppilipalayam, Coimbatore"
+              className="grayscale contrast-125 brightness-75 group-hover:grayscale-0 group-hover:brightness-100 group-hover:contrast-100 transition-all duration-1000"
             ></iframe>
+
+            {/* Overlay badge */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+              <div className="flex items-center gap-2 bg-zinc-950/90 backdrop-blur-md border border-red-600/30 px-4 py-2 rounded-full shadow-xl">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse flex-shrink-0"></span>
+                <span className="text-white text-xs font-black uppercase tracking-widest whitespace-nowrap">Mutant Modz — Coimbatore</span>
+              </div>
+            </div>
           </div>
+
+          {/* Get Directions Button */}
+          <a
+            href="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[0.3em] text-xs rounded-2xl transition-all active:scale-95 shadow-xl shadow-red-600/30"
+          >
+            <Target size={16} />
+            Get Directions
+          </a>
         </div>
       </section>
+
     </div>
   );
 }

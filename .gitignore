@@ -21,3 +21,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+server/uploads/
+dist/
+node_modules/
+.DS_Store

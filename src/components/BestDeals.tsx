@@ -6,10 +6,10 @@ import { useCart } from '../context/CartContext';
 import { useUserAuth } from '../context/UserAuthContext';
 
 interface BestDealsProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: string) => void;
 }
 
-function MobileProductCard({ product, onNavigate }: { product: Product; onNavigate: (page: string) => void }) {
+function MobileProductCard({ product, onNavigate }: { product: Product; onNavigate: (page: string, params?: string) => void }) {
   const { addToCart } = useCart();
   const { isLoggedIn, setShowLoginPopup, setPendingAction } = useUserAuth();
 
@@ -34,11 +34,14 @@ function MobileProductCard({ product, onNavigate }: { product: Product; onNaviga
 
   return (
     <div
-      className="flex-shrink-0 w-[180px] sm:w-[200px] snap-start bg-zinc-900/60 border border-white/5 rounded-2xl overflow-hidden flex flex-col touch-manipulation"
-      onClick={() => onNavigate(`productDetails?productId=${product.id}`)}
+      className="flex-shrink-0 w-44 sm:w-[200px] snap-start bg-zinc-900/60 border border-white/5 rounded-2xl overflow-hidden flex flex-col touch-manipulation"
+      onClick={() => {
+        const typeParam = product.is_combo ? '&type=combo' : product.is_garage_sale ? '&type=garage' : '';
+        onNavigate(`productDetails?productId=${product.id}${typeParam}`);
+      }}
     >
       {/* Image area with discount badge */}
-      <div className="relative h-[160px] sm:h-[180px] bg-zinc-800/50 overflow-hidden">
+      <div className="relative h-[130px] sm:h-[180px] bg-zinc-800/50 overflow-hidden">
         <img
           src={imageUrl}
           alt={product.name}
@@ -46,7 +49,7 @@ function MobileProductCard({ product, onNavigate }: { product: Product; onNaviga
           loading="lazy"
         />
         {/* Discount Badge */}
-        <div className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded-lg shadow-lg uppercase tracking-wide">
+        <div className="absolute top-2 left-2 bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md shadow-lg uppercase tracking-wide">
           Save {discountPercent}%
         </div>
       </div>
@@ -98,12 +101,14 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
   useEffect(() => {
     const fetchProducts = async () => {
       const all = await getProducts();
-      // Pick products with highest stock as "best deals"
-      const deals = [...all]
+      
+      // Show high-stock regular products as "Best Deals"
+      const deals = all
+        .filter(p => !p.is_garage_sale && !p.is_combo)
         .sort((a, b) => b.stock - a.stock)
-        .slice(0, 10)
-        .map(p => ({ ...p, isBestSeller: true }));
-      setProducts(deals);
+        .slice(0, 10);
+      
+      setProducts(deals.map(p => ({ ...p, isBestSeller: true })));
     };
     fetchProducts();
   }, []);
@@ -156,34 +161,44 @@ export default function BestDeals({ onNavigate }: BestDealsProps) {
   if (products.length === 0) return null;
 
   return (
-    <section className="py-8 sm:py-16 bg-zinc-950" ref={sectionRef}>
-      <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto">
-        {/* Section Header */}
-        <div className="flex justify-between items-end mb-6 sm:mb-10">
-          <div className="flex items-center gap-3">
-            <Flame size={22} className="text-red-600 animate-pulse" />
+    <section ref={sectionRef} className="py-8 sm:py-16 bg-zinc-950/50 border-t border-white/5 relative overflow-hidden">
+      <div className="px-4 sm:px-8 lg:px-12 max-w-[1700px] mx-auto relative z-10">
+        {/* Header Section */}
+        <div className="flex items-end justify-between mb-6 sm:mb-10">
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-red-600/10 border border-red-600/20 rounded-xl flex items-center justify-center text-red-500">
+              <Flame size={16} className="fill-current" />
+            </div>
             <div>
-              <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tighter uppercase leading-none">
+              <h2 className="text-xl sm:text-3xl lg:text-4xl font-black text-white tracking-tighter uppercase leading-none">
                 BEST <span className="text-red-600">DEALS!!</span>
               </h2>
-              <p className="text-zinc-500 text-[10px] sm:text-xs font-black uppercase tracking-widest mt-1">
-                Limited time offers on top products
+              <p className="text-zinc-500 text-[8px] sm:text-[10px] font-black uppercase tracking-widest mt-1">
+                Top offers on gear.
               </p>
             </div>
           </div>
-          <div className="hidden sm:flex gap-3">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => onNavigate('products', '?cat=garage-sale')}
+              className="text-zinc-500 hover:text-white transition-colors uppercase text-[10px] font-black tracking-[0.3em] mr-4 hidden sm:block"
+            >
+              View All
+            </button>
+            <div className="flex gap-2">
             <button 
               onClick={() => scroll('left')}
-              className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
+              className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} />
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
+              className="w-10 h-10 bg-white/5 border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-red-600 hover:border-red-600 transition-all shadow-xl active:scale-90"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} />
             </button>
+            </div>
           </div>
         </div>
 

@@ -3,10 +3,15 @@ import { Flame } from 'lucide-react';
 import { getProducts } from '../utils/storage';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
+import { updatePageSEO, PAGE_SEO } from '../utils/seo';
 
 export default function GarageSale({ onNavigate }: { onNavigate: (page: string) => void }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    updatePageSEO(PAGE_SEO['garage-sale']);
+  }, []);
 
   useEffect(() => {
     const fetch = async () => {
@@ -25,7 +30,7 @@ export default function GarageSale({ onNavigate }: { onNavigate: (page: string) 
   }, []);
 
   return (
-    <div className={`min-h-screen bg-zinc-950 pt-20 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`min-h-screen bg-zinc-950 pt-44 pb-20 transition-opacity duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
       <section className="relative py-40 px-6 sm:px-12 overflow-hidden">
         <div className="absolute inset-0 bg-red-600/10 blur-[150px] transform -translate-x-1/2 rounded-full"></div>
         <div className="max-w-7xl mx-auto text-center space-y-12">

@@ -140,8 +140,12 @@ const OnlineOrders = () => {
                                     }}>
                                         {order.status || 'Pending'}
                                     </div>
-                                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                                        ₹{parseFloat(order.total_amount).toLocaleString('en-IN')}
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                                            ₹{parseFloat(order.total_amount).toLocaleString('en-IN')}
+                                        </div>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#64748b' }}>(Incl. {parseFloat(order.delivery_charge || 0).toFixed(0)} Delivery)</div>
+                                        <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#94a3b8' }}>(Inclusive of all taxes)</div>
                                     </div>
                                 </div>
                             </div>
@@ -216,17 +220,34 @@ const OnlineOrders = () => {
                                             <Package size={16} /> Mark as Shipped
                                         </button>
                                     </>
+                                ) : order.status === 'Shipped' ? (
+                                    <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '1rem', border: '1px solid #dcfce7' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#16a34a' }}>
+                                            <Clock size={20} />
+                                            <div>
+                                                <p style={{ fontWeight: 800, fontSize: '0.875rem', textTransform: 'uppercase' }}>In Transit</p>
+                                                {order.expected_delivery && <p style={{ fontSize: '0.75rem', opacity: 0.8 }}>Expected: {new Date(order.expected_delivery).toLocaleDateString('en-IN')}</p>}
+                                            </div>
+                                        </div>
+                                        <button 
+                                            className="btn btn-success" 
+                                            style={{ backgroundColor: '#16a34a', borderColor: '#16a34a', color: '#fff', fontWeight: 800, padding: '0.5rem 1rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                                            onClick={() => markAsCompleted(order.id)}
+                                        >
+                                            <CheckCircle size={14} /> Mark as Delivered
+                                        </button>
+                                    </div>
                                 ) : (
                                     <div style={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f0fdf4', padding: '1rem', borderRadius: '1rem', border: '1px solid #dcfce7' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#16a34a' }}>
                                             <CheckCircle size={20} />
                                             <div>
-                                                <p style={{ fontWeight: 800, fontSize: '0.875rem', textTransform: 'uppercase' }}>Shipment Dispatched</p>
-                                                {order.expected_delivery && <p style={{ fontSize: '0.75rem', opacity: 0.8 }}>Estimate: {new Date(order.expected_delivery).toLocaleDateString('en-IN')}</p>}
+                                                <p style={{ fontWeight: 800, fontSize: '0.875rem', textTransform: 'uppercase' }}>Completed & Delivered</p>
+                                                <p style={{ fontSize: '0.75rem', opacity: 0.8 }}>Order successfully processed</p>
                                             </div>
                                         </div>
                                         <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', textTransform: 'uppercase' }}>
-                                            Live on Customer Feed
+                                            Finalized
                                         </div>
                                     </div>
                                 )}

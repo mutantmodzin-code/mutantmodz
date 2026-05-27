@@ -106,7 +106,7 @@ export default function CartDrawer({ isOpen, onClose, onNavigate }: CartDrawerPr
                             <span className="text-white font-black text-xl">₹{totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <button
-                            onClick={() => { onClose(); onNavigate('payment'); }}
+                            onClick={() => { onClose(); onNavigate('checkout'); }}
                             className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-red-700 transition-all active:scale-95 shadow-[0_0_30px_rgba(220,38,38,0.4)]"
                         >
                             Proceed to Checkout

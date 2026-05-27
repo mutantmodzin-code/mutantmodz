@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Bell, Search, User, LogOut, ShoppingBag, X } from 'lucide-react';
+import { Bell, Search, User, LogOut, ShoppingBag, X, Menu } from 'lucide-react';
 
 // ── Loud notification ding via Web Audio API ──────────────────────────────────
 const playNotificationSound = () => {
@@ -55,13 +55,15 @@ const showBrowserNotification = (notif) => {
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
-const Navbar = () => {
+const Navbar = ({ onToggleSidebar, isMobile }) => {
     const { user, logout } = useAuth();
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [pushPermission, setPushPermission] = useState('default');
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
     const dropdownRef = useRef(null);
+    const profileRef = useRef(null);
 
     // Register service worker & request notification permission on mount
     useEffect(() => {
@@ -178,6 +180,9 @@ const Navbar = () => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setShowNotifications(false);
             }
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setShowProfileMenu(false);
+            }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -209,10 +214,17 @@ const Navbar = () => {
     };
 
     return (
-        <nav style={{ height: '70px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2rem', position: 'sticky', top: 0, zIndex: 100 }}>
-            <div style={{ position: 'relative', width: '400px' }}>
-                <Search style={{ position: 'absolute', top: '10px', left: '12px', color: '#94a3b8' }} size={18} />
-                <input className="input" style={{ backgroundColor: '#f8fafc', border: 'none', paddingLeft: '3rem' }} placeholder="Search commands or data..." />
+        <nav style={{ height: '70px', backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: isMobile ? '0 1rem' : '0 2rem', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {isMobile && (
+                    <button onClick={onToggleSidebar} style={{ padding: '0.5rem', color: '#64748b', border: 'none', background: '#f1f5f9', borderRadius: '0.5rem', cursor: 'pointer' }}>
+                        <Menu size={20} />
+                    </button>
+                )}
+                <div style={{ position: 'relative', width: isMobile ? '180px' : '400px' }}>
+                    <Search style={{ position: 'absolute', top: '10px', left: '12px', color: '#94a3b8' }} size={18} />
+                    <input className="input" style={{ backgroundColor: '#f8fafc', border: 'none', paddingLeft: '3rem' }} placeholder="Search..." />
+                </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -363,17 +375,77 @@ const Navbar = () => {
                     )}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '1.5rem', borderLeft: '1px solid #e2e8f0' }}>
-                    <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>{user?.username || 'Admin'}</p>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b' }}>System Administrator</p>
-                    </div>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div ref={profileRef} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '1.5rem', borderLeft: '1px solid #e2e8f0', position: 'relative' }}>
+                    {!isMobile && (
+                        <div style={{ textAlign: 'right' }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>{user?.username || 'Admin'}</p>
+                            <p style={{ fontSize: '0.75rem', color: '#64748b' }}>System Administrator</p>
+                        </div>
+                    )}
+                    <button 
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        style={{ width: 40, height: 40, borderRadius: '50%', backgroundColor: '#2563eb', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', border: 'none', padding: 0 }}
+                        title="Profile menu"
+                    >
                         <User size={20} />
-                    </div>
-                    <button onClick={logout} className="btn" style={{ padding: '0.5rem', color: '#ef4444' }}>
-                        <LogOut size={20} />
                     </button>
+
+                    {/* Profile Dropdown Menu */}
+                    {showProfileMenu && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '60px',
+                            right: 0,
+                            width: '250px',
+                            backgroundColor: 'white',
+                            borderRadius: '0.75rem',
+                            boxShadow: '0 20px 60px -15px rgba(0,0,0,0.2)',
+                            border: '1px solid #e2e8f0',
+                            overflow: 'hidden',
+                            zIndex: 200,
+                            animation: 'fadeInDown 0.2s ease-out'
+                        }}>
+                            {/* Header */}
+                            <div style={{ padding: '1rem', borderBottom: '1px solid #f1f5f9', backgroundColor: '#fafbfd' }}>
+                                <p style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a', margin: '0 0 0.25rem 0' }}>
+                                    {user?.username || 'Admin'}
+                                </p>
+                                <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>System Administrator</p>
+                            </div>
+
+                            {/* Menu Items */}
+                            <div style={{ padding: '0.5rem' }}>
+                                <button
+                                    onClick={() => {
+                                        logout();
+                                        setShowProfileMenu(false);
+                                    }}
+                                    type="button"
+                                    style={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        padding: '0.75rem 1rem',
+                                        backgroundColor: 'transparent',
+                                        border: 'none',
+                                        borderRadius: '0.5rem',
+                                        cursor: 'pointer',
+                                        color: '#ef4444',
+                                        fontWeight: 700,
+                                        fontSize: '0.875rem',
+                                        transition: 'all 0.2s',
+                                        textAlign: 'left'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                >
+                                    <LogOut size={16} />
+                                    Logout
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

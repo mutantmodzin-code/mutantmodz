@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useUserAuth } from './UserAuthContext';
 import { Product } from '../types';
+import toast from 'react-hot-toast';
 
 export interface CartItem {
     product: Product;
@@ -9,7 +10,7 @@ export interface CartItem {
 
 interface CartContextType {
     items: CartItem[];
-    addToCart: (product: Product) => void;
+    addToCart: (product: Product, quantity?: number) => void;
     removeFromCart: (productId: string) => void;
     updateQty: (productId: string, qty: number) => void;
     clearCart: () => void;
@@ -41,15 +42,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(storageKey, JSON.stringify(items));
     }, [items, storageKey]);
 
-    const addToCart = (product: Product) => {
+    const addToCart = (product: Product, quantity: number = 1) => {
+        if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate([100, 50, 100]);
+        }
+        
+        toast.success('Added to cart!', {
+            icon: '🔥',
+            style: { border: '1px solid #dc2626' }
+        });
+        
         setItems(prev => {
             const existing = prev.find(i => i.product.id === product.id);
             if (existing) {
                 return prev.map(i =>
-                    i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+                    i.product.id === product.id ? { ...i, quantity: i.quantity + quantity } : i
                 );
             }
-            return [...prev, { product, quantity: 1 }];
+            return [...prev, { product, quantity }];
         });
     };
 

@@ -2,10 +2,10 @@ import { ShieldCheck, BadgeCheck, RotateCcw, MessageSquareText } from 'lucide-re
 
 export default function TrustBadges() {
   const badges = [
-    { icon: ShieldCheck, title: '100% Secure Payment', desc: 'Safe & secure checkout' },
-    { icon: BadgeCheck, title: '100% Genuine Products', desc: 'Original brands only' },
-    { icon: RotateCcw, title: 'Easy 7-Day Returns', desc: 'Hassle-free returns' },
-    { icon: MessageSquareText, title: 'Chat Support', desc: "We're here to help" },
+    { icon: ShieldCheck, title: '100% Secure Payment', desc: 'Encrypted checkout protocol for safe shopping' },
+    { icon: BadgeCheck, title: 'Genuine Accessories', desc: 'Official parts from premium global brands' },
+    { icon: RotateCcw, title: '30-Day Support', desc: 'Expert technical assistance for every purchase' },
+    { icon: MessageSquareText, title: 'Direct Intelligence', desc: "Professional consultation for Coimbatore riders" },
   ];
 
   return (

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star, ShoppingBag } from 'lucide-react';
+import { X, ChevronDown, User, ShoppingCart, Home, Package, Shield, Bike, Phone, Mail, MapPin, Instagram, Facebook, Flame, Star, ShoppingBag, Zap } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
+import { brands } from '../data/brands';
 
 interface MenuDrawerProps {
   isOpen: boolean;
@@ -92,6 +93,17 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
 
   const categories = [
     {
+      id: 'combos', label: 'Combos', icon: Package,
+      subs: [
+        { label: 'View All Combos', params: '?cat=combos' },
+        { label: 'General Combos', params: '?cat=combos&comboType=General%20Combos' },
+        { label: 'Riding Combo Kit', params: '?cat=combos&comboType=Riding%20Combo%20Kit' },
+        { label: 'Monsoon Combo', params: '?cat=combos&comboType=Monsoon%20Combo' },
+        { label: 'Service Combo', params: '?cat=combos&comboType=Service%20Combo' },
+        { label: 'Touring Combo', params: '?cat=combos&comboType=Touring%20Combo' },
+      ]
+    },
+    {
       id: 'bike', label: 'Shop By Bike', icon: Bike,
       brands: [
         { name: 'KTM', models: ['390/250 Adventure X', 'Gen 3 Duke 390', 'Duke 125', 'RC 125', 'RC 200', 'Duke 200', 'Duke 250', 'ADV 250', 'RC 390', 'Adv 390', 'Duke 390', 'Duke 790'] },
@@ -114,14 +126,6 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
       ]
     },
     {
-      id: 'combos', label: 'Combos', icon: Package,
-      subs: [
-        { label: 'General Combos', params: '?cat=General' },
-        { label: 'Riding Combo Kit', params: '?cat=Riding%20Combo%20Kit' },
-        { label: 'Monsoon Combo', params: '?cat=Monsoon%20Combo' },
-      ]
-    },
-    {
       id: 'helmets', label: 'Helmet & Accessories', icon: Shield,
       subs: [
         { label: 'Helmet', params: '?cat=Helmet' },
@@ -133,12 +137,39 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
       id: 'additional', label: 'Other Categories', icon: ChevronDown,
       subs: [
         { label: 'MOTORCYCLE ACCESSORIES', params: '?cat=MOTORCYCLE%20ACCESSORIES' },
+        { label: '--- Bike Protection', params: '?sub=Bike%20Protection' },
+        { label: '--- Handlebar', params: '?sub=Handlebar' },
+        { label: '--- Electronic', params: '?sub=Electronic' },
+        { label: '--- Essentials', params: '?sub=Essentials' },
+        { label: '--- Rain Cover', params: '?sub=Rain%20Cover' },
+        { label: '--- Cameras', params: '?sub=Cameras' },
         { label: 'Lighting', params: '?cat=Lighting' },
-        { label: 'Lubricants', params: '?cat=Lubricants' },
-        { label: 'Performance Parts', params: '?cat=Performance%20Parts' },
+        { label: '--- Auxiliary Light', params: '?sub=Auxiliary%20Light' },
+        { label: '--- Headlight', params: '?sub=Headlight' },
+        { label: '--- Hazards', params: '?sub=Hazards' },
+        { label: '--- Light Accessories', params: '?sub=Light%20Accessories' },
         { label: 'Riding Gear', params: '?cat=Riding%20Gear' },
+        { label: '--- Jackets', params: '?sub=Jackets' },
+        { label: '--- Jerseys', params: '?sub=Jerseys' },
+        { label: '--- Pants', params: '?sub=Pants' },
+        { label: '--- Gloves', params: '?sub=Gloves' },
+        { label: '--- Boots', params: '?sub=Boots' },
         { label: 'Luggage', params: '?cat=Luggage' },
-        { label: 'Apparels', params: '?cat=Apparels' },
+        { label: '--- Racks', params: '?sub=Racks' },
+        { label: '--- Bag and panniers', params: '?sub=Bag%20and%20panniers' },
+        { label: '--- Jerry can', params: '?sub=Jerry%20can' },
+        { label: '--- GPS mount', params: '?sub=GPS%20mount' },
+        { label: '--- Air seat', params: '?sub=Air%20seat' },
+        { label: 'Performance Parts', params: '?cat=Performance%20Parts' },
+        { label: '--- Air Filter', params: '?sub=Air%20Filter' },
+        { label: '--- Brake Pads', params: '?sub=Brake%20Pads' },
+        { label: '--- Bendpipe', params: '?sub=Bendpipe' },
+        { label: '--- Chain Sprocket', params: '?sub=Chain%20Sprocket' },
+        { label: '--- Exhaust', params: '?sub=Exhaust' },
+        { label: '--- ECU', params: '?sub=ECU' },
+        { label: '--- Spark Plug', params: '?sub=Spark%20Plug' },
+        { label: '--- Oil Filter', params: '?sub=Oil%20Filter' },
+        { label: 'Lubricants', params: '?cat=Lubricants' },
         { label: 'Wholesale', params: '?cat=Wholesale' },
       ]
     }
@@ -162,9 +193,12 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950">
           <div className="flex items-center gap-3">
-             <div className="font-extrabold tracking-tighter text-lg">
-                <span className="text-white">MUTANT</span>
-                <span className="text-red-600 ml-1">MODZ</span>
+             <div 
+               className="font-extrabold tracking-tight text-lg cursor-pointer group"
+               onClick={() => handleNav('home')}
+             >
+                <span className="text-white group-hover:text-red-500 transition-colors">MUTANT</span>
+                <span className="text-red-600 ml-1 group-hover:text-white transition-colors">MODZ</span>
              </div>
           </div>
           <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors">
@@ -174,38 +208,97 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto no-scrollbar py-6">
-          <div className="px-4 space-y-2">
+          <div className="px-4 space-y-1">
             
-            {/* Main Links */}
+            {/* 1. Home */}
             <button onClick={() => handleNav('home')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
               <Home size={20} className="text-zinc-500" /> Home
             </button>
 
+            {/* 2. New Arrivals */}
             <button onClick={() => handleNav('products', '?cat=new')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors border-b border-white/5">
               <Flame size={20} /> New Arrivals!!
             </button>
 
-            <button onClick={() => handleNav('products', '?brands=all')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5">
-              <Star size={20} className="text-zinc-500" /> Shop By Brands
+            {/* 3. Helmets (Accordion) */}
+            <AccordionItem
+              label="Helmets"
+              icon={Shield}
+              items={[
+                { label: 'View All Helmets', params: '?cat=Helmet' },
+                { label: 'Helmet Accessories', params: '?cat=Helmet%20Accessories' },
+                { label: 'Bluetooth Intercoms', params: '?cat=Bluetooth%20Intercoms' },
+              ]}
+              isOpen={openAccordion === 'helmets'}
+              onToggle={() => setOpenAccordion(openAccordion === 'helmets' ? null : 'helmets')}
+              onNavigate={handleNav}
+            />
+
+            {/* 4. Accessories (Accordion) */}
+            <AccordionItem
+              label="Accessories"
+              icon={Star}
+              items={[
+                { label: 'Motorcycle Accessories', params: '?cat=MOTORCYCLE%20ACCESSORIES' },
+                { label: 'Bike Protection', params: '?sub=Bike%20Protection' },
+                { label: 'Handlebar Accessories', params: '?sub=Handlebar' },
+                { label: 'Electronics', params: '?sub=Electronic' },
+                { label: 'Lighting', params: '?cat=Lighting' },
+              ]}
+              isOpen={openAccordion === 'accessories'}
+              onToggle={() => setOpenAccordion(openAccordion === 'accessories' ? null : 'accessories')}
+              onNavigate={handleNav}
+            />
+
+            {/* 5. Shop By Brands (Accordion) */}
+            <AccordionItem
+              label="Shop By Brand"
+              icon={Star}
+              items={brands.map(b => ({ label: b.name, params: `?brand=${encodeURIComponent(b.name.toLowerCase())}` }))}
+              isOpen={openAccordion === 'brands-list'}
+              onToggle={() => setOpenAccordion(openAccordion === 'brands-list' ? null : 'brands-list')}
+              onNavigate={handleNav}
+            />
+
+            {/* 6. Shop By Bike (Accordion) */}
+            <AccordionItem
+              label="Shop By Bike"
+              icon={Bike}
+              items={[]}
+              brands={categories.find(c => c.id === 'bike')?.brands}
+              isOpen={openAccordion === 'bike'}
+              onToggle={() => setOpenAccordion(openAccordion === 'bike' ? null : 'bike')}
+              onNavigate={handleNav}
+            />
+
+            {/* 7. Garage Sale */}
+            <button onClick={() => handleNav('products', '?cat=garage-sale')} className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-white hover:text-orange-500 transition-colors border-b border-white/5 bg-gradient-to-r from-red-600/20 to-orange-600/20 rounded-xl my-2">
+              <Zap size={20} className="text-orange-500" /> Garage Sale
             </button>
 
-            {/* Accordion Categories */}
-            {categories.map((cat) => (
-              <AccordionItem
-                key={cat.id}
-                label={cat.label}
-                icon={cat.icon}
-                items={(cat as any).subs}
-                brands={(cat as any).brands}
-                isOpen={openAccordion === cat.id}
-                onToggle={() => setOpenAccordion(openAccordion === cat.id ? null : cat.id)}
-                onNavigate={handleNav}
-              />
-            ))}
+            {/* 8. Combos (Accordion) */}
+            <AccordionItem
+              label="Combos"
+              icon={Package}
+              items={categories.find(c => c.id === 'combos')?.subs || []}
+              isOpen={openAccordion === 'combos'}
+              onToggle={() => setOpenAccordion(openAccordion === 'combos' ? null : 'combos')}
+              onNavigate={handleNav}
+            />
+
+            {/* 9. Other Categories (Accordion) */}
+            <AccordionItem
+              label="Other Categories"
+              icon={ChevronDown}
+              items={categories.find(c => c.id === 'additional')?.subs || []}
+              isOpen={openAccordion === 'additional'}
+              onToggle={() => setOpenAccordion(openAccordion === 'additional' ? null : 'additional')}
+              onNavigate={handleNav}
+            />
 
             {/* User Account / Login */}
             <button 
-              onClick={() => { if (!isLoggedIn) setShowLoginPopup(true); else handleNav('payment'); }}
+              onClick={() => { if (!isLoggedIn) setShowLoginPopup(true); else handleNav('settings'); }}
               className="w-full flex items-center gap-4 py-4 px-2 text-sm font-black uppercase tracking-widest text-zinc-300 hover:text-white transition-colors border-b border-white/5"
             >
               <User size={20} className="text-zinc-500" /> {isLoggedIn ? 'Account Settings' : 'Login / Register'}
@@ -237,18 +330,29 @@ export default function MenuDrawer({ isOpen, onClose, onNavigate, onOpenCart }: 
           <div className="space-y-4">
             <h4 className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em]">Contact Us</h4>
             <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin size={16} className="text-zinc-500 mt-0.5" />
-                <p className="text-zinc-400 text-[11px] font-bold leading-relaxed">Uppilipalayam, Coimbatore, TN</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone size={16} className="text-zinc-500" />
-                <p className="text-zinc-400 text-[11px] font-bold">+91 98765 43210</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail size={16} className="text-zinc-500" />
-                <p className="text-zinc-400 text-[11px] font-bold">info@mutantmodz.com</p>
-              </div>
+              <a
+                href="https://maps.app.goo.gl/LqMYmPvYTdRkvGBn7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-3 group touch-manipulation active:opacity-70"
+              >
+                <MapPin size={16} className="text-zinc-500 mt-0.5 group-hover:text-red-500 transition-colors flex-shrink-0" />
+                <p className="text-zinc-400 text-[11px] font-bold leading-relaxed group-hover:text-white transition-colors">Opposite Vibgyor School, Uppilipalayam, Coimbatore - 641015</p>
+              </a>
+              <a
+                href="tel:+918807727227"
+                className="flex items-center gap-3 group touch-manipulation active:opacity-70"
+              >
+                <Phone size={16} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
+                <p className="text-zinc-400 text-[11px] font-bold group-hover:text-white transition-colors">+91 88077 27227</p>
+              </a>
+              <a
+                href="mailto:info@mutantmodz.com"
+                className="flex items-center gap-3 group touch-manipulation active:opacity-70"
+              >
+                <Mail size={16} className="text-zinc-500 group-hover:text-red-500 transition-colors flex-shrink-0" />
+                <p className="text-zinc-400 text-[11px] font-bold group-hover:text-white transition-colors">info@mutantmodz.com</p>
+              </a>
             </div>
           </div>
 

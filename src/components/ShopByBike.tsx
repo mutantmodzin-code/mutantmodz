@@ -5,9 +5,9 @@ interface ShopByBikeProps {
 export const bikes = [
   { name: 'Royal Enfield', image: '/bike brands/royal Enfield.png' },
   { name: 'KTM', image: '/bike brands/ktm.png' },
-  { name: 'Yamaha', image: '/bike brands/Yamaha.png' },
   { name: 'Honda', image: '/bike brands/honda.png' },
   { name: 'Kawasaki', image: '/bike brands/Kawasaki.png' },
+  { name: 'Yamaha', image: '/bike brands/Yamaha.png' },
   { name: 'Ducati', image: '/bike brands/ducati.png' },
   { name: 'BMW', image: '/bike brands/Bmw.png' },
   { name: 'Triumph', image: '/bike brands/NicePng_red-solo-cup-png_5412282.png' },
@@ -32,25 +32,26 @@ export default function ShopByBike({ onNavigate }: ShopByBikeProps) {
         </div>
 
         {/* Circular Thumbnails Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
+        <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-6 lg:gap-8 justify-items-center">
           {bikes.map((bike, idx) => (
             <button
               key={idx}
-              onClick={() => onNavigate('products', `?bike=${encodeURIComponent(bike.name.trim())}`)}
-              className="flex flex-col items-center gap-2 sm:gap-3 group touch-manipulation active:scale-95 transition-transform"
+              onClick={() => onNavigate('bike-models', `?bike=${encodeURIComponent(bike.name)}`)}
+              className="flex flex-col items-center gap-2 group touch-manipulation active:scale-95 transition-all duration-300"
             >
-              {/* Circular Image with White Background */}
-              <div className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] lg:w-[120px] lg:h-[120px] rounded-full overflow-hidden bg-white border-2 border-white/10 group-hover:border-red-600 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.3)] flex items-center justify-center p-1 sm:p-2">
+              {/* Circular Content Container */}
+              <div className="relative w-[70px] h-[70px] sm:w-[100px] sm:h-[100px] lg:w-[110px] lg:h-[110px] rounded-full overflow-hidden border border-white/10 bg-[#f8f8f8] group-hover:bg-white group-hover:border-red-600/50 transition-all duration-500 shadow-lg group-hover:shadow-[0_0_20px_rgba(220,38,38,0.2)] p-2 sm:p-3">
                 <img
-                  src={bike.image.trim()}
+                  src={bike.image}
                   alt={bike.name}
-                  className="w-[100%] h-[100%] object-contain group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-110 transition-transform duration-500"
                   loading="lazy"
                 />
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5 pointer-events-none" />
               </div>
-
+              
               {/* Name Label */}
-              <span className="text-zinc-300 group-hover:text-white text-[11px] sm:text-xs font-black uppercase tracking-wider text-center transition-colors leading-tight">
+              <span className="text-zinc-500 group-hover:text-white text-[9px] sm:text-xs font-black uppercase tracking-tighter sm:tracking-wider text-center transition-colors leading-none truncate w-full px-1">
                 {bike.name}
               </span>
             </button>

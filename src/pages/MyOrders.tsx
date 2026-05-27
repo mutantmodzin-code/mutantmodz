@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useUserAuth } from '../context/UserAuthContext';
 import { 
-  ShoppingBag, Calendar, DollarSign, Loader2, AlertCircle, 
-  CheckCircle2, Clock, Truck, Package, ArrowRight,
+  ShoppingBag, Loader2, AlertCircle, 
+  CheckCircle2, Truck, Package, ArrowRight,
   TrendingUp, MapPin, Receipt, ShieldCheck
 } from 'lucide-react';
+import { getMediaUrl } from '../utils/url';
 
 interface OrderItem {
     id: number;
@@ -13,6 +14,7 @@ interface OrderItem {
     price: number;
     product_name: string;
     image_url?: string;
+    discount_percent?: number;
 }
 
 interface Order {
@@ -25,6 +27,7 @@ interface Order {
     created_at: string;
     shipped_at?: string;
     expected_delivery?: string;
+    delivery_charge?: number;
     items: OrderItem[];
 }
 
@@ -51,7 +54,13 @@ export default function MyOrders() {
             setLoading(true);
             setError('');
             const token = localStorage.getItem('auth_token');
-            if (!token || !user?.uid) return;
+            
+            // Robust token check
+            if (!token || token === 'undefined' || token === 'null' || !user?.uid) {
+                if (!isLoggedIn) setError('Please login to view your orders');
+                setLoading(false);
+                return;
+            }
 
             const response = await fetch(`${API_URL}/invoices/customer/${user.uid}`, {
                 method: 'GET',
@@ -61,9 +70,25 @@ export default function MyOrders() {
                 }
             });
 
+            // Handle non-JSON responses (like "Forbidden")
+            if (!response.ok) {
+                const text = await response.text();
+                let errorMessage = 'Failed to load orders';
+                
+                if (response.status === 403 || response.status === 401) {
+                    errorMessage = 'Session expired or unauthorized. Please log out and sign in again.';
+                } else {
+                    try {
+                        const data = JSON.parse(text);
+                        errorMessage = data.error || errorMessage;
+                    } catch (e) {
+                        errorMessage = text || errorMessage;
+                    }
+                }
+                throw new Error(errorMessage);
+            }
+
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Failed to load orders');
-            
             setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Database connection error');
@@ -92,9 +117,9 @@ export default function MyOrders() {
             <div className="min-h-screen bg-zinc-950 pt-32 pb-20 px-4 flex items-center justify-center">
                 <div className="bg-zinc-900 border border-white/10 p-12 rounded-[2.5rem] text-center max-w-lg w-full shadow-2xl">
                     <ShieldCheck size={64} className="text-red-600 mx-auto mb-6" />
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Identity Unverified</h2>
-                    <p className="text-zinc-500 mb-8 font-bold uppercase tracking-widest text-[10px]">Secure login required to access order vault</p>
-                    <button className="w-full py-4 bg-red-600 text-white font-black uppercase rounded-2xl hover:bg-red-700 transition-all">Sign In Protocol</button>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Login Required</h2>
+                    <p className="text-zinc-500 mb-8 font-bold uppercase tracking-widest text-[10px]">Please sign in to view your order history</p>
+                    <button className="w-full py-4 bg-red-600 text-white font-black uppercase rounded-2xl hover:bg-red-700 transition-all">Sign In</button>
                 </div>
             </div>
         );
@@ -111,9 +136,9 @@ export default function MyOrders() {
                             <span className="text-red-500 text-[10px] font-black uppercase tracking-[0.2em]">Operational Manifest 2026</span>
                         </div>
                         <h1 className="text-6xl sm:text-8xl font-black text-white uppercase tracking-tighter leading-none mb-4">
-                            MY <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">VAULT</span>
+                            MY <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-800">ORDERS</span>
                         </h1>
-                        <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em]">Hardware tracking & acquisition history</p>
+                        <p className="text-zinc-500 text-xs font-black uppercase tracking-[0.4em]">Tracking & Purchase history</p>
                     </div>
                     {orders.length > 0 && (
                         <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 backdrop-blur-xl flex items-center gap-6">
@@ -123,7 +148,7 @@ export default function MyOrders() {
                             </div>
                             <div className="w-px h-12 bg-white/10"></div>
                             <div className="text-right">
-                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Completed</p>
+                                <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Delivered</p>
                                 <p className="text-3xl font-black text-white">{orders.filter(o => o.status === 'Completed').length}</p>
                             </div>
                         </div>
@@ -133,7 +158,7 @@ export default function MyOrders() {
                 {loading && (
                     <div className="flex flex-col items-center justify-center py-32 space-y-4">
                         <Loader2 className="animate-spin text-red-600" size={64} strokeWidth={3} />
-                        <p className="text-zinc-500 font-black uppercase tracking-[0.3em] text-[10px]">Retrieving secure data...</p>
+                        <p className="text-zinc-500 font-black uppercase tracking-[0.3em] text-[10px]">Loading your orders...</p>
                     </div>
                 )}
 
@@ -141,7 +166,22 @@ export default function MyOrders() {
                     <div className="bg-red-600/5 border border-red-600/20 rounded-[2rem] p-12 text-center max-w-2xl mx-auto backdrop-blur-3xl">
                         <AlertCircle className="text-red-600 mx-auto mb-6" size={48} />
                         <p className="text-white font-black uppercase tracking-widest mb-6">{error}</p>
-                        <button onClick={fetchOrders} className="px-8 py-3 bg-red-600 text-white font-black uppercase rounded-xl hover:bg-red-700 transition-all text-xs">Reconnect Uplink</button>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <button onClick={fetchOrders} className="w-full sm:w-auto px-8 py-3 bg-red-600 text-white font-black uppercase rounded-xl hover:bg-red-700 transition-all text-xs">
+                                Retry Connection
+                            </button>
+                            {(error.includes('Session') || error.includes('unauthorized')) && (
+                                <button 
+                                    onClick={() => {
+                                        localStorage.removeItem('auth_token');
+                                        window.location.reload();
+                                    }} 
+                                    className="w-full sm:w-auto px-8 py-3 bg-white/5 border border-white/10 text-white font-black uppercase rounded-xl hover:bg-white/10 transition-all text-xs"
+                                >
+                                    Re-Login
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -167,8 +207,8 @@ export default function MyOrders() {
                                                     <Package size={32} className="text-red-600" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.4em] mb-1">Assigned Protocol #{order.id}</p>
-                                                    <p className="text-white text-2xl sm:text-3xl font-black uppercase tracking-tight">Initiated {formatDate(order.created_at)}</p>
+                                                    <p className="text-[10px] font-black text-red-600 uppercase tracking-[0.4em] mb-1">Order ID #{order.id}</p>
+                                                    <p className="text-white text-2xl sm:text-3xl font-black uppercase tracking-tight">Placed on {formatDate(order.created_at)}</p>
                                                     <div className="flex items-center gap-4 mt-3">
                                                         <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">Method: {order.payment_method}</span>
                                                         <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full">Type: {order.order_type}</span>
@@ -192,7 +232,7 @@ export default function MyOrders() {
                                                         {[
                                                             { label: 'Confirmed', icon: CheckCircle2 },
                                                             { label: 'In Transit', icon: Truck },
-                                                            { label: 'Secured', icon: ShieldCheck }
+                                                            { label: 'Delivered', icon: Package }
                                                         ].map((s, i) => {
                                                             const Icon = s.icon;
                                                             const isActive = step >= i + 1;
@@ -214,8 +254,9 @@ export default function MyOrders() {
                                             {/* Right Info: Financials & Action */}
                                             <div className="flex flex-col sm:flex-row items-center gap-8 min-w-[240px] lg:justify-end">
                                                 <div className="text-right">
-                                                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total Manifest</p>
+                                                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total Amount</p>
                                                     <p className="text-4xl font-black text-white">₹{Number(order.total_amount || 0).toLocaleString('en-IN')}</p>
+                                                    <p className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mt-1">(Inclusive of all taxes)</p>
                                                 </div>
                                                 <button 
                                                     onClick={() => setSelectedOrder(isExpanded ? null : order.id)}
@@ -234,7 +275,7 @@ export default function MyOrders() {
                                                 <div className="flex items-center gap-3 text-red-500 bg-red-600/10 px-6 py-3 rounded-2xl border border-red-600/20">
                                                     <Truck size={18} />
                                                     <span className="text-[11px] font-black uppercase tracking-widest">
-                                                        {order.status === 'Shipped' ? 'In Transit' : 'Arrival Expected'}: {order.expected_delivery ? formatDate(order.expected_delivery) : 'Pending Update'}
+                                                        {order.status === 'Completed' ? 'Package Delivered' : (order.status === 'Shipped' ? 'In Transit' : 'Arrival Expected')}: {order.expected_delivery ? formatDate(order.expected_delivery) : 'Pending Update'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -248,47 +289,62 @@ export default function MyOrders() {
                                                 {/* Line Items */}
                                                 <div>
                                                     <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-3">
-                                                        <Receipt size={14} className="text-red-600" /> Secure Itemized Manifest
+                                                        <Receipt size={14} className="text-red-600" /> Order Summary
                                                     </h3>
                                                     <div className="space-y-4">
                                                         {order.items.map((item) => (
-                                                            <div key={item.id} className="flex items-center gap-6 p-6 bg-zinc-950/50 rounded-3xl border border-white/5 hover:border-red-600/20 transition-all">
-                                                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shrink-0">
+                                                            <div 
+                                                                key={item.id} 
+                                                                onClick={() => window.location.hash = `productDetails?productId=${item.product_id}`}
+                                                                className="group flex items-center gap-6 p-6 bg-zinc-950/50 rounded-3xl border border-white/5 hover:border-red-600/50 transition-all cursor-pointer"
+                                                            >
+                                                                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shrink-0 group-hover:border-red-600/30 transition-colors">
                                                                     <img 
-                                                                        src={item.image_url || 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg'} 
+                                                                        src={getMediaUrl(item.image_url || 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg')} 
                                                                         alt={item.product_name} 
-                                                                        className="w-full h-full object-cover opacity-80"
+                                                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                                                     />
                                                                 </div>
                                                                 <div className="flex-1">
-                                                                    <p className="text-white font-black uppercase tracking-tight leading-tight">{item.product_name}</p>
+                                                                    <p className="text-white font-black uppercase tracking-tight leading-tight group-hover:text-red-500 transition-colors">{item.product_name}</p>
                                                                     <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mt-1">
-                                                                        Qty: {item.quantity} units @ ₹{Number(item.price || 0).toLocaleString('en-IN')}
+                                                                        Qty: {item.quantity} units @ ₹{Number(item.price || 0).toLocaleString('en-IN')} {Number(item.discount_percent || 0) > 0 && `(${Number(item.discount_percent).toFixed(0)}% OFF)`}
                                                                     </p>
                                                                 </div>
-                                                                <p className="text-lg font-black text-white">₹{(Number(item.quantity) * Number(item.price || 0)).toLocaleString('en-IN')}</p>
+                                                                <p className="text-lg font-black text-white group-hover:text-red-500 transition-colors">₹{(Number(item.quantity) * Number(item.price || 0)).toLocaleString('en-IN')}</p>
                                                             </div>
                                                         ))}
+                                                        {Number(order.delivery_charge || 0) > 0 && (
+                                                            <div className="flex items-center justify-between p-6 bg-zinc-950/30 rounded-3xl border border-dashed border-white/10">
+                                                                <div className="flex items-center gap-4 text-zinc-500">
+                                                                    <Truck size={20} />
+                                                                    <span className="text-[10px] font-black uppercase tracking-widest">Delivery Charge</span>
+                                                                </div>
+                                                                <p className="text-lg font-black text-white">₹{Number(order.delivery_charge).toLocaleString('en-IN')}</p>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 {/* Delivery Intel */}
                                                 <div>
                                                     <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em] mb-8 flex items-center gap-3">
-                                                        <MapPin size={14} className="text-red-600" /> Logistic Intelligence
+                                                        <MapPin size={14} className="text-red-600" /> Delivery Details
                                                     </h3>
                                                     <div className="bg-zinc-950/50 rounded-3xl p-8 border border-white/5 space-y-8">
                                                         <div className="flex items-center justify-between">
                                                             <div>
                                                                 <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Current Status</p>
-                                                                <p className={`text-sm font-black uppercase tracking-widest ${order.status === 'Completed' ? 'text-green-500' : 'text-red-500'}`}>{order.status}</p>
+                                                                <p className={`text-sm font-black uppercase tracking-widest ${order.status === 'Completed' ? 'text-green-500' : 'text-red-500'}`}>
+                                                                    {order.status === 'Completed' ? 'Delivered' : order.status}
+                                                                </p>
                                                             </div>
                                                             <TrendingUp size={24} className="text-zinc-800" />
                                                         </div>
 
                                                         <div className="grid grid-cols-2 gap-8">
                                                             <div>
-                                                                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Payment Protocol</p>
+                                                                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">Payment Method</p>
                                                                 <p className="text-[11px] font-bold text-white uppercase">{order.payment_method}</p>
                                                             </div>
                                                             <div>
@@ -302,7 +358,7 @@ export default function MyOrders() {
                                                                 <div className="flex items-center gap-4 text-green-500">
                                                                     <Truck size={24} />
                                                                     <div>
-                                                                        <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-70">Estimated Incursion</p>
+                                                                        <p className="text-[9px] font-black uppercase tracking-widest mb-1 opacity-70">Estimated Arrival</p>
                                                                         <p className="text-xl font-black uppercase tracking-tighter">{formatDate(order.expected_delivery)}</p>
                                                                     </div>
                                                                 </div>
@@ -323,12 +379,12 @@ export default function MyOrders() {
                 {!loading && orders.length === 0 && !error && (
                     <div className="py-32 text-center border-2 border-dashed border-white/5 rounded-[4rem]">
                         <ShoppingBag size={80} className="text-zinc-900 mx-auto mb-8" strokeWidth={1} />
-                        <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Vault is Vacant</h3>
+                        <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-4">No Orders Found</h3>
                         <p className="text-zinc-600 max-w-sm mx-auto font-bold uppercase tracking-widest text-[10px] leading-relaxed mb-12">
-                            No hardware acquisitions recorded. Start your tactical kit building now.
+                            You haven't placed any orders yet. Explore our arsenal of products.
                         </p>
                         <button className="px-12 py-5 bg-white text-black font-black uppercase rounded-2xl hover:bg-red-600 hover:text-white transition-all transform active:scale-95 text-xs tracking-widest">
-                            Browse Arsenal
+                            Shop Now
                         </button>
                     </div>
                 )}

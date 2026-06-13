@@ -19,7 +19,6 @@ import { getProducts, getCombos, getGarageSale } from '../utils/storage';
 import { Product } from '../types';
 import { useUserAuth } from '../context/UserAuthContext';
 import { useCart } from '../context/CartContext';
-import toast from 'react-hot-toast';
 import { updatePageSEO, getProductDetailSEO } from '../utils/seo';
 import { getMediaUrl } from '../utils/url';
 

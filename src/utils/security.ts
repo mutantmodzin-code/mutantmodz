@@ -5,7 +5,8 @@
  */
 
 export const initSecurity = () => {
-    // Disable right-click
+    // Disable right-click (Disabled per user request)
+    /*
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     // Disable keyboard shortcuts for DevTools
@@ -26,8 +27,10 @@ export const initSecurity = () => {
             return false;
         }
     });
+    */
 
-    // Disable console in production
+    // Disable console in production (Disabled per user request)
+    /*
     if (import.meta.env.PROD) {
         const noop = () => {};
         console.log = noop;
@@ -52,4 +55,5 @@ export const initSecurity = () => {
             })();
         }, 1000);
     }
+    */
 };

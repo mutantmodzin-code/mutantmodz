@@ -17,9 +17,48 @@ function getResend() {
 }
 
 
+// Verify Google reCAPTCHA v2 token
+async function verifyRecaptcha(token) {
+    if (!token) {
+        console.log('⚠️ ReCAPTCHA check failed: No token provided');
+        return false;
+    }
+    const secret = process.env.RECAPTCHA_SECRET_KEY;
+    if (!secret) {
+        console.error('❌ CRITICAL: RECAPTCHA_SECRET_KEY is missing from environment variables');
+        return false;
+    }
+
+    try {
+        const url = 'https://www.google.com/recaptcha/api/siteverify';
+        const params = new URLSearchParams();
+        params.append('secret', secret);
+        params.append('response', token);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        });
+
+        if (!response.ok) {
+            console.error(`❌ Google reCAPTCHA server responded with status: ${response.status}`);
+            return false;
+        }
+
+        const data = await response.json();
+        console.log('Google reCAPTCHA verification response:', data);
+        return data.success === true;
+    } catch (err) {
+        console.error('❌ Exception during reCAPTCHA verification:', err);
+        return false;
+    }
+}
+
+
 // Login Check Route (Direct Login - OTP removed)
 router.post('/check-user', async (req, res) => {
-    const { phone } = req.body;
+    const { phone, recaptchaToken } = req.body;
     try {
         const result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
         if (result.rows.length > 0) {
@@ -182,8 +221,13 @@ router.post('/verify-otp', async (req, res) => {
 
 // Admin Login Route
 router.post('/login', async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, recaptchaToken } = req.body;
     try {
+        const isHuman = await verifyRecaptcha(recaptchaToken);
+        if (!isHuman) {
+            return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
+        }
+
         const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
         if (result.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });

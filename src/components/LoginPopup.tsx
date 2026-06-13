@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { X, ArrowRight, ShieldCheck, Loader2, CheckCircle, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
+import ReCAPTCHA from './ReCAPTCHA';
 
 import { getApiUrl } from '../utils/url';
 const API_URL = getApiUrl();
+const RECAPTCHA_SITE_KEY = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY || '';
 
 interface LoginPopupProps {
   isOpen: boolean;
@@ -22,10 +24,15 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [userData, setUserData] = useState<any>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const handleSubmitPhone = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       setError('Please enter a valid 10-digit mobile number');
+      return;
+    }
+    if (!recaptchaToken) {
+      setError('Please verify that you are not a robot');
       return;
     }
     setIsLoading(true);
@@ -35,7 +42,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/check-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber })
+        body: JSON.stringify({ phone: phoneNumber, recaptchaToken })
       });
 
       const data = await response.json();
@@ -187,6 +194,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     setDisplayName('');
     setError('');
     setUserData(null);
+    setRecaptchaToken(null);
   };
 
   if (!isOpen) return null;
@@ -253,6 +261,13 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                   />
                 </div>
               </div>
+              {RECAPTCHA_SITE_KEY && (
+                <ReCAPTCHA
+                  siteKey={RECAPTCHA_SITE_KEY}
+                  onChange={setRecaptchaToken}
+                  theme="dark"
+                />
+              )}
               <button
                 onClick={handleSubmitPhone}
                 disabled={isLoading}

@@ -1,27 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Bike, Lock, User, LogIn } from 'lucide-react';
-import ReCAPTCHA from '../components/ReCAPTCHA';
+import { loadRecaptchaV3, executeRecaptchaV3 } from '../utils/recaptcha';
 
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyTRFCwISmq7sotLw1sFLH';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        if (RECAPTCHA_SITE_KEY) {
+            loadRecaptchaV3(RECAPTCHA_SITE_KEY);
+        }
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!recaptchaToken) {
-            setError('Please verify that you are not a robot.');
+        setError('');
+        const token = await executeRecaptchaV3(RECAPTCHA_SITE_KEY, 'login');
+        if (!token) {
+            setError('Please verify that you are not a robot (CAPTCHA failed).');
             return;
         }
         try {
-            await login(username, password, recaptchaToken);
+            await login(username, password, token);
             navigate('/');
         } catch (err) {
             if (err.response && (err.response.status === 400 || err.response.status === 401)) {
@@ -52,11 +59,9 @@ const Login = () => {
                         <input className="input" style={{ paddingLeft: '3rem' }} type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                     {RECAPTCHA_SITE_KEY && (
-                        <ReCAPTCHA
-                            siteKey={RECAPTCHA_SITE_KEY}
-                            onChange={setRecaptchaToken}
-                            theme="light"
-                        />
+                        <p style={{ fontSize: '0.75rem', color: '#94a3b8', textAlign: 'center', margin: '1rem 0' }}>
+                            Protected by Google reCAPTCHA
+                        </p>
                     )}
                     {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
                     <button className="btn btn-primary" style={{ width: '100%', padding: '0.875rem', fontSize: '1rem' }} type="submit">

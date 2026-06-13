@@ -17,7 +17,7 @@ function getResend() {
 }
 
 
-// Verify Google reCAPTCHA v2 token
+// Verify Google reCAPTCHA v3 token
 async function verifyRecaptcha(token) {
     if (!token) {
         console.log('⚠️ ReCAPTCHA check failed: No token provided');
@@ -48,7 +48,18 @@ async function verifyRecaptcha(token) {
 
         const data = await response.json();
         console.log('Google reCAPTCHA verification response:', data);
-        return data.success === true;
+
+        // For reCAPTCHA v3, verify success and score (if score exists)
+        if (data.success !== true) {
+            return false;
+        }
+
+        if (data.score !== undefined && data.score < 0.5) {
+            console.log(`⚠️ ReCAPTCHA v3 score low: ${data.score}`);
+            return false;
+        }
+
+        return true;
     } catch (err) {
         console.error('❌ Exception during reCAPTCHA verification:', err);
         return false;
@@ -60,6 +71,11 @@ async function verifyRecaptcha(token) {
 router.post('/check-user', async (req, res) => {
     const { phone, recaptchaToken } = req.body;
     try {
+        const isHuman = await verifyRecaptcha(recaptchaToken);
+        if (!isHuman) {
+            return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
+        }
+
         const result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
         if (result.rows.length > 0) {
             const user = result.rows[0];

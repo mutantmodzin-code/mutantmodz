@@ -25,6 +25,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const [error, setError] = useState('');
   const [userData, setUserData] = useState<any>(null);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [recaptchaKey, setRecaptchaKey] = useState(0);
 
   const handleSubmitPhone = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
@@ -47,7 +48,15 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
       const data = await response.json();
 
-      if (response.ok && data.exists) {
+      if (!response.ok) {
+        setError(data.error || 'Verification failed. Please try again.');
+        setRecaptchaToken(null);
+        setRecaptchaKey(prev => prev + 1); // Reset reCAPTCHA widget
+        setIsLoading(false);
+        return;
+      }
+
+      if (data.exists) {
         // User exists, initiate OTP verification via email
         setUserData(data.user);
         try {
@@ -64,6 +73,8 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     } catch (err: any) {
       console.error('Login error:', err);
       setError('Unable to connect to security server');
+      setRecaptchaToken(null);
+      setRecaptchaKey(prev => prev + 1); // Reset reCAPTCHA widget
     } finally {
       setIsLoading(false);
     }
@@ -263,6 +274,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
               </div>
               {RECAPTCHA_SITE_KEY && (
                 <ReCAPTCHA
+                  key={recaptchaKey}
                   siteKey={RECAPTCHA_SITE_KEY}
                   onChange={setRecaptchaToken}
                   theme="dark"

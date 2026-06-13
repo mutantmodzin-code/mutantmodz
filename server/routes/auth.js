@@ -60,6 +60,11 @@ async function verifyRecaptcha(token) {
 router.post('/check-user', async (req, res) => {
     const { phone, recaptchaToken } = req.body;
     try {
+        const isHuman = await verifyRecaptcha(recaptchaToken);
+        if (!isHuman) {
+            return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
+        }
+
         const result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
         if (result.rows.length > 0) {
             const user = result.rows[0];

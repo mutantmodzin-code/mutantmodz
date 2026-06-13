@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { Bike, Lock, User, LogIn } from 'lucide-react';
 import ReCAPTCHA from '../components/ReCAPTCHA';
 
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyTRFCwISmq7sotLw1sFLH';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LePZR0tAAAAAJNgANXBgoV1TtkWVmsXfmBzl74d';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [recaptchaToken, setRecaptchaToken] = useState(null);
+    const [recaptchaKey, setRecaptchaKey] = useState(0);
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -24,6 +25,8 @@ const Login = () => {
             await login(username, password, recaptchaToken);
             navigate('/');
         } catch (err) {
+            setRecaptchaToken(null);
+            setRecaptchaKey(prev => prev + 1); // Reset reCAPTCHA widget
             if (err.response && (err.response.status === 400 || err.response.status === 401)) {
                 setError(err.response.data?.error || 'Invalid credentials. Please try again.');
             } else {
@@ -53,6 +56,7 @@ const Login = () => {
                     </div>
                     {RECAPTCHA_SITE_KEY && (
                         <ReCAPTCHA
+                            key={recaptchaKey}
                             siteKey={RECAPTCHA_SITE_KEY}
                             onChange={setRecaptchaToken}
                             theme="light"

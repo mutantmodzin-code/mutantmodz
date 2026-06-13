@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bike, Lock, User, LogIn } from 'lucide-react';
 import ReCAPTCHA from '../components/ReCAPTCHA';
 
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyTRFCwISmq7sotLw1sFLH';
 
 const Login = () => {
     const [username, setUsername] = useState('');

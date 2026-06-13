@@ -5,7 +5,7 @@ import ReCAPTCHA from './ReCAPTCHA';
 
 import { getApiUrl } from '../utils/url';
 const API_URL = getApiUrl();
-const RECAPTCHA_SITE_KEY = (import.meta as any).env?.VITE_RECAPTCHA_SITE_KEY || '';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyTRFCwISmq7sotLw1sFLH';
 
 interface LoginPopupProps {
   isOpen: boolean;

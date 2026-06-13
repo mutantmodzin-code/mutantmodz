@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, ArrowRight, ShieldCheck, Loader2, CheckCircle, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
-import { loadRecaptchaV3, executeRecaptchaV3 } from '../utils/recaptcha';
+import ReCAPTCHA from './ReCAPTCHA';
 
 import { getApiUrl } from '../utils/url';
 const API_URL = getApiUrl();
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyTRFCwISmq7sotLw1sFLH';
 
 interface LoginPopupProps {
   isOpen: boolean;
@@ -24,42 +24,30 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [userData, setUserData] = useState<any>(null);
-
-  useEffect(() => {
-    if (isOpen && RECAPTCHA_SITE_KEY) {
-      loadRecaptchaV3(RECAPTCHA_SITE_KEY);
-    }
-  }, [isOpen]);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   const handleSubmitPhone = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       setError('Please enter a valid 10-digit mobile number');
       return;
     }
+    if (!recaptchaToken) {
+      setError('Please verify that you are not a robot');
+      return;
+    }
     setIsLoading(true);
     setError('');
 
     try {
-      const token = await executeRecaptchaV3(RECAPTCHA_SITE_KEY, 'login');
-      if (!token) {
-        setError('Please verify that you are not a robot (CAPTCHA failed)');
-        setIsLoading(false);
-        return;
-      }
-
       const response = await fetch(`${API_URL}/auth/check-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, recaptchaToken: token })
+        body: JSON.stringify({ phone: phoneNumber, recaptchaToken })
       });
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Verification failed');
-      }
-
-      if (data.exists) {
+      if (response.ok && data.exists) {
         // User exists, initiate OTP verification via email
         setUserData(data.user);
         try {
@@ -75,7 +63,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'Unable to connect to security server');
+      setError('Unable to connect to security server');
     } finally {
       setIsLoading(false);
     }
@@ -206,6 +194,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     setDisplayName('');
     setError('');
     setUserData(null);
+    setRecaptchaToken(null);
   };
 
   if (!isOpen) return null;
@@ -273,9 +262,11 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                 </div>
               </div>
               {RECAPTCHA_SITE_KEY && (
-                <p className="text-[10px] text-zinc-600 text-center uppercase tracking-widest my-2 select-none">
-                  Protected by Google reCAPTCHA
-                </p>
+                <ReCAPTCHA
+                  siteKey={RECAPTCHA_SITE_KEY}
+                  onChange={setRecaptchaToken}
+                  theme="dark"
+                />
               )}
               <button
                 onClick={handleSubmitPhone}

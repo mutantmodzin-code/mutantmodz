@@ -104,7 +104,7 @@ export default function ReCAPTCHA({ siteKey, onChange, theme = 'dark' }: ReCAPTC
   }, [isLoaded, siteKey, theme, onChange]);
 
   return (
-    <div className="flex justify-center my-4 overflow-hidden rounded-xl bg-zinc-900/40 p-2 border border-white/5">
+    <div className="flex justify-center my-4">
       <div ref={containerRef} />
     </div>
   );

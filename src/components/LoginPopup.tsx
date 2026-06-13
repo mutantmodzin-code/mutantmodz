@@ -390,15 +390,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-8 border-t border-white/5 bg-black/50">
-          <div className="flex items-center gap-4 opacity-50">
-            <ShieldCheck size={16} className="text-zinc-500" />
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-              Secure 256-bit SSL Encryption
-            </p>
-          </div>
-        </div>
+
       </div>
     </>
   );

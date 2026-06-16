@@ -4,6 +4,17 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Resend } = require('resend');
+const {
+    OTP_PROTECTION_MIDDLEWARE,
+    checkBruteForceLockout,
+    handleFailedOTPAttempt,
+    clearFailedOTPAttempts,
+    generateSecureOTP,
+    hashOTP,
+    setSecureSessionCookie,
+    clearSecureSessionCookie,
+    logSecurityEvent
+} = require('../utils/security');
 
 // Initialize Resend with API key (lazy initialization)
 let resendClient = null;
@@ -91,13 +102,13 @@ router.post('/check-user', async (req, res) => {
 
 
 // Send OTP Route
-router.post('/send-otp', async (req, res) => {
+router.post('/send-otp', OTP_PROTECTION_MIDDLEWARE, async (req, res) => {
     const { email, phone } = req.body;
     try {
         console.log(`📧 OTP REQUEST for ${email || phone}`);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otp_hash = await bcrypt.hash(otp, 10);
-        const otp_expiry = new Date(Date.now() + 10 * 60000); // 10 minutes from now
+        const otp = generateSecureOTP();
+        const otp_hash = await hashOTP(otp);
+        const otp_expiry = new Date(Date.now() + 5 * 60000); // 5 minutes from now (Requirement 8)
 
         // Store OTP in database (either for customer or user)
         let userResult = await db.query('SELECT * FROM customers WHERE phone = $1 OR email = $2', [phone, email]);
@@ -142,8 +153,8 @@ router.post('/send-otp', async (req, res) => {
                 html: `
                     <div style="font-family: sans-serif; text-align: center; padding: 20px;">
                         <h2>Your Verification Code</h2>
-                        <h1 style="color: #ff0000;">${otp}</h1>
-                        <p>This code expires in 10 minutes.</p>
+                        <h1 style="color: #ff0000; font-size: 32px; letter-spacing: 4px;">${otp}</h1>
+                        <p>This code expires in 5 minutes.</p>
                     </div>
                 `
             });
@@ -176,7 +187,36 @@ router.post('/send-otp', async (req, res) => {
 // Verify OTP Route
 router.post('/verify-otp', async (req, res) => {
     const { phone, email, otp } = req.body;
+    const ip = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'] || '';
+
     try {
+        // Resolve email to run brute force checks (Requirement 5)
+        let resolvedEmail = email ? email.trim().toLowerCase() : null;
+        if (!resolvedEmail && phone) {
+            try {
+                let checkRes = await db.query('SELECT email FROM customers WHERE phone = $1', [phone]);
+                if (checkRes.rows.length > 0) {
+                    resolvedEmail = checkRes.rows[0].email;
+                } else {
+                    checkRes = await db.query('SELECT email FROM users WHERE phone = $1', [phone]);
+                    if (checkRes.rows.length > 0) {
+                        resolvedEmail = checkRes.rows[0].email;
+                    }
+                }
+            } catch (dbErr) {
+                console.error('Failed to resolve email for brute force check:', dbErr);
+            }
+        }
+
+        // 1. Check if email account is currently locked out
+        if (resolvedEmail) {
+            const bruteCheck = checkBruteForceLockout(resolvedEmail, ip, userAgent);
+            if (bruteCheck.locked) {
+                return res.status(429).json({ error: bruteCheck.error });
+            }
+        }
+
         let query = 'SELECT * FROM customers WHERE phone = $1 OR email = $2';
         let result = await db.query(query, [phone, email]);
 
@@ -186,28 +226,76 @@ router.post('/verify-otp', async (req, res) => {
         }
 
         if (result.rows.length === 0) {
+            logSecurityEvent({
+                ip,
+                email: resolvedEmail,
+                userAgent,
+                action: 'VERIFY_OTP_FAILED',
+                status: 'NOT_FOUND',
+                reason: 'User record not found during OTP verification'
+            });
             return res.status(404).json({ error: 'User not found' });
         }
 
         const user = result.rows[0];
 
+        // 2. Check if OTP is expired or missing
         if (!user.otp_hash || new Date() > user.otp_expiry) {
-            return res.status(400).json({ error: 'OTP expired or not found' });
+            if (resolvedEmail) {
+                const bruteResult = handleFailedOTPAttempt(resolvedEmail, ip, userAgent);
+                if (bruteResult.locked) {
+                    return res.status(429).json({ error: bruteResult.error });
+                }
+            }
+            return res.status(401).json({ error: 'OTP expired or not found' });
         }
 
+        // 3. Verify cryptographic match
         const isMatch = await bcrypt.compare(otp, user.otp_hash);
         if (!isMatch) {
-            return res.status(400).json({ error: 'Invalid code' });
+            if (resolvedEmail) {
+                const bruteResult = handleFailedOTPAttempt(resolvedEmail, ip, userAgent);
+                if (bruteResult.locked) {
+                    return res.status(429).json({ error: bruteResult.error });
+                }
+                return res.status(401).json({ 
+                    error: 'Invalid verification code',
+                    remainingAttempts: bruteResult.remainingAttempts
+                });
+            }
+            return res.status(401).json({ error: 'Invalid verification code' });
         }
 
-        // Clear OTP on success and mark customer as verified if applicable
+        // Clear failed attempts counter on successful login (Requirement 5)
+        if (resolvedEmail) {
+            clearFailedOTPAttempts(resolvedEmail);
+        }
+
+        // Clear OTP on success and mark customer as verified if applicable (Requirement 8)
         if (!user.role || user.role === 'customer') {
             await db.query('UPDATE customers SET otp_hash = NULL, otp_expiry = NULL, is_verified = TRUE WHERE id = $1', [user.id]);
         } else {
             await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
         }
 
-        const token = jwt.sign({ id: user.id, username: user.username || user.name, role: user.role || 'customer' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign(
+            { id: user.id, username: user.username || user.name, role: user.role || 'customer' }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '7d' }
+        );
+
+        // Set secure cookies for session protection (Requirement 9)
+        setSecureSessionCookie(res, token);
+
+        logSecurityEvent({
+            ip,
+            email: user.email,
+            userAgent,
+            action: 'VERIFY_OTP_SUCCESS',
+            status: 'SUCCESS',
+            reason: 'Successful verification and token issued'
+        });
+
         res.json({ 
             token, 
             user: { 
@@ -222,6 +310,12 @@ router.post('/verify-otp', async (req, res) => {
         console.error('VERIFY OTP ERROR:', error);
         res.status(500).json({ error: 'Server error' });
     }
+});
+
+// Logout Route
+router.post('/logout', (req, res) => {
+    clearSecureSessionCookie(res);
+    res.json({ message: 'Logged out successfully' });
 });
 
 // Admin Login Route

@@ -267,8 +267,14 @@ router.put('/:id', async (req, res) => {
         size_stock
     } = req.body;
 
-    const fs = require('fs');
-    fs.appendFileSync('server_debug.log', `[${new Date().toISOString()}] UPDATING PRODUCT ${req.params.id}\nBODY: ${JSON.stringify(req.body)}\n`);
+    try {
+        const fs = require('fs');
+        fs.appendFileSync('server_debug.log', `[${new Date().toISOString()}] UPDATING PRODUCT ${req.params.id}\nBODY: ${JSON.stringify(req.body)}\n`);
+    } catch (fsErr) {
+        if (process.env.NODE_ENV !== 'production') {
+            console.error('Failed to write product update log:', fsErr.message);
+        }
+    }
     console.log(`Updating product ${req.params.id}. Incoming stock: ${stock}, size_stock:`, size_stock);
 
     // Robust size_stock parsing for backend

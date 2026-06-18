@@ -320,13 +320,8 @@ router.post('/logout', (req, res) => {
 
 // Admin Login Route
 router.post('/login', async (req, res) => {
-    const { username, password, recaptchaToken } = req.body;
+    const { username, password } = req.body;
     try {
-        const isHuman = await verifyRecaptcha(recaptchaToken);
-        if (!isHuman) {
-            return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
-        }
-
         const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
         if (result.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid credentials' });

@@ -2,31 +2,20 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Bike, Lock, User, LogIn } from 'lucide-react';
-import ReCAPTCHA from '../components/ReCAPTCHA';
-
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LePZR0tAAAAAJNgANXBgoV1TtkWVmsXfmBzl74d';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [recaptchaToken, setRecaptchaToken] = useState(null);
-    const [recaptchaKey, setRecaptchaKey] = useState(0);
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!recaptchaToken) {
-            setError('Please verify that you are not a robot.');
-            return;
-        }
         try {
-            await login(username, password, recaptchaToken);
+            await login(username, password);
             navigate('/');
         } catch (err) {
-            setRecaptchaToken(null);
-            setRecaptchaKey(prev => prev + 1); // Reset reCAPTCHA widget
             if (err.response && (err.response.status === 400 || err.response.status === 401)) {
                 setError(err.response.data?.error || 'Invalid credentials. Please try again.');
             } else {
@@ -54,14 +43,7 @@ const Login = () => {
                         <Lock style={{ position: 'absolute', top: '12px', left: '12px', color: '#94a3b8' }} size={20} />
                         <input className="input" style={{ paddingLeft: '3rem' }} type="password" placeholder="Password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
-                    {RECAPTCHA_SITE_KEY && (
-                        <ReCAPTCHA
-                            key={recaptchaKey}
-                            siteKey={RECAPTCHA_SITE_KEY}
-                            onChange={setRecaptchaToken}
-                            theme="light"
-                        />
-                    )}
+
                     {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
                     <button className="btn btn-primary" style={{ width: '100%', padding: '0.875rem', fontSize: '1rem' }} type="submit">
                         <LogIn size={20} /> Login Securely

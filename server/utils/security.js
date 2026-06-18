@@ -19,10 +19,16 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-// Ensure Logs Directory exists
+// Ensure Logs Directory exists (only if not in a read-only environment)
 const LOG_DIR = path.join(__dirname, '..', 'logs');
-if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
+try {
+    if (!fs.existsSync(LOG_DIR)) {
+        fs.mkdirSync(LOG_DIR, { recursive: true });
+    }
+} catch (err) {
+    if (process.env.NODE_ENV !== 'production') {
+        console.warn('⚠️ Could not create logs directory:', err.message);
+    }
 }
 const SECURITY_LOG_FILE = path.join(LOG_DIR, 'security.log');
 
@@ -42,17 +48,15 @@ function logSecurityEvent(event) {
         reason: reason || ''
     });
     
-    // Append to dedicated security log file
+    // Always print to console so cloud logging captures the events
+    console.log(`[SECURITY] [${action}] Status: ${status} | IP: ${ip} | Email: ${email} | Reason: ${reason}`);
+
+    // Append to dedicated security log file (local/development environments)
     fs.appendFile(SECURITY_LOG_FILE, logLine + '\n', (err) => {
-        if (err) {
-            console.error('❌ Failed to write to security log:', err);
+        if (err && process.env.NODE_ENV !== 'production') {
+            console.error('❌ Failed to write to security log:', err.message);
         }
     });
-
-    // Also output to console in non-production environments
-    if (process.env.NODE_ENV !== 'production') {
-        console.log(`[SECURITY] [${action}] Status: ${status} | IP: ${ip} | Email: ${email} | Reason: ${reason}`);
-    }
 }
 
 // ==========================================

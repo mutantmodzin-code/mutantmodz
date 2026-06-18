@@ -69,6 +69,7 @@ router.post('/', async (req, res) => {
             to: [adminEmail],
             replyTo: email,
             subject: `📩 New Contact from ${name} — Mutant Modz`,
+            text: `New contact submission from ${name} (${email}): ${message}`,
             html
         });
 

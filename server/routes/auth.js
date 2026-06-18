@@ -168,6 +168,7 @@ router.post('/send-otp', OTP_PROTECTION_MIDDLEWARE, async (req, res) => {
                 from: fromEmail,
                 to: [emailToUse],
                 subject: 'MutantModz Verification Code',
+                text: `Your MutantModz verification code is: ${otp}. This code expires in 5 minutes.`,
                 html: `
                     <div style="font-family: sans-serif; text-align: center; padding: 20px;">
                         <h2>Your Verification Code</h2>
@@ -424,6 +425,7 @@ const handleSendEmailOTP = async (req, res) => {
                 from: fromEmail,
                 to: [newEmail],
                 subject: 'MutantModz Email Verification',
+                text: `Your MutantModz email verification code is: ${otp}`,
                 html: `
                     <div style="font-family: sans-serif; text-align: center; padding: 20px;">
                         <h2>Verify Your New Email</h2>

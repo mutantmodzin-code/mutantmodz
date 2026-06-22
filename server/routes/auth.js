@@ -87,13 +87,8 @@ async function verifyRecaptcha(token) {
 
 // Login Check Route (Direct Login - OTP removed)
 router.post('/check-user', async (req, res) => {
-    const { phone, recaptchaToken } = req.body;
+    const { phone } = req.body;
     try {
-        const isHuman = await verifyRecaptcha(recaptchaToken);
-        if (!isHuman) {
-            return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
-        }
-
         const result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
         if (result.rows.length > 0) {
             const user = result.rows[0];
@@ -128,13 +123,18 @@ router.post('/send-otp', OTP_PROTECTION_MIDDLEWARE, async (req, res) => {
         const otp_hash = await hashOTP(otp);
         const otp_expiry = new Date(Date.now() + 5 * 60000); // 5 minutes from now (Requirement 8)
 
-        // Store OTP in database (either for customer or user)
+        // Store OTP in database (either for customer, user, or pending registration)
         let userResult = await db.query('SELECT * FROM customers WHERE phone = $1 OR email = $2', [phone, email]);
         let tableName = 'customers';
         
         if (userResult.rows.length === 0) {
             userResult = await db.query('SELECT * FROM users WHERE phone = $1 OR email = $2', [phone, email]);
             tableName = 'users';
+        }
+
+        if (userResult.rows.length === 0) {
+            userResult = await db.query('SELECT * FROM pending_registrations WHERE phone = $1 OR email = $2', [phone, email]);
+            tableName = 'pending_registrations';
         }
 
         if (userResult.rows.length === 0) {
@@ -221,6 +221,11 @@ router.post('/verify-otp', async (req, res) => {
                     checkRes = await db.query('SELECT email FROM users WHERE phone = $1', [phone]);
                     if (checkRes.rows.length > 0) {
                         resolvedEmail = checkRes.rows[0].email;
+                    } else {
+                        checkRes = await db.query('SELECT email FROM pending_registrations WHERE phone = $1', [phone]);
+                        if (checkRes.rows.length > 0) {
+                            resolvedEmail = checkRes.rows[0].email;
+                        }
                     }
                 }
             } catch (dbErr) {
@@ -238,10 +243,17 @@ router.post('/verify-otp', async (req, res) => {
 
         let query = 'SELECT * FROM customers WHERE phone = $1 OR email = $2';
         let result = await db.query(query, [phone, email]);
+        let isPending = false;
 
         if (result.rows.length === 0) {
             query = 'SELECT * FROM users WHERE phone = $1 OR email = $2';
             result = await db.query(query, [phone, email]);
+        }
+
+        if (result.rows.length === 0) {
+            query = 'SELECT * FROM pending_registrations WHERE phone = $1 OR email = $2';
+            result = await db.query(query, [phone, email]);
+            isPending = true;
         }
 
         if (result.rows.length === 0) {
@@ -266,6 +278,14 @@ router.post('/verify-otp', async (req, res) => {
                     return res.status(429).json({ error: bruteResult.error });
                 }
             }
+            logSecurityEvent({
+                ip,
+                email: resolvedEmail,
+                userAgent,
+                action: 'VERIFY_OTP_FAILED',
+                status: 'REJECTED',
+                reason: 'OTP expired or not found'
+            });
             return res.status(401).json({ error: 'OTP expired or not found' });
         }
 
@@ -277,6 +297,14 @@ router.post('/verify-otp', async (req, res) => {
                 if (bruteResult.locked) {
                     return res.status(429).json({ error: bruteResult.error });
                 }
+                logSecurityEvent({
+                    ip,
+                    email: resolvedEmail,
+                    userAgent,
+                    action: 'VERIFY_OTP_FAILED',
+                    status: 'REJECTED',
+                    reason: `Invalid OTP code entered (Remaining attempts: ${bruteResult.remainingAttempts})`
+                });
                 return res.status(401).json({ 
                     error: 'Invalid verification code',
                     remainingAttempts: bruteResult.remainingAttempts
@@ -290,15 +318,29 @@ router.post('/verify-otp', async (req, res) => {
             clearFailedOTPAttempts(resolvedEmail);
         }
 
-        // Clear OTP on success and mark customer as verified if applicable (Requirement 8)
-        if (!user.role || user.role === 'customer') {
-            await db.query('UPDATE customers SET otp_hash = NULL, otp_expiry = NULL, is_verified = TRUE WHERE id = $1', [user.id]);
+        let authenticatedUser = user;
+
+        if (isPending) {
+            // Create the customer record only now after successful verification
+            const insertResult = await db.query(
+                'INSERT INTO customers (name, phone, email, address, is_verified) VALUES ($1, $2, $3, $4, TRUE) RETURNING *',
+                [user.name, user.phone, user.email, user.address || '']
+            );
+            authenticatedUser = insertResult.rows[0];
+
+            // Delete from pending registrations
+            await db.query('DELETE FROM pending_registrations WHERE id = $1', [user.id]);
         } else {
-            await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
+            // Clear OTP on success and mark customer as verified if applicable (Requirement 8)
+            if (!user.role || user.role === 'customer') {
+                await db.query('UPDATE customers SET otp_hash = NULL, otp_expiry = NULL, is_verified = TRUE WHERE id = $1', [user.id]);
+            } else {
+                await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
+            }
         }
 
         const token = jwt.sign(
-            { id: user.id, username: user.username || user.name, role: user.role || 'customer' }, 
+            { id: authenticatedUser.id, username: authenticatedUser.username || authenticatedUser.name, role: authenticatedUser.role || 'customer' }, 
             process.env.JWT_SECRET, 
             { expiresIn: '7d' }
         );
@@ -308,21 +350,21 @@ router.post('/verify-otp', async (req, res) => {
 
         logSecurityEvent({
             ip,
-            email: user.email,
+            email: authenticatedUser.email,
             userAgent,
             action: 'VERIFY_OTP_SUCCESS',
             status: 'SUCCESS',
-            reason: 'Successful verification and token issued'
+            reason: isPending ? 'Successful pending registration verification' : 'Successful login verification'
         });
 
         res.json({ 
             token, 
             user: { 
-                id: user.id, 
-                name: user.name || user.username, 
-                email: user.email,
-                phone: user.phone,
-                role: user.role || 'customer' 
+                id: authenticatedUser.id, 
+                name: authenticatedUser.name || authenticatedUser.username, 
+                email: authenticatedUser.email,
+                phone: authenticatedUser.phone,
+                role: authenticatedUser.role || 'customer' 
             } 
         });
     } catch (error) {

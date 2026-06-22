@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { X, ArrowRight, ShieldCheck, Loader2, CheckCircle, KeyRound } from 'lucide-react';
+import { X, ArrowRight, Loader2, CheckCircle, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
-import ReCAPTCHA from './ReCAPTCHA';
+import Turnstile from './Turnstile';
 
 import { getApiUrl } from '../utils/url';
 const API_URL = getApiUrl();
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LePZR0tAAAAAJNgANXBgoV1TtkWVmsXfmBzl74d';
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAC-6098vM6kY6J37G91tYq0M5w-';
 
 interface LoginPopupProps {
   isOpen: boolean;
@@ -24,15 +24,15 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [userData, setUserData] = useState<any>(null);
-  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-  const [recaptchaKey, setRecaptchaKey] = useState(0);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const handleSubmitPhone = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       setError('Please enter a valid 10-digit mobile number');
       return;
     }
-    if (!recaptchaToken) {
+    if (!turnstileToken) {
       setError('Please verify that you are not a robot');
       return;
     }
@@ -43,15 +43,15 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/check-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, recaptchaToken })
+        body: JSON.stringify({ phone: phoneNumber })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         setError(data.error || 'Verification failed. Please try again.');
-        setRecaptchaToken(null);
-        setRecaptchaKey(prev => prev + 1); // Reset reCAPTCHA widget
+        setTurnstileToken(null);
+        setTurnstileKey(prev => prev + 1); // Reset Turnstile widget
         setIsLoading(false);
         return;
       }
@@ -60,33 +60,35 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         // User exists, initiate OTP verification via email
         setUserData(data.user);
         try {
-          await handleSendOTP(data.user.email);
+          await handleSendOTP(data.user.email, turnstileToken);
           setStep('otp');
         } catch (otpErr) {
           // Error already set by handleSendOTP
         }
       } else {
         // New user - go to registration
+        setTurnstileToken(null);
+        setTurnstileKey(prev => prev + 1);
         setStep('register');
       }
 
     } catch (err: any) {
       console.error('Login error:', err);
       setError('Unable to connect to security server');
-      setRecaptchaToken(null);
-      setRecaptchaKey(prev => prev + 1); // Reset reCAPTCHA widget
+      setTurnstileToken(null);
+      setTurnstileKey(prev => prev + 1); // Reset Turnstile widget
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSendOTP = async (targetEmail: string) => {
+  const handleSendOTP = async (targetEmail: string, token: string | null) => {
     setIsLoading(true);
     try {
       const response = await fetch(`${API_URL}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, email: targetEmail })
+        body: JSON.stringify({ phone: phoneNumber, email: targetEmail, recaptchaToken: token })
       });
       if (!response.ok) {
         const data = await response.json();
@@ -94,6 +96,9 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       }
     } catch (err: any) {
       setError(err.message);
+      // Reset Turnstile on error so they can re-verify
+      setTurnstileToken(null);
+      setTurnstileKey(prev => prev + 1);
       throw err;
     } finally {
       setIsLoading(false);
@@ -134,6 +139,10 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       setError('Please fill in all fields');
       return;
     }
+    if (!turnstileToken) {
+      setError('Please verify that you are not a robot');
+      return;
+    }
     setIsLoading(true);
     setError('');
 
@@ -149,14 +158,14 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to create account');
-      
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to create account');
+      
       setUserData(data.user);
       
-      // After registration, trigger OTP for email verification
+      // After registration, trigger OTP for email verification using the same Turnstile token
       try {
-        await handleSendOTP(email);
+        await handleSendOTP(email, turnstileToken);
         setStep('otp');
       } catch (otpErr) {
         // Error handling in handleSendOTP
@@ -205,7 +214,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
     setDisplayName('');
     setError('');
     setUserData(null);
-    setRecaptchaToken(null);
+    setTurnstileToken(null);
   };
 
   if (!isOpen) return null;
@@ -272,11 +281,11 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                   />
                 </div>
               </div>
-              {RECAPTCHA_SITE_KEY && (
-                <ReCAPTCHA
-                  key={recaptchaKey}
-                  siteKey={RECAPTCHA_SITE_KEY}
-                  onChange={setRecaptchaToken}
+              {TURNSTILE_SITE_KEY && (
+                <Turnstile
+                  key={`phone-${turnstileKey}`}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onChange={setTurnstileToken}
                   theme="dark"
                 />
               )}
@@ -323,13 +332,21 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                 </div>
                 <div className="flex justify-end">
                   <button 
-                    onClick={() => handleSendOTP(userData?.email || email)}
-                    disabled={isLoading}
-                    className="text-[10px] font-bold text-zinc-500 hover:text-red-500 uppercase tracking-widest transition-colors mr-2"
+                    onClick={() => handleSendOTP(userData?.email || email, turnstileToken)}
+                    disabled={isLoading || !turnstileToken}
+                    className="text-[10px] font-bold text-zinc-500 hover:text-red-500 disabled:text-zinc-800 uppercase tracking-widest transition-colors mr-2"
                   >
                     Resend Code
                   </button>
                 </div>
+                {TURNSTILE_SITE_KEY && (
+                  <Turnstile
+                    key={`otp-${turnstileKey}`}
+                    siteKey={TURNSTILE_SITE_KEY}
+                    onChange={setTurnstileToken}
+                    theme="dark"
+                  />
+                )}
               </div>
               <button
                 onClick={handleVerifyOTP}
@@ -367,6 +384,14 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
                   />
                 </div>
               </div>
+              {TURNSTILE_SITE_KEY && (
+                <Turnstile
+                  key={`register-${turnstileKey}`}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onChange={setTurnstileToken}
+                  theme="dark"
+                />
+              )}
               <button
                 onClick={handleRegister}
                 disabled={isLoading}

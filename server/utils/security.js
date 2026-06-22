@@ -57,6 +57,17 @@ function logSecurityEvent(event) {
             console.error('❌ Failed to write to security log:', err.message);
         }
     });
+
+    // Persist log to PostgreSQL database
+    try {
+        const db = require('../db');
+        db.query(
+            'INSERT INTO security_logs (ip, email, user_agent, action, status, reason) VALUES ($1, $2, $3, $4, $5, $6)',
+            [ip || 'UNKNOWN_IP', email || 'UNKNOWN_EMAIL', userAgent || 'UNKNOWN_UA', action, status, reason || '']
+        ).catch(err => console.error('Failed to log security event to DB:', err.message));
+    } catch (dbErr) {
+        console.error('Failed to require/query db in security logger:', dbErr.message);
+    }
 }
 
 // ==========================================
@@ -188,7 +199,7 @@ function detectBot(req) {
 async function verifyCaptcha(token, remoteIp) {
     if (!token) return { success: false, reason: 'No token provided' };
 
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || '0x4AAAAAADpJUtqpn-0QM822DIlDjvOJp7Y';
     const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
     try {
@@ -342,6 +353,9 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
             if (userResult.rows.length === 0) {
                 userResult = await db.query('SELECT email FROM users WHERE phone = $1', [phone]);
             }
+            if (userResult.rows.length === 0) {
+                userResult = await db.query('SELECT email FROM pending_registrations WHERE phone = $1', [phone]);
+            }
             if (userResult.rows.length > 0 && userResult.rows[0].email) {
                 email = userResult.rows[0].email.trim().toLowerCase();
             }
@@ -399,22 +413,38 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
 
     // Validate email format and protect against disposable domains
     if (email) {
-        // --- REQUIREMENT 4: DISPOSABLE EMAIL PROTECTION ---
-        if (isDisposableEmail(email)) {
+        // --- REQUIREMENT 2 & 3: GMAIL ONLY VALIDATION ---
+        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+        if (!gmailRegex.test(email)) {
             logSecurityEvent({
                 ip,
                 email,
                 userAgent,
-                action: 'DISPOSABLE_EMAIL_REJECT',
+                action: 'INVALID_EMAIL_ATTEMPT',
                 status: 'REJECTED',
-                reason: 'Disposable or temporary email provider detected'
+                reason: `Non-Gmail address format: ${email}`
             });
-            return res.status(400).json({ error: 'Registration/Login using temporary emails is not permitted.' });
+            return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
+        }
+
+        // --- REQUIREMENT 10: DISPOSABLE EMAIL PROTECTION ---
+        const domain = email.split('@')[1].toLowerCase();
+        const disposableDomains = ['tempmail.com', 'mailinator.com', 'guerrillamail.com', '10minutemail.com'];
+        if (disposableDomains.includes(domain) || isDisposableEmail(email)) {
+            logSecurityEvent({
+                ip,
+                email,
+                userAgent,
+                action: 'INVALID_EMAIL_ATTEMPT',
+                status: 'REJECTED',
+                reason: `Disposable or temporary email domain detected: ${email}`
+            });
+            return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
         }
     } else {
         logSecurityEvent({
             ip,
-            email,
+            email: 'NONE',
             userAgent,
             action: 'INVALID_REQUEST',
             status: 'REJECTED',
@@ -423,144 +453,85 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
         return res.status(400).json({ error: 'Email address is required.' });
     }
 
-    // --- REQUIREMENT 1: OTP ENDPOINT PROTECTION & RATE LIMITS ---
-    const hourlyEmailKey = `otp_hr_email:${email}`;
-    const hourlyIpKey = `otp_hr_ip:${ip}`;
-    const dailyIpKey = `otp_daily_ip:${ip}`;
+    // --- REQUIREMENT 9: CAPTCHA VERIFICATION before sending OTP ---
+    if (!recaptchaToken) {
+        logSecurityEvent({
+            ip,
+            email,
+            userAgent,
+            action: 'CAPTCHA_FAILURE',
+            status: 'REJECTED',
+            reason: 'Verification token missing before OTP send'
+        });
+        return res.status(403).json({ error: 'Verification failed.' });
+    }
+
+    const captchaResult = await verifyCaptcha(recaptchaToken, ip);
+    if (!captchaResult.success) {
+        logSecurityEvent({
+            ip,
+            email,
+            userAgent,
+            action: 'CAPTCHA_FAILURE',
+            status: 'REJECTED',
+            reason: `CAPTCHA verification failed: ${captchaResult.reason}`
+        });
+        return res.status(403).json({ error: 'Verification failed.' });
+    }
+
+    // --- REQUIREMENT 6 & 7: RATE LIMITS & COOLDOWNS ---
+    const email15mKey = `otp_15m_email:${email}`;
+    const ipHourlyKey = `otp_hr_ip:${ip}`;
+    const cooldownEmailKey = `otp_cooldown_email:${email}`;
     const cooldownIpKey = `otp_cooldown_ip:${ip}`;
+    const now = Date.now();
 
-    // 1. Cooldown protection (60 seconds between requests)
-    const lastRequestTime = securityStore.get(cooldownIpKey);
-    if (lastRequestTime) {
-        const secondsPassed = Math.floor((Date.now() - lastRequestTime) / 1000);
-        const cooldownRemaining = 60 - secondsPassed;
-        if (cooldownRemaining > 0) {
-            logSecurityEvent({
-                ip,
-                email,
-                userAgent,
-                action: 'COOLDOWN_VIOLATION',
-                status: 'REJECTED',
-                reason: `Cooldown violation. Remaining: ${cooldownRemaining}s`
-            });
-            return res.status(429).json({ 
-                error: `Please wait ${cooldownRemaining} seconds before requesting another code.` 
-            });
-        }
+    // 1. 60-second cooldown protection between resends
+    const lastEmailTime = securityStore.get(cooldownEmailKey);
+    const lastIpTime = securityStore.get(cooldownIpKey);
+
+    if (lastEmailTime && (now - lastEmailTime < 60 * 1000)) {
+        const remaining = Math.ceil((60 * 1000 - (now - lastEmailTime)) / 1000);
+        return res.status(429).json({ error: `Please wait ${remaining} seconds before requesting another code.` });
+    }
+    if (lastIpTime && (now - lastIpTime < 60 * 1000)) {
+        const remaining = Math.ceil((60 * 1000 - (now - lastIpTime)) / 1000);
+        return res.status(429).json({ error: `Please wait ${remaining} seconds before requesting another code.` });
     }
 
-    // 2. Maximum 3 OTP emails per email address per hour
-    const emailHourlyCount = securityStore.get(hourlyEmailKey) || 0;
-    if (emailHourlyCount >= 3) {
-        securityStore.set(`violations_ip:${ip}`, ipViolations + 1, 24 * 60 * 60 * 1000);
+    // 2. Maximum 3 OTP requests per email within 15 minutes
+    const email15mCount = securityStore.get(email15mKey) || 0;
+    if (email15mCount >= 3) {
         logSecurityEvent({
             ip,
             email,
             userAgent,
-            action: 'EMAIL_LIMIT_EXCEEDED',
+            action: 'EXCESSIVE_OTP_REQUESTS',
             status: 'BLOCKED',
-            reason: 'Max 3 OTP emails per email per hour exceeded'
+            reason: `Email ${email} exceeded 3 OTP requests within 15 minutes`
         });
-        return res.status(429).json({ error: 'Too many OTP requests for this email address. Please try again in an hour.' });
+        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
-    // 3. Maximum 5 OTP requests per IP address per hour
-    const ipHourlyCount = securityStore.get(hourlyIpKey) || 0;
+    // 3. Maximum 5 OTP requests per IP per hour
+    const ipHourlyCount = securityStore.get(ipHourlyKey) || 0;
     if (ipHourlyCount >= 5) {
-        securityStore.set(`violations_ip:${ip}`, ipViolations + 1, 24 * 60 * 60 * 1000);
         logSecurityEvent({
             ip,
             email,
             userAgent,
-            action: 'IP_HOURLY_LIMIT_EXCEEDED',
+            action: 'EXCESSIVE_OTP_REQUESTS',
             status: 'BLOCKED',
-            reason: 'Max 5 OTP requests per IP per hour exceeded'
+            reason: `IP ${ip} exceeded 5 OTP requests within 1 hour`
         });
-        return res.status(429).json({ error: 'Too many OTP requests from this IP. Please try again in an hour.' });
+        return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
-    // 4. Maximum 20 OTP requests per IP per day
-    const ipDailyCount = securityStore.get(dailyIpKey) || 0;
-    if (ipDailyCount >= 20) {
-        // Apply temporary IP ban immediately
-        securityStore.set(`ban_ip:${ip}`, Date.now() + 60 * 60 * 1000, 60 * 60 * 1000); // 1 hour ban
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'IP_DAILY_LIMIT_EXCEEDED',
-            status: 'BANNED',
-            reason: 'Max 20 OTP requests per IP per day exceeded. Temporary 1 hour ban applied.'
-        });
-        return res.status(429).json({ error: 'Daily OTP request limit exceeded. Try again in an hour.' });
-    }
-
-    // --- REQUIREMENT 6: BOT DETECTION - Multiple emails from one IP ---
-    const ipEmailsKey = `ip_emails:${ip}`;
-    const ipRequestedEmails = securityStore.get(ipEmailsKey) || [];
-    if (!ipRequestedEmails.includes(email)) {
-        ipRequestedEmails.push(email);
-        securityStore.set(ipEmailsKey, ipRequestedEmails, 60 * 60 * 1000); // 1 hour TTL
-    }
-    if (ipRequestedEmails.length > 3) {
-        securityStore.set(`ban_ip:${ip}`, Date.now() + 2 * 60 * 60 * 1000, 2 * 60 * 60 * 1000); // 2 hour ban
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'MULTIPLE_EMAILS_SUSPICION',
-            status: 'BANNED',
-            reason: `IP requested OTP for ${ipRequestedEmails.length} different emails: ${ipRequestedEmails.join(', ')}`
-        });
-        return res.status(429).json({ error: 'Suspicious multi-account request patterns detected. IP temporarily blocked.' });
-    }
-
-    // --- REQUIREMENT 10: ESCALATION & CAPTCHA MANDATE ---
-    // Mandate CAPTCHA only if there are multiple suspicious attempts
-    if (ipHourlyCount >= 3 || emailHourlyCount >= 2 || ipDailyCount > 5) {
-        if (!recaptchaToken) {
-            logSecurityEvent({
-                ip,
-                email,
-                userAgent,
-                action: 'CAPTCHA_REQUIRED',
-                status: 'REJECTED',
-                reason: 'Repeated requests. CAPTCHA token missing.'
-            });
-            return res.status(403).json({ 
-                error: 'Security verification required. Please complete the CAPTCHA.' 
-            });
-        }
-    }
-
-    // --- REQUIREMENT 2: CAPTCHA VERIFICATION ---
-    if (recaptchaToken) {
-        const captchaResult = await verifyCaptcha(recaptchaToken, ip);
-        if (!captchaResult.success) {
-            logSecurityEvent({
-                ip,
-                email,
-                userAgent,
-                action: 'CAPTCHA_FAILURE',
-                status: 'REJECTED',
-                reason: `CAPTCHA verification failed: ${captchaResult.reason}`
-            });
-            return res.status(403).json({ error: 'Security verification failed. Please try again.' });
-        }
-    }
-
-    // --- REQUIREMENT 10: EXPONENTIAL BACKOFF COOLDOWN ---
-    // Increase cooldown dynamically based on requests count
-    let backoffDelay = 60 * 1000; // base 60s
-    if (emailHourlyCount === 1) backoffDelay = 5 * 60 * 1000;      // 2nd request: 5 mins
-    if (emailHourlyCount === 2) backoffDelay = 15 * 60 * 1000;     // 3rd request: 15 mins
-    if (emailHourlyCount >= 3) backoffDelay = 60 * 60 * 1000;      // subsequent: 1 hour
-
-    // Increment Counts in Store
-    securityStore.set(cooldownIpKey, Date.now(), backoffDelay);
-    securityStore.set(hourlyEmailKey, emailHourlyCount + 1, 60 * 60 * 1000);
-    securityStore.set(hourlyIpKey, ipHourlyCount + 1, 60 * 60 * 1000);
-    securityStore.set(dailyIpKey, ipDailyCount + 1, 24 * 60 * 60 * 1000);
+    // Increment Counts and update cooldowns in cache
+    securityStore.set(email15mKey, email15mCount + 1, 15 * 60 * 1000); // 15 mins TTL
+    securityStore.set(ipHourlyKey, ipHourlyCount + 1, 60 * 60 * 1000); // 1 hour TTL
+    securityStore.set(cooldownEmailKey, now, 60 * 1000);
+    securityStore.set(cooldownIpKey, now, 60 * 1000);
 
     logSecurityEvent({
         ip,
@@ -568,7 +539,7 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
         userAgent,
         action: 'OTP_REQUEST_ALLOWED',
         status: 'SUCCESS',
-        reason: `Request allowed. Hourly counts - IP: ${ipHourlyCount + 1}, Email: ${emailHourlyCount + 1}`
+        reason: `OTP allowed. Email 15m count: ${email15mCount + 1}, IP hourly count: ${ipHourlyCount + 1}`
     });
 
     next();

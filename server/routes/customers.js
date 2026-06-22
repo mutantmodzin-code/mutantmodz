@@ -42,29 +42,63 @@ router.get('/search', async (req, res) => {
 
 // Add customer (Registration/Initial)
 router.post('/', async (req, res) => {
-    const { name, phone, email, address, is_verified } = req.body;
+    const { name, phone, email, address } = req.body;
+
+    // Validate email format
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
+    if (!email || !gmailRegex.test(email)) {
+        return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
+    }
+
+    // Reject disposable email domains
+    const domain = email.split('@')[1].toLowerCase();
+    const disposableDomains = ['tempmail.com', 'mailinator.com', 'guerrillamail.com', '10minutemail.com'];
+    if (disposableDomains.includes(domain)) {
+        return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
+    }
+
     try {
+        // Prevent duplicate accounts: check email
+        const existingEmail = await db.query('SELECT id FROM customers WHERE email = $1', [email]);
+        if (existingEmail.rows.length > 0) {
+            return res.status(400).json({ error: 'Account already exists.' });
+        }
+
+        const existingEmailAdmin = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+        if (existingEmailAdmin.rows.length > 0) {
+            return res.status(400).json({ error: 'Account already exists.' });
+        }
+
+        // Prevent duplicate accounts: check phone
+        const existingPhone = await db.query('SELECT id FROM customers WHERE phone = $1', [phone]);
+        if (existingPhone.rows.length > 0) {
+            return res.status(400).json({ error: 'Account already exists.' });
+        }
+
+        const existingPhoneAdmin = await db.query('SELECT id FROM users WHERE phone = $1', [phone]);
+        if (existingPhoneAdmin.rows.length > 0) {
+            return res.status(400).json({ error: 'Account already exists.' });
+        }
+
+        // Do not create the user account until OTP verification succeeds.
+        // Save pending registration details first.
         const result = await db.query(
-            'INSERT INTO customers (name, phone, email, address, is_verified) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (phone) DO UPDATE SET name = $1, email = $3, address = $4, is_verified = EXCLUDED.is_verified RETURNING *',
-            [name, phone, email, address, is_verified || false]
+            `INSERT INTO pending_registrations (name, phone, email, address) 
+             VALUES ($1, $2, $3, $4) 
+             ON CONFLICT (phone) 
+             DO UPDATE SET name = $1, email = $3, address = $4 
+             RETURNING *`,
+            [name, phone, email, address || '']
         );
         
-        const user = result.rows[0];
-        
-        // Generate token for immediate login after registration
-        const token = jwt.sign(
-            { id: user.id, username: user.name, role: 'customer' },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
+        const pendingUser = result.rows[0];
 
         res.status(201).json({
-            token,
+            pending: true,
             user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone
+                name: pendingUser.name,
+                email: pendingUser.email,
+                phone: pendingUser.phone
             }
         });
     } catch (error) {

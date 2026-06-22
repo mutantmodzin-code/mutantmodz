@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../db');
 const jwt = require('jsonwebtoken');
 const { authenticateToken } = require('./auth');
+const { checkIPBlockStatus, checkHoneypot } = require('../utils/security');
 
 // Get all customers with online/offline classification
 router.get('/', authenticateToken, async (req, res) => {
@@ -41,8 +42,10 @@ router.get('/search', async (req, res) => {
 });
 
 // Add customer (Registration/Initial)
-router.post('/', async (req, res) => {
-    const { name, phone, email, address } = req.body;
+router.post('/', checkIPBlockStatus, checkHoneypot, async (req, res) => {
+    const { name, phone, email, address, browserFingerprint } = req.body;
+    const ipAddress = req.ip || req.connection.remoteAddress;
+    const userAgent = req.headers['user-agent'] || '';
 
     // Validate email format
     const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
@@ -83,12 +86,12 @@ router.post('/', async (req, res) => {
         // Do not create the user account until OTP verification succeeds.
         // Save pending registration details first.
         const result = await db.query(
-            `INSERT INTO pending_registrations (name, phone, email, address) 
-             VALUES ($1, $2, $3, $4) 
+            `INSERT INTO pending_registrations (name, phone, email, address, ip_address, user_agent, browser_fingerprint) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7) 
              ON CONFLICT (phone) 
-             DO UPDATE SET name = $1, email = $3, address = $4 
+             DO UPDATE SET name = $1, email = $3, address = $4, ip_address = $5, user_agent = $6, browser_fingerprint = $7 
              RETURNING *`,
-            [name, phone, email, address || '']
+            [name, phone, email, address || '', ipAddress, userAgent, browserFingerprint || '']
         );
         
         const pendingUser = result.rows[0];

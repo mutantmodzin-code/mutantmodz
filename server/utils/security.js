@@ -18,6 +18,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const redis = require('./redis');
 
 // Ensure Logs Directory exists (only if not in a read-only environment)
 const LOG_DIR = path.join(__dirname, '..', 'logs');
@@ -338,6 +339,116 @@ function parseCookies(req) {
 // ==========================================
 // 10. ABUSE PREVENTION & RATE LIMITS MIDDLEWARE
 // ==========================================
+
+/**
+ * Middleware to check if an IP address is blocked in the database.
+ */
+const checkIPBlockStatus = async (req, res, next) => {
+    const ip = req.ip || req.connection.remoteAddress;
+    try {
+        const db = require('../db');
+        const blockedRes = await db.query(
+            'SELECT * FROM blocked_ips WHERE ip = $1',
+            [ip]
+        );
+        if (blockedRes.rows.length > 0) {
+            const block = blockedRes.rows[0];
+            if (block.block_type === 'permanent') {
+                return res.status(403).json({ error: 'This IP address has been permanently blocked due to suspicious activity.' });
+            }
+            if (block.expires_at && new Date() < new Date(block.expires_at)) {
+                const minutesLeft = Math.ceil((new Date(block.expires_at) - new Date()) / (1000 * 60));
+                return res.status(403).json({ 
+                    error: `This IP address is temporarily blocked. Try again in ${minutesLeft} minutes.` 
+                });
+            }
+            // If expired, clean up the block
+            await db.query('DELETE FROM blocked_ips WHERE ip = $1', [ip]);
+        }
+    } catch (err) {
+        console.error('Failed to check blocked IP status:', err.message);
+    }
+    next();
+};
+
+/**
+ * Middleware to check honeypot fields to filter automated bot requests.
+ */
+const checkHoneypot = async (req, res, next) => {
+    const { website } = req.body;
+    if (website) {
+        const ip = req.ip || req.connection.remoteAddress;
+        const userAgent = req.headers['user-agent'] || '';
+        const email = req.body.email || 'NONE';
+        
+        await recordFailedAttempt(ip, email, userAgent, 'Honeypot field filled');
+        return res.status(400).json({ error: 'Spam detected. Access denied.' });
+    }
+    next();
+};
+
+/**
+ * Records a failed attempt for an IP and applies automatic 24h or permanent bans.
+ */
+const recordFailedAttempt = async (ip, email, userAgent, reason) => {
+    const db = require('../db');
+    
+    // 1. Log event in database and security log file
+    logSecurityEvent({
+        ip,
+        email,
+        userAgent,
+        action: 'AUTH_FAILED',
+        status: 'FAILED',
+        reason
+    });
+
+    try {
+        // 2. Increment failed attempts count in Redis
+        const failedKey = `failed_attempts:${ip}`;
+        const count = await redis.incr(failedKey);
+
+        if (count >= 20) {
+            // Permanent block after 20 failed attempts
+            await db.query(
+                `INSERT INTO blocked_ips (ip, block_type, expires_at) 
+                 VALUES ($1, 'permanent', NULL) 
+                 ON CONFLICT (ip) 
+                 DO UPDATE SET block_type = 'permanent', expires_at = NULL`,
+                [ip]
+            );
+            logSecurityEvent({
+                ip,
+                email,
+                userAgent,
+                action: 'IP_BLOCKED_PERMANENT',
+                status: 'BLOCKED',
+                reason: `Exceeded 20 failed attempts (count: ${count})`
+            });
+        } else if (count >= 10) {
+            // 24h block after 10 failed attempts
+            const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+            await db.query(
+                `INSERT INTO blocked_ips (ip, block_type, expires_at) 
+                 VALUES ($1, 'temporary', $2) 
+                 ON CONFLICT (ip) 
+                 DO UPDATE SET block_type = 'temporary', expires_at = $2`,
+                [ip, expiresAt]
+            );
+            logSecurityEvent({
+                ip,
+                email,
+                userAgent,
+                action: 'IP_BLOCKED_24H',
+                status: 'BLOCKED',
+                reason: `Exceeded 10 failed attempts (count: ${count})`
+            });
+        }
+    } catch (err) {
+        console.error('Failed to record failed attempt or block IP:', err.message);
+    }
+};
+
 const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
     const ip = req.ip || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'] || '';
@@ -364,174 +475,115 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
         }
     }
 
-    // --- REQUIREMENT 6: BOT DETECTION ---
+    // Check if IP is blocked in database
+    let ipBlocked = false;
+    try {
+        const db = require('../db');
+        const blockedRes = await db.query('SELECT * FROM blocked_ips WHERE ip = $1', [ip]);
+        if (blockedRes.rows.length > 0) {
+            const block = blockedRes.rows[0];
+            if (block.block_type === 'permanent') {
+                return res.status(403).json({ error: 'This IP address has been permanently blocked due to suspicious activity.' });
+            }
+            if (block.expires_at && new Date() < new Date(block.expires_at)) {
+                const minutesLeft = Math.ceil((new Date(block.expires_at) - new Date()) / (1000 * 60));
+                return res.status(403).json({ 
+                    error: `This IP address is temporarily blocked. Try again in ${minutesLeft} minutes.` 
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to query blocked_ips table:', err.message);
+    }
+
+    // Honeypot validation
+    if (req.body.website) {
+        await recordFailedAttempt(ip, email || 'NONE', userAgent, 'Honeypot field filled');
+        return res.status(400).json({ error: 'Spam detected. Access denied.' });
+    }
+
+    // Bot check
     const botCheck = detectBot(req);
     if (botCheck.isBot) {
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'BOT_BLOCKED',
-            status: 'BLOCKED',
-            reason: botCheck.reason
-        });
+        await recordFailedAttempt(ip, email || 'NONE', userAgent, botCheck.reason);
         return res.status(429).json({ error: 'Automated request detected. Access Denied.' });
-    }
-
-    // --- REQUIREMENT 10: TEMPORARY IP BAN ---
-    const ipBanUntil = securityStore.get(`ban_ip:${ip}`);
-    if (ipBanUntil && Date.now() < ipBanUntil) {
-        const remaining = Math.ceil((ipBanUntil - Date.now()) / 1000 / 60);
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'IP_BAN_CHECK',
-            status: 'BLOCKED',
-            reason: `IP temporarily banned. Remaining: ${remaining} mins`
-        });
-        return res.status(429).json({ 
-            error: `Your IP has been temporarily locked due to suspicious activity. Try again in ${remaining} minutes.` 
-        });
-    }
-
-    // Check if IP or email is blocked globally for excessive violations
-    const ipViolations = securityStore.get(`violations_ip:${ip}`) || 0;
-    if (ipViolations >= 5) {
-        // Ban IP for 24 hours
-        securityStore.set(`ban_ip:${ip}`, Date.now() + 24 * 60 * 60 * 1000, 24 * 60 * 60 * 1000);
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'IP_BANNED_24H',
-            status: 'BANNED',
-            reason: 'Exceeded maximum rate violations'
-        });
-        return res.status(429).json({ error: 'Your IP is banned due to abuse.' });
     }
 
     // Validate email format and protect against disposable domains
     if (email) {
-        // --- REQUIREMENT 2 & 3: GMAIL ONLY VALIDATION ---
         const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
         if (!gmailRegex.test(email)) {
-            logSecurityEvent({
-                ip,
-                email,
-                userAgent,
-                action: 'INVALID_EMAIL_ATTEMPT',
-                status: 'REJECTED',
-                reason: `Non-Gmail address format: ${email}`
-            });
+            await recordFailedAttempt(ip, email, userAgent, `Non-Gmail address format: ${email}`);
             return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
         }
 
-        // --- REQUIREMENT 10: DISPOSABLE EMAIL PROTECTION ---
+        // Disposable Email Protection
         const domain = email.split('@')[1].toLowerCase();
         const disposableDomains = ['tempmail.com', 'mailinator.com', 'guerrillamail.com', '10minutemail.com'];
         if (disposableDomains.includes(domain) || isDisposableEmail(email)) {
-            logSecurityEvent({
-                ip,
-                email,
-                userAgent,
-                action: 'INVALID_EMAIL_ATTEMPT',
-                status: 'REJECTED',
-                reason: `Disposable or temporary email domain detected: ${email}`
-            });
+            await recordFailedAttempt(ip, email, userAgent, `Disposable email domain detected: ${email}`);
             return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
         }
     } else {
-        logSecurityEvent({
-            ip,
-            email: 'NONE',
-            userAgent,
-            action: 'INVALID_REQUEST',
-            status: 'REJECTED',
-            reason: 'Email is required for OTP send request'
-        });
+        await recordFailedAttempt(ip, 'NONE', userAgent, 'Email is required for OTP send request');
         return res.status(400).json({ error: 'Email address is required.' });
     }
 
-    // --- REQUIREMENT 9: CAPTCHA VERIFICATION before sending OTP ---
+    // Captcha verification
     if (!recaptchaToken) {
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'CAPTCHA_FAILURE',
-            status: 'REJECTED',
-            reason: 'Verification token missing before OTP send'
-        });
+        await recordFailedAttempt(ip, email, userAgent, 'Verification token missing before OTP send');
         return res.status(403).json({ error: 'Verification failed.' });
     }
 
     const captchaResult = await verifyCaptcha(recaptchaToken, ip);
     if (!captchaResult.success) {
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'CAPTCHA_FAILURE',
-            status: 'REJECTED',
-            reason: `CAPTCHA verification failed: ${captchaResult.reason}`
-        });
+        await recordFailedAttempt(ip, email, userAgent, `CAPTCHA verification failed: ${captchaResult.reason}`);
         return res.status(403).json({ error: 'Verification failed.' });
     }
 
-    // --- REQUIREMENT 6 & 7: RATE LIMITS & COOLDOWNS ---
+    // UPSTASH REDIS RATE LIMITS & COOLDOWNS
     const email15mKey = `otp_15m_email:${email}`;
     const ipHourlyKey = `otp_hr_ip:${ip}`;
     const cooldownEmailKey = `otp_cooldown_email:${email}`;
     const cooldownIpKey = `otp_cooldown_ip:${ip}`;
-    const now = Date.now();
 
     // 1. 60-second cooldown protection between resends
-    const lastEmailTime = securityStore.get(cooldownEmailKey);
-    const lastIpTime = securityStore.get(cooldownIpKey);
+    const emailCooldown = await redis.get(cooldownEmailKey);
+    const ipCooldown = await redis.get(cooldownIpKey);
 
-    if (lastEmailTime && (now - lastEmailTime < 60 * 1000)) {
-        const remaining = Math.ceil((60 * 1000 - (now - lastEmailTime)) / 1000);
-        return res.status(429).json({ error: `Please wait ${remaining} seconds before requesting another code.` });
-    }
-    if (lastIpTime && (now - lastIpTime < 60 * 1000)) {
-        const remaining = Math.ceil((60 * 1000 - (now - lastIpTime)) / 1000);
-        return res.status(429).json({ error: `Please wait ${remaining} seconds before requesting another code.` });
+    if (emailCooldown || ipCooldown) {
+        return res.status(429).json({ error: 'Please wait 60 seconds before requesting another code.' });
     }
 
     // 2. Maximum 3 OTP requests per email within 15 minutes
-    const email15mCount = securityStore.get(email15mKey) || 0;
+    const email15mCount = parseInt(await redis.get(email15mKey) || '0');
     if (email15mCount >= 3) {
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'EXCESSIVE_OTP_REQUESTS',
-            status: 'BLOCKED',
-            reason: `Email ${email} exceeded 3 OTP requests within 15 minutes`
-        });
+        await recordFailedAttempt(ip, email, userAgent, `Email ${email} exceeded 3 OTP requests within 15 minutes`);
         return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
     // 3. Maximum 5 OTP requests per IP per hour
-    const ipHourlyCount = securityStore.get(ipHourlyKey) || 0;
+    const ipHourlyCount = parseInt(await redis.get(ipHourlyKey) || '0');
     if (ipHourlyCount >= 5) {
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'EXCESSIVE_OTP_REQUESTS',
-            status: 'BLOCKED',
-            reason: `IP ${ip} exceeded 5 OTP requests within 1 hour`
-        });
+        await recordFailedAttempt(ip, email, userAgent, `IP ${ip} exceeded 5 OTP requests within 1 hour`);
         return res.status(429).json({ error: 'Too many requests. Please try again later.' });
     }
 
-    // Increment Counts and update cooldowns in cache
-    securityStore.set(email15mKey, email15mCount + 1, 15 * 60 * 1000); // 15 mins TTL
-    securityStore.set(ipHourlyKey, ipHourlyCount + 1, 60 * 60 * 1000); // 1 hour TTL
-    securityStore.set(cooldownEmailKey, now, 60 * 1000);
-    securityStore.set(cooldownIpKey, now, 60 * 1000);
+    // Set cooldown (60 seconds)
+    await redis.set(cooldownEmailKey, '1', { ex: 60 });
+    await redis.set(cooldownIpKey, '1', { ex: 60 });
+
+    // Increment email counter and set 15m expiration
+    const nextEmailCount = await redis.incr(email15mKey);
+    if (nextEmailCount === 1) {
+        await redis.expire(email15mKey, 15 * 60);
+    }
+
+    // Increment IP counter and set 1h expiration
+    const nextIpCount = await redis.incr(ipHourlyKey);
+    if (nextIpCount === 1) {
+        await redis.expire(ipHourlyKey, 60 * 60);
+    }
 
     logSecurityEvent({
         ip,
@@ -539,93 +591,11 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
         userAgent,
         action: 'OTP_REQUEST_ALLOWED',
         status: 'SUCCESS',
-        reason: `OTP allowed. Email 15m count: ${email15mCount + 1}, IP hourly count: ${ipHourlyCount + 1}`
+        reason: `OTP allowed. Email 15m count: ${nextEmailCount}, IP hourly count: ${nextIpCount}`
     });
 
     next();
 };
-
-// ==========================================
-// 5. BRUTE-FORCE PROTECTION (FAILED OTP LOGINS)
-// ==========================================
-/**
- * Checks if an account is currently locked out due to too many failed OTP verification attempts.
- */
-function checkBruteForceLockout(email, ip, userAgent) {
-    const lockoutKey = `lockout:${email}`;
-    const lockoutUntil = securityStore.get(lockoutKey);
-
-    if (lockoutUntil && Date.now() < lockoutUntil) {
-        const remainingMinutes = Math.ceil((lockoutUntil - Date.now()) / 1000 / 60);
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'LOGIN_LOCKOUT_ENFORCED',
-            status: 'BLOCKED',
-            reason: `Account locked. Remaining: ${remainingMinutes} mins`
-        });
-        return {
-            locked: true,
-            remainingMinutes,
-            error: `This account has been temporarily locked due to too many failed attempts. Please try again in ${remainingMinutes} minutes.`
-        };
-    }
-    return { locked: false };
-}
-
-/**
- * Handles failed OTP verification attempts and applies account lockout if threshold is exceeded.
- */
-function handleFailedOTPAttempt(email, ip, userAgent) {
-    const attemptsKey = `failed_attempts:${email}`;
-    const lockoutKey = `lockout:${email}`;
-
-    const failedCount = (securityStore.get(attemptsKey) || 0) + 1;
-    securityStore.set(attemptsKey, failedCount, 15 * 60 * 1000); // 15 min TTL
-
-    logSecurityEvent({
-        ip,
-        email,
-        userAgent,
-        action: 'FAILED_OTP_VERIFICATION',
-        status: 'FAILED',
-        reason: `Attempt ${failedCount} of 5`
-    });
-
-    if (failedCount >= 5) {
-        const lockoutTimeMs = 15 * 60 * 1000; // Lock for 15 minutes
-        securityStore.set(lockoutKey, Date.now() + lockoutTimeMs, lockoutTimeMs);
-        securityStore.delete(attemptsKey); // Clear attempts counter during active lockout
-
-        logSecurityEvent({
-            ip,
-            email,
-            userAgent,
-            action: 'ACCOUNT_LOCKED',
-            status: 'LOCKED',
-            reason: '5 failed attempts reached. Account locked for 15 minutes.'
-        });
-
-        return {
-            locked: true,
-            error: 'Maximum failed attempts reached. Your account is locked for 15 minutes.'
-        };
-    }
-
-    return {
-        locked: false,
-        remainingAttempts: 5 - failedCount
-    };
-}
-
-/**
- * Clears failed login attempts on a successful verification.
- */
-function clearFailedOTPAttempts(email) {
-    securityStore.delete(`failed_attempts:${email}`);
-    securityStore.delete(`lockout:${email}`);
-}
 
 module.exports = {
     logSecurityEvent,
@@ -638,7 +608,7 @@ module.exports = {
     clearSecureSessionCookie,
     parseCookies,
     OTP_PROTECTION_MIDDLEWARE,
-    checkBruteForceLockout,
-    handleFailedOTPAttempt,
-    clearFailedOTPAttempts
+    checkIPBlockStatus,
+    checkHoneypot,
+    recordFailedAttempt
 };

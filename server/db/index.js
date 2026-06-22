@@ -41,6 +41,30 @@ async function initTables() {
       );
     `);
     console.log('✓ security_logs table checked/created');
+
+    // Create blocked_ips table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS blocked_ips (
+          id SERIAL PRIMARY KEY,
+          ip VARCHAR(50) UNIQUE NOT NULL,
+          block_type VARCHAR(20) NOT NULL,
+          blocked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          expires_at TIMESTAMP
+      );
+    `);
+    console.log('✓ blocked_ips table checked/created');
+
+    // Add columns for tracking origins to customers and pending_registrations
+    await pool.query(`
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS ip_address VARCHAR(50);
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS user_agent TEXT;
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS browser_fingerprint TEXT;
+
+      ALTER TABLE pending_registrations ADD COLUMN IF NOT EXISTS ip_address VARCHAR(50);
+      ALTER TABLE pending_registrations ADD COLUMN IF NOT EXISTS user_agent TEXT;
+      ALTER TABLE pending_registrations ADD COLUMN IF NOT EXISTS browser_fingerprint TEXT;
+    `);
+    console.log('✓ IP and user-agent columns added/verified');
   } catch (err) {
     console.error('❌ Error initializing custom auth/security tables:', err);
   }

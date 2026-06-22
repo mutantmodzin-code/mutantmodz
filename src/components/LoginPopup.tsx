@@ -26,6 +26,23 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const [userData, setUserData] = useState<any>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
+  const [website, setWebsite] = useState('');
+
+  const getBrowserFingerprint = () => {
+    try {
+      const parts = [
+        navigator.userAgent,
+        navigator.language,
+        screen.colorDepth,
+        screen.width + 'x' + screen.height,
+        new Date().getTimezoneOffset(),
+        navigator.plugins ? navigator.plugins.length : 0
+      ];
+      return btoa(parts.join('||'));
+    } catch (e) {
+      return 'fallback-fingerprint';
+    }
+  };
 
   const handleSubmitPhone = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
@@ -43,7 +60,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/check-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber })
+        body: JSON.stringify({ phone: phoneNumber, website, browserFingerprint: getBrowserFingerprint() })
       });
 
       const data = await response.json();
@@ -88,7 +105,13 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, email: targetEmail, recaptchaToken: token })
+        body: JSON.stringify({ 
+          phone: phoneNumber, 
+          email: targetEmail, 
+          recaptchaToken: token,
+          website,
+          browserFingerprint: getBrowserFingerprint()
+        })
       });
       if (!response.ok) {
         const data = await response.json();
@@ -117,7 +140,7 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, otp })
+        body: JSON.stringify({ phone: phoneNumber, otp, website, browserFingerprint: getBrowserFingerprint() })
       });
 
       const data = await response.json();
@@ -154,7 +177,9 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
           name: displayName,
           phone: phoneNumber,
           email: email,
-          is_verified: true
+          is_verified: true,
+          website,
+          browserFingerprint: getBrowserFingerprint()
         })
       });
 
@@ -252,6 +277,18 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto px-8 py-10 flex flex-col">
+
+          {/* Honeypot field (hidden from humans, filled by bots) */}
+          <div style={{ display: 'none' }}>
+            <input
+              type="text"
+              name="website"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+            />
+          </div>
 
           {/* Login Steps Rendering */}
           {error && (

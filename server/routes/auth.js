@@ -6,15 +6,16 @@ const jwt = require('jsonwebtoken');
 const { Resend } = require('resend');
 const {
     OTP_PROTECTION_MIDDLEWARE,
-    checkBruteForceLockout,
-    handleFailedOTPAttempt,
-    clearFailedOTPAttempts,
+    checkIPBlockStatus,
+    checkHoneypot,
+    recordFailedAttempt,
     generateSecureOTP,
     hashOTP,
     setSecureSessionCookie,
     clearSecureSessionCookie,
     logSecurityEvent
 } = require('../utils/security');
+const redis = require('../utils/redis');
 
 // Initialize Resend with API key (lazy initialization)
 let resendClient = null;
@@ -86,22 +87,14 @@ async function verifyRecaptcha(token) {
 
 
 // Login Check Route (Direct Login - OTP removed)
-router.post('/check-user', async (req, res) => {
+router.post('/check-user', checkIPBlockStatus, checkHoneypot, async (req, res) => {
     const { phone } = req.body;
     try {
         const result = await db.query('SELECT * FROM customers WHERE phone = $1', [phone]);
         if (result.rows.length > 0) {
             const user = result.rows[0];
-            // Provide token immediately (OTP Bypass)
-            const token = jwt.sign({ 
-                id: user.id, 
-                username: user.name, 
-                role: 'customer' 
-            }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
             res.json({ 
                 exists: true, 
-                token: token,
                 user: { id: user.id, name: user.name, email: user.email, phone: user.phone } 
             });
         } else {
@@ -115,7 +108,7 @@ router.post('/check-user', async (req, res) => {
 
 
 // Send OTP Route
-router.post('/send-otp', OTP_PROTECTION_MIDDLEWARE, async (req, res) => {
+router.post('/send-otp', checkIPBlockStatus, checkHoneypot, OTP_PROTECTION_MIDDLEWARE, async (req, res) => {
     const { email, phone } = req.body;
     try {
         console.log(`📧 OTP REQUEST for ${email || phone}`);
@@ -204,10 +197,11 @@ router.post('/send-otp', OTP_PROTECTION_MIDDLEWARE, async (req, res) => {
 });
 
 // Verify OTP Route
-router.post('/verify-otp', async (req, res) => {
+router.post('/verify-otp', checkIPBlockStatus, checkHoneypot, async (req, res) => {
     const { phone, email, otp } = req.body;
     const ip = req.ip || req.connection.remoteAddress;
     const userAgent = req.headers['user-agent'] || '';
+    const browserFingerprint = req.body.browserFingerprint || '';
 
     try {
         // Resolve email to run brute force checks (Requirement 5)
@@ -233,13 +227,7 @@ router.post('/verify-otp', async (req, res) => {
             }
         }
 
-        // 1. Check if email account is currently locked out
-        if (resolvedEmail) {
-            const bruteCheck = checkBruteForceLockout(resolvedEmail, ip, userAgent);
-            if (bruteCheck.locked) {
-                return res.status(429).json({ error: bruteCheck.error });
-            }
-        }
+
 
         let query = 'SELECT * FROM customers WHERE phone = $1 OR email = $2';
         let result = await db.query(query, [phone, email]);
@@ -257,14 +245,7 @@ router.post('/verify-otp', async (req, res) => {
         }
 
         if (result.rows.length === 0) {
-            logSecurityEvent({
-                ip,
-                email: resolvedEmail,
-                userAgent,
-                action: 'VERIFY_OTP_FAILED',
-                status: 'NOT_FOUND',
-                reason: 'User record not found during OTP verification'
-            });
+            await recordFailedAttempt(ip, resolvedEmail || 'NONE', userAgent, 'User record not found during OTP verification');
             return res.status(404).json({ error: 'User not found' });
         }
 
@@ -272,70 +253,61 @@ router.post('/verify-otp', async (req, res) => {
 
         // 2. Check if OTP is expired or missing
         if (!user.otp_hash || new Date() > user.otp_expiry) {
-            if (resolvedEmail) {
-                const bruteResult = handleFailedOTPAttempt(resolvedEmail, ip, userAgent);
-                if (bruteResult.locked) {
-                    return res.status(429).json({ error: bruteResult.error });
-                }
-            }
-            logSecurityEvent({
-                ip,
-                email: resolvedEmail,
-                userAgent,
-                action: 'VERIFY_OTP_FAILED',
-                status: 'REJECTED',
-                reason: 'OTP expired or not found'
-            });
+            await recordFailedAttempt(ip, resolvedEmail || 'NONE', userAgent, 'OTP expired or not found');
             return res.status(401).json({ error: 'OTP expired or not found' });
         }
 
         // 3. Verify cryptographic match
         const isMatch = await bcrypt.compare(otp, user.otp_hash);
         if (!isMatch) {
-            if (resolvedEmail) {
-                const bruteResult = handleFailedOTPAttempt(resolvedEmail, ip, userAgent);
-                if (bruteResult.locked) {
-                    return res.status(429).json({ error: bruteResult.error });
-                }
-                logSecurityEvent({
-                    ip,
-                    email: resolvedEmail,
-                    userAgent,
-                    action: 'VERIFY_OTP_FAILED',
-                    status: 'REJECTED',
-                    reason: `Invalid OTP code entered (Remaining attempts: ${bruteResult.remainingAttempts})`
-                });
-                return res.status(401).json({ 
-                    error: 'Invalid verification code',
-                    remainingAttempts: bruteResult.remainingAttempts
-                });
-            }
+            await recordFailedAttempt(ip, resolvedEmail || 'NONE', userAgent, 'Invalid OTP code entered');
             return res.status(401).json({ error: 'Invalid verification code' });
         }
 
-        // Clear failed attempts counter on successful login (Requirement 5)
-        if (resolvedEmail) {
-            clearFailedOTPAttempts(resolvedEmail);
-        }
+        // Clear failed attempts counter on successful login
+        await redis.del(`failed_attempts:${ip}`);
 
         let authenticatedUser = user;
 
         if (isPending) {
             // Create the customer record only now after successful verification
+            // Store origin tracking (IP, User Agent, Browser Fingerprint)
             const insertResult = await db.query(
-                'INSERT INTO customers (name, phone, email, address, is_verified) VALUES ($1, $2, $3, $4, TRUE) RETURNING *',
-                [user.name, user.phone, user.email, user.address || '']
+                `INSERT INTO customers (name, phone, email, address, is_verified, ip_address, user_agent, browser_fingerprint) 
+                 VALUES ($1, $2, $3, $4, TRUE, $5, $6, $7) 
+                 RETURNING *`,
+                [
+                    user.name, 
+                    user.phone, 
+                    user.email, 
+                    user.address || '', 
+                    user.ip_address || ip, 
+                    user.user_agent || userAgent, 
+                    user.browser_fingerprint || browserFingerprint
+                ]
             );
             authenticatedUser = insertResult.rows[0];
 
             // Delete from pending registrations
             await db.query('DELETE FROM pending_registrations WHERE id = $1', [user.id]);
         } else {
-            // Clear OTP on success and mark customer as verified if applicable (Requirement 8)
+            // Clear OTP on success and mark customer as verified if applicable
+            // Update tracking data
             if (!user.role || user.role === 'customer') {
-                await db.query('UPDATE customers SET otp_hash = NULL, otp_expiry = NULL, is_verified = TRUE WHERE id = $1', [user.id]);
+                await db.query(
+                    `UPDATE customers 
+                     SET otp_hash = NULL, otp_expiry = NULL, is_verified = TRUE, 
+                         ip_address = $2, user_agent = $3, browser_fingerprint = $4 
+                     WHERE id = $1`, 
+                    [user.id, ip, userAgent, browserFingerprint]
+                );
             } else {
-                await db.query('UPDATE ' + (user.role ? 'users' : 'customers') + ' SET otp_hash = NULL, otp_expiry = NULL WHERE id = $1', [user.id]);
+                await db.query(
+                    `UPDATE users 
+                     SET otp_hash = NULL, otp_expiry = NULL 
+                     WHERE id = $1`, 
+                    [user.id]
+                );
             }
         }
 

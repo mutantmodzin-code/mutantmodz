@@ -119,15 +119,27 @@ const securityStore = new InMemorySecurityCache();
 // ==========================================
 // Comprehensive list of popular disposable/temp email domains
 const DISPOSABLE_DOMAINS = new Set([
-    'mailinator.com', '10minutemail.com', 'tempmail.com', 'yopmail.com', 
-    'sharklasers.com', 'guerrillamail.com', 'dispostable.com', 'getairmail.com', 
-    'throwawaymail.com', 'temp-mail.org', 'maildrop.cc', 'trashmail.com', 
-    'burnermail.io', 'fakeinbox.com', 'generator.email', 'moakt.com', 
-    'guerrillamailblock.com', 'guerrillamail.net', 'guerrillamail.org', 
-    'guerrillamail.biz', 'guerrillamail.co', 'guerrillamail.de', 
+    // Classic disposable services
+    'mailinator.com', '10minutemail.com', 'tempmail.com', 'yopmail.com',
+    'sharklasers.com', 'guerrillamail.com', 'dispostable.com', 'getairmail.com',
+    'throwawaymail.com', 'temp-mail.org', 'maildrop.cc', 'trashmail.com',
+    'burnermail.io', 'fakeinbox.com', 'generator.email', 'moakt.com',
+    'guerrillamailblock.com', 'guerrillamail.net', 'guerrillamail.org',
+    'guerrillamail.biz', 'guerrillamail.co', 'guerrillamail.de',
     'disposable.com', 'tempmailaddress.com', 'mailnesia.com', 'mailcatch.com',
     'boun.cr', 'mintemail.com', 'spambox.us', 'spamex.com', 'spamgourmet.com',
-    '0clickmail.com', '33mail.com', 'anonymousmail.me', 'tempmail.net'
+    '0clickmail.com', '33mail.com', 'anonymousmail.me', 'tempmail.net',
+    // Additional blocked domains
+    'example.com', 'test.com', 'mailnull.com', 'mailscrap.com',
+    'inboxbear.com', 'tempr.email', 'discard.email', 'spamgourmet.net',
+    'getonemail.com', 'mailpoof.com', 'mohmal.com', 'tempemail.net',
+    'throwam.com', 'mailtemp.info', 'drdrb.com', 'filzmail.com',
+    'jetable.fr.nf', 'meltmail.com', 'nwldx.com', 'sogetthis.com',
+    'spamfree24.org', 'spamgob.com', 'spam4.me', 'trashmail.at',
+    'trashmail.io', 'trashmail.me', 'trashmail.net', 'trashmail.org',
+    'wegwerfmail.de', 'wegwerfmail.net', 'wegwerfmail.org', 'yopmail.fr',
+    'tmpmail.net', 'tmpmail.org', 'trashmail.xyz', 'crazymailing.com',
+    'e4ward.com', 'egotab.com', 'einrot.com', 'emltmp.com'
 ]);
 
 function isDisposableEmail(email) {
@@ -200,23 +212,32 @@ function detectBot(req) {
 async function verifyCaptcha(token, remoteIp) {
     if (!token) return { success: false, reason: 'No token provided' };
 
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || '0x4AAAAAADpJUtqpn-0QM822DIlDjvOJp7Y';
+    // Cloudflare Turnstile takes priority if configured
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
     const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
 
     try {
-        // Option A: Cloudflare Turnstile
+        // Option A: Cloudflare Turnstile (preferred - better than reCAPTCHA)
         if (turnstileSecret) {
+            // Cloudflare Turnstile requires application/x-www-form-urlencoded
+            const params = new URLSearchParams();
+            params.append('secret', turnstileSecret);
+            params.append('response', token);
+            if (remoteIp) params.append('remoteip', remoteIp);
+
             const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    secret: turnstileSecret,
-                    response: token,
-                    remoteip: remoteIp
-                })
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
             });
 
+            if (!response.ok) {
+                console.error(`❌ Turnstile server responded with HTTP ${response.status}`);
+                return { success: false, reason: `Turnstile HTTP error: ${response.status}` };
+            }
+
             const data = await response.json();
+            console.log('🛡️ Turnstile verification response:', JSON.stringify(data));
             if (data.success) {
                 return { success: true, provider: 'turnstile' };
             }
@@ -509,20 +530,18 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
         return res.status(429).json({ error: 'Automated request detected. Access Denied.' });
     }
 
-    // Validate email format and protect against disposable domains
+    // Validate email format strictly (RFC 5322 compliant regex)
     if (email) {
-        const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/i;
-        if (!gmailRegex.test(email)) {
-            await recordFailedAttempt(ip, email, userAgent, `Non-Gmail address format: ${email}`);
-            return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
+        const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[A-Za-z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            await recordFailedAttempt(ip, email, userAgent, `Invalid email format: ${email}`);
+            return res.status(400).json({ error: 'Please enter a valid email address.' });
         }
 
-        // Disposable Email Protection
-        const domain = email.split('@')[1].toLowerCase();
-        const disposableDomains = ['tempmail.com', 'mailinator.com', 'guerrillamail.com', '10minutemail.com'];
-        if (disposableDomains.includes(domain) || isDisposableEmail(email)) {
+        // Disposable Email Protection — block all known temp/fake domains
+        if (isDisposableEmail(email)) {
             await recordFailedAttempt(ip, email, userAgent, `Disposable email domain detected: ${email}`);
-            return res.status(400).json({ error: 'Only Gmail addresses are supported.' });
+            return res.status(400).json({ error: 'Disposable or temporary email addresses are not allowed. Please use a real email.' });
         }
     } else {
         await recordFailedAttempt(ip, 'NONE', userAgent, 'Email is required for OTP send request');

@@ -4,16 +4,60 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// ==========================================
+// RATE LIMITERS (HTTP-layer, independent of Redis)
+// ==========================================
+
+// Global rate limiter: 100 requests per 15 minutes per IP
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests from this IP. Please try again later.' },
+    skip: (req) => {
+        // Allow health check and static asset routes
+        return req.path === '/' || req.path.startsWith('/uploads/');
+    }
+});
+
+// Strict OTP-specific limiter: 3 requests per 15 minutes per IP
+const otpLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 3,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many OTP requests. Please wait 15 minutes before requesting another code.' },
+    keyGenerator: (req) => {
+        // Rate limit by IP (proxy-aware)
+        return req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    }
+});
+
+// Admin login strict limiter: 5 attempts per 15 minutes
+const adminLoginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many login attempts. Please wait 15 minutes.' }
+});
+
+
 console.log('--- Server Debug ---');
 console.log('PORT:', PORT);
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'PRESENT' : 'MISSING');
 console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'PRESENT' : 'MISSING');
+console.log('TURNSTILE_SECRET_KEY:', process.env.TURNSTILE_SECRET_KEY ? 'PRESENT ✅' : 'MISSING ⚠️');
+console.log('RECAPTCHA_SECRET_KEY:', process.env.RECAPTCHA_SECRET_KEY ? 'PRESENT ✅' : 'MISSING ⚠️');
 console.log('--------------------');
+
 
 
 
@@ -36,6 +80,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     immutable: true,
     etag: true
 }));
+
+// Apply global rate limiter to all API routes
+app.use('/api/', globalLimiter);
+
 
 
 // Main Route Check
@@ -62,6 +110,11 @@ const reelRoutes = require('./routes/reels');
 const heroRoutes = require('./routes/hero');
 const promoRoutes = require('./routes/promo');
 
+// Apply specific route rate limiters BEFORE registering the auth route
+// (Express processes middleware in registration order)
+app.use('/api/auth/send-otp', otpLimiter);
+app.use('/api/auth/login', adminLoginLimiter);
+
 // Apply Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
@@ -79,6 +132,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/reels', reelRoutes);
 app.use('/api/hero', heroRoutes);
 app.use('/api/promo', promoRoutes);
+
+
+
 
 // Global Error Handler
 app.use((err, req, res, next) => {

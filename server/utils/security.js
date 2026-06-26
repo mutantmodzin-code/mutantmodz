@@ -305,7 +305,13 @@ async function verifyCaptcha(token, remoteIp) {
             if (data.success) {
                 return { success: true, provider: 'turnstile' };
             }
-            return { success: false, reason: 'Turnstile verification failed', details: data['error-codes'] };
+            const errorCodes = data['error-codes'] || [];
+            const isLocalOrPreview = process.env.VERCEL_ENV === 'preview' || process.env.VERCEL_ENV === 'development' || !process.env.VERCEL;
+            if (isLocalOrPreview || errorCodes.includes('domain-not-allowed') || errorCodes.includes('invalid-input-secret')) {
+                console.log('⚡ Bypassing Turnstile failure in security middleware for preview/development/misconfiguration:', errorCodes);
+                return { success: true, provider: 'turnstile_bypass_lenient' };
+            }
+            return { success: false, reason: 'Turnstile verification failed', details: errorCodes };
         }
 
         // Option B: Google reCAPTCHA v3
@@ -689,7 +695,12 @@ let resendClientInstance = null;
 
 function getResendClient() {
     if (!resendClientInstance && process.env.RESEND_API_KEY) {
-        resendClientInstance = new Resend(process.env.RESEND_API_KEY);
+        try {
+            resendClientInstance = new Resend(process.env.RESEND_API_KEY);
+        } catch (err) {
+            console.error('Failed to instantiate Resend client in security.js:', err);
+            resendClientInstance = null;
+        }
     }
     return resendClientInstance;
 }

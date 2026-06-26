@@ -15,6 +15,7 @@ const {
     setSecureSessionCookie,
     clearSecureSessionCookie,
     logSecurityEvent,
+    detectBot,
     // Enterprise utilities
     sendSecurityEmail,
     getGeoIPData,
@@ -34,7 +35,12 @@ const {
 let resendClient = null;
 function getResend() {
     if (!resendClient && process.env.RESEND_API_KEY) {
-        resendClient = new Resend(process.env.RESEND_API_KEY);
+        try {
+            resendClient = new Resend(process.env.RESEND_API_KEY);
+        } catch (err) {
+            console.error('Failed to instantiate Resend client in auth.js:', err);
+            resendClient = null;
+        }
     }
     return resendClient;
 }

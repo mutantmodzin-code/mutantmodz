@@ -35,7 +35,7 @@ class InMemoryFallback {
         } else if (options.px) {
             expiry = Date.now() + options.px;
         }
-        this.store.set(key, { value, expiry });
+        this.store.set(key, { value: value.toString(), expiry });
         return 'OK';
     }
 
@@ -62,20 +62,96 @@ class InMemoryFallback {
     }
 }
 
+class ResilientRedis {
+    constructor(upstashRedis, fallback) {
+        this.upstash = upstashRedis;
+        this.fallback = fallback;
+        this.useFallback = !upstashRedis;
+    }
+
+    async get(key) {
+        if (this.useFallback) {
+            return this.fallback.get(key);
+        }
+        try {
+            return await this.upstash.get(key);
+        } catch (err) {
+            console.error('⚠️ Upstash Redis error on GET. Falling back to InMemoryFallback:', err.message);
+            this.useFallback = true;
+            return this.fallback.get(key);
+        }
+    }
+
+    async set(key, value, options = {}) {
+        if (this.useFallback) {
+            return this.fallback.set(key, value, options);
+        }
+        try {
+            return await this.upstash.set(key, value, options);
+        } catch (err) {
+            console.error('⚠️ Upstash Redis error on SET. Falling back to InMemoryFallback:', err.message);
+            this.useFallback = true;
+            return this.fallback.set(key, value, options);
+        }
+    }
+
+    async incr(key) {
+        if (this.useFallback) {
+            return this.fallback.incr(key);
+        }
+        try {
+            return await this.upstash.incr(key);
+        } catch (err) {
+            console.error('⚠️ Upstash Redis error on INCR. Falling back to InMemoryFallback:', err.message);
+            this.useFallback = true;
+            return this.fallback.incr(key);
+        }
+    }
+
+    async expire(key, seconds) {
+        if (this.useFallback) {
+            return this.fallback.expire(key, seconds);
+        }
+        try {
+            return await this.upstash.expire(key, seconds);
+        } catch (err) {
+            console.error('⚠️ Upstash Redis error on EXPIRE. Falling back to InMemoryFallback:', err.message);
+            this.useFallback = true;
+            return this.fallback.expire(key, seconds);
+        }
+    }
+
+    async del(key) {
+        if (this.useFallback) {
+            return this.fallback.del(key);
+        }
+        try {
+            return await this.upstash.del(key);
+        } catch (err) {
+            console.error('⚠️ Upstash Redis error on DEL. Falling back to InMemoryFallback:', err.message);
+            this.useFallback = true;
+            return this.fallback.del(key);
+        }
+    }
+}
+
+const fallback = new InMemoryFallback();
+
 if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
     try {
-        redis = new Redis({
+        const upstashInstance = new Redis({
             url: process.env.UPSTASH_REDIS_REST_URL,
             token: process.env.UPSTASH_REDIS_REST_TOKEN,
         });
-        console.log('✅ Connected to Upstash Redis');
+        redis = new ResilientRedis(upstashInstance, fallback);
+        console.log('✅ Initialized Resilient Upstash Redis client');
     } catch (err) {
         console.error('❌ Failed to initialize Upstash Redis:', err.message);
-        redis = new InMemoryFallback();
+        redis = fallback;
     }
 } else {
     console.warn('⚠️ UPSTASH_REDIS_REST_URL/TOKEN not configured. Using InMemoryFallback.');
-    redis = new InMemoryFallback();
+    redis = fallback;
 }
 
 module.exports = redis;

@@ -20,6 +20,70 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const redis = require('./redis');
 
+// ==========================================
+// GLOBALS & POLYFILLS (fetch support for legacy Node.js runtimes)
+// ==========================================
+if (!globalThis.fetch) {
+    const https = require('https');
+    const http = require('http');
+    const { URL } = require('url');
+
+    globalThis.fetch = function (url, options = {}) {
+        return new Promise((resolve, reject) => {
+            const parsedUrl = new URL(url);
+            const client = parsedUrl.protocol === 'https:' ? https : http;
+            
+            const reqOptions = {
+                method: options.method || 'GET',
+                headers: options.headers || {},
+                timeout: options.signal ? 3000 : undefined
+            };
+
+            const req = client.request(url, reqOptions, (res) => {
+                let data = '';
+                res.on('data', (chunk) => {
+                    data += chunk;
+                });
+                res.on('end', () => {
+                    let parsedData;
+                    try {
+                        parsedData = JSON.parse(data);
+                    } catch (e) {
+                        parsedData = null;
+                    }
+                    resolve({
+                        ok: res.statusCode >= 200 && res.statusCode < 300,
+                        status: res.statusCode,
+                        json: () => Promise.resolve(parsedData),
+                        text: () => Promise.resolve(data)
+                    });
+                });
+            });
+
+            req.on('error', (err) => {
+                reject(err);
+            });
+
+            req.on('timeout', () => {
+                req.destroy();
+                reject(new Error('Request Timeout'));
+            });
+
+            if (options.body) {
+                req.write(options.body);
+            }
+            req.end();
+
+            if (options.signal) {
+                options.signal.addEventListener('abort', () => {
+                    req.destroy();
+                    reject(new Error('The user aborted a request.'));
+                });
+            }
+        });
+    };
+}
+
 // Ensure Logs Directory exists (only if not in a read-only environment)
 const LOG_DIR = path.join(__dirname, '..', 'logs');
 try {

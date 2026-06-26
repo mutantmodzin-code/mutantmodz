@@ -322,7 +322,7 @@ router.post('/send-otp', checkIPBlockStatus, checkHoneypot, indiaAccessPolicy, O
 
         try {
             const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-            await resendInstance.emails.send({
+            const { data, error } = await resendInstance.emails.send({
                 from: fromEmail,
                 to: [emailToUse],
                 subject: 'MutantModz Verification Code',
@@ -335,6 +335,15 @@ router.post('/send-otp', checkIPBlockStatus, checkHoneypot, indiaAccessPolicy, O
                     </div>
                 `
             });
+
+            if (error) {
+                console.error('RESEND ERROR:', error);
+                console.log(`[EMERGENCY FALLBACK] OTP CODE for ${emailToUse}: ${otp}`);
+                return res.json({ 
+                    dev: true, 
+                    message: 'Authentication protocol initiated. OTP printed to terminal due to mailer status.' 
+                });
+            }
 
             res.json({ message: 'Identity verification code sent to your email.' });
         } catch (mailError) {

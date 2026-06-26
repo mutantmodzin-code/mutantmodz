@@ -10,6 +10,9 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Enable proxy trust to support Cloudflare connecting IP extraction
+app.set('trust proxy', true);
+
 // ==========================================
 // RATE LIMITERS (HTTP-layer, independent of Redis)
 // ==========================================
@@ -33,11 +36,7 @@ const otpLimiter = rateLimit({
     max: 3,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'Too many OTP requests. Please wait 15 minutes before requesting another code.' },
-    keyGenerator: (req) => {
-        // Rate limit by IP (proxy-aware)
-        return req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    }
+    message: { error: 'Too many OTP requests. Please wait 15 minutes before requesting another code.' }
 });
 
 // Admin login strict limiter: 5 attempts per 15 minutes
@@ -80,6 +79,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
     immutable: true,
     etag: true
 }));
+
+// Honeynet trap endpoints (Express v5 RegExp matches)
+const { honeynetTrap } = require('./middleware/enterpriseSecurity');
+app.all(/^\/wp-admin.*/, honeynetTrap);
+app.all(/^\/phpmyadmin.*/, honeynetTrap);
+app.all(/^\/\.env.*/, honeynetTrap);
+app.all(/^\/admin\.php.*/, honeynetTrap);
+app.all(/^\/config\.php.*/, honeynetTrap);
 
 // Apply global rate limiter to all API routes
 app.use('/api/', globalLimiter);

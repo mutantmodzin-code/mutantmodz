@@ -14,7 +14,8 @@ import {
     Zap,
     Video,
     Tag,
-    X
+    X,
+    ShieldCheck
 } from 'lucide-react';
 
 const SidebarLink = ({ to, icon: Icon, children }) => (
@@ -95,6 +96,7 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
                 <SidebarLink to="/reports" icon={BarChart3}>Revenue Reports</SidebarLink>
                 <SidebarLink to="/profit" icon={TrendingUp}>Profit Dashboard</SidebarLink>
                 <SidebarLink to="/gst-reports" icon={Receipt}>GST Reports</SidebarLink>
+                <SidebarLink to="/security" icon={ShieldCheck}>Security Monitor</SidebarLink>
             </nav>
 
             <div style={{ marginTop: 'auto', padding: '1rem', backgroundColor: '#f8fafc', borderRadius: '1rem', border: '1px solid #f1f5f9' }}>

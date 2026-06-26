@@ -19,6 +19,7 @@ import GarageSale from './pages/GarageSale';
 import ManageReels from './pages/ManageReels';
 import ManageHero from './pages/ManageHero';
 import ManagePromo from './pages/ManagePromo';
+import SecurityDashboard from './pages/SecurityDashboard';
 
 const Layout = ({ children }) => {
   const { user, loading } = useAuth();
@@ -83,6 +84,7 @@ const App = () => {
           <Route path="/reels" element={<Layout><ManageReels /></Layout>} />
           <Route path="/hero" element={<Layout><ManageHero /></Layout>} />
           <Route path="/promo" element={<Layout><ManagePromo /></Layout>} />
+          <Route path="/security" element={<Layout><SecurityDashboard /></Layout>} />
         </Routes>
       </Router>
     </AuthProvider>

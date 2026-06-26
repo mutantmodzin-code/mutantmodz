@@ -616,6 +616,348 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
     next();
 };
 
+// ==========================================
+// ENTERPRISE SECURITY UTILITIES
+// ==========================================
+
+const { Resend } = require('resend');
+let resendClientInstance = null;
+
+function getResendClient() {
+    if (!resendClientInstance && process.env.RESEND_API_KEY) {
+        resendClientInstance = new Resend(process.env.RESEND_API_KEY);
+    }
+    return resendClientInstance;
+}
+
+/**
+ * Sends a security email notification using Resend
+ */
+async function sendSecurityEmail(email, subject, html) {
+    const resend = getResendClient();
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    if (!resend) {
+        console.log(`[MOCK EMAIL] to: ${email} | Subject: ${subject}`);
+        console.log(`[MOCK EMAIL BODY] ${html.replace(/<[^>]*>/g, '')}`);
+        return;
+    }
+    try {
+        await resend.emails.send({
+            from: fromEmail,
+            to: [email],
+            subject: subject,
+            html: html
+        });
+        console.log(`✓ Security notification email sent to ${email}`);
+    } catch (err) {
+        console.error('❌ Failed to send security email:', err.message);
+    }
+}
+
+/**
+ * Retrieves GeoIP metadata with local caching and fallback checks
+ */
+async function getGeoIPData(ip) {
+    if (!ip || ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.16.') || ip.startsWith('::ffff:127.0.0.1')) {
+        return {
+            country: 'IN',
+            country_name: 'India',
+            city: 'Coimbatore',
+            lat: 11.0168,
+            lon: 76.9558,
+            isp: 'Reliance Jio Infocomm',
+            org: 'Reliance Jio Infocomm Limited',
+            proxy: false,
+            vpn: false
+        };
+    }
+
+    const cacheKey = `geoip_cache:${ip}`;
+    try {
+        const cached = await redis.get(cacheKey);
+        if (cached) return JSON.parse(cached);
+    } catch (err) {
+        console.error('Redis geoip cache read error:', err.message);
+    }
+
+    try {
+        // Primary provider: FreeIPAPI
+        const response = await fetch(`https://freeipapi.com/api/json/${ip}`, { signal: AbortSignal.timeout(2000) });
+        if (response.ok) {
+            const data = await response.json();
+            const geoData = {
+                country: data.countryCode || 'IN',
+                country_name: data.countryName || 'India',
+                city: data.cityName || 'Unknown',
+                lat: data.latitude || 11.0168,
+                lon: data.longitude || 76.9558,
+                isp: 'Reliance Jio Infocomm', // Default fallback
+                org: '',
+                proxy: data.isProxy || false,
+                vpn: data.isVpn || false
+            };
+
+            // Secondary check for ISP & Org details (ip-api.com)
+            try {
+                const secondaryRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,countryCode,country,city,lat,lon,isp,org,proxy,vpn`, { signal: AbortSignal.timeout(1500) });
+                if (secondaryRes.ok) {
+                    const sec = await secondaryRes.json();
+                    if (sec.status === 'success') {
+                        geoData.isp = sec.isp || geoData.isp;
+                        geoData.org = sec.org || geoData.org;
+                        geoData.proxy = sec.proxy || geoData.proxy;
+                        geoData.vpn = sec.vpn || geoData.vpn;
+                        geoData.country = sec.countryCode || geoData.country;
+                        geoData.country_name = sec.country || geoData.country_name;
+                        geoData.city = sec.city || geoData.city;
+                        geoData.lat = sec.lat || geoData.lat;
+                        geoData.lon = sec.lon || geoData.lon;
+                    }
+                }
+            } catch (secErr) {
+                // Ignore secondary failure
+            }
+
+            try {
+                await redis.set(cacheKey, JSON.stringify(geoData), { ex: 24 * 60 * 60 });
+            } catch (err) {
+                // Ignore cache set errors
+            }
+
+            return geoData;
+        }
+    } catch (err) {
+        console.error(`Primary GeoIP lookup failed for ${ip}:`, err.message);
+    }
+
+    return {
+        country: 'IN',
+        country_name: 'India',
+        city: 'Coimbatore',
+        lat: 11.0168,
+        lon: 76.9558,
+        isp: 'Unknown ISP',
+        org: 'Unknown Org',
+        proxy: false,
+        vpn: false
+    };
+}
+
+/**
+ * Checks if the request is originating from a cloud hosting datacenter
+ */
+function isDatacenterIP(geoData) {
+    if (!geoData) return false;
+    const org = (geoData.org || geoData.isp || '').toLowerCase();
+    const dcKeywords = [
+        'amazon', 'aws', 'microsoft', 'azure', 'google', 'oracle',
+        'hetzner', 'ovh', 'digitalocean', 'vultr', 'linode',
+        'datacenter', 'hosting', 'cloud', 'server', 'm247',
+        'contabo', 'leaseweb', 'scannet', 'choopa', 'zenlayer'
+    ];
+    return dcKeywords.some(keyword => org.includes(keyword));
+}
+
+/**
+ * Haversine formula helper
+ */
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const toRad = x => (x * Math.PI) / 180;
+    const R = 6371; // Earth radius in km
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+/**
+ * Checks if consecutive logins represent physically impossible travel
+ */
+async function checkImpossibleTravel(userId, userRole, currentLat, currentLon, currentTimestamp) {
+    const db = require('../db');
+    try {
+        const res = await db.query(
+            `SELECT timestamp, metadata FROM security_events 
+             WHERE user_id = $1 AND user_role = $2 AND event_type = 'Login Success' AND status = 'SUCCESS'
+             ORDER BY timestamp DESC LIMIT 1`,
+            [userId, userRole]
+        );
+
+        if (res.rows.length === 0) {
+            return { isSuspicious: false };
+        }
+
+        const lastEvent = res.rows[0];
+        const lastMetadata = lastEvent.metadata || {};
+        const lastLat = parseFloat(lastMetadata.latitude);
+        const lastLon = parseFloat(lastMetadata.longitude);
+        const lastTime = new Date(lastEvent.timestamp).getTime();
+
+        if (isNaN(lastLat) || isNaN(lastLon)) {
+            return { isSuspicious: false };
+        }
+
+        const distance = haversineDistance(lastLat, lastLon, parseFloat(currentLat), parseFloat(currentLon));
+        const timeDiffMs = new Date(currentTimestamp).getTime() - lastTime;
+        const timeDiffHours = timeDiffMs / (1000 * 60 * 60);
+
+        if (timeDiffHours <= 0) {
+            if (distance > 50) {
+                return { isSuspicious: true, speed: 9999, distance };
+            }
+            return { isSuspicious: false };
+        }
+
+        const speed = distance / timeDiffHours; // km/h
+        
+        // Flag speed > 800 km/h and distance > 100 km
+        if (speed > 800 && distance > 100) {
+            return {
+                isSuspicious: true,
+                speed: Math.round(speed),
+                distance: Math.round(distance),
+                timeDiffMinutes: Math.round(timeDiffHours * 60)
+            };
+        }
+    } catch (err) {
+        console.error('Impossible travel check failed:', err.message);
+    }
+    return { isSuspicious: false };
+}
+
+/**
+ * Validates password strength & checks Have I Been Pwned database
+ */
+async function checkPwnedPassword(password) {
+    if (!password || password.length < 6) return { isBreached: false };
+    try {
+        const hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase();
+        const prefix = hash.slice(0, 5);
+        const suffix = hash.slice(5);
+
+        const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, { signal: AbortSignal.timeout(3000) });
+        if (!response.ok) {
+            return { isBreached: false };
+        }
+
+        const dataText = await response.text();
+        const hashes = dataText.split('\n');
+        for (const line of hashes) {
+            const [hashSuffix, count] = line.split(':');
+            if (hashSuffix.trim() === suffix) {
+                return { isBreached: true, count: parseInt(count, 10) };
+            }
+        }
+    } catch (err) {
+        console.error('Have I Been Pwned check exception:', err.message);
+    }
+    return { isBreached: false };
+}
+
+/**
+ * Calculates a consolidated risk score for a request
+ */
+async function calculateRiskScore(options = {}) {
+    let score = 0;
+    const reasons = [];
+
+    const {
+        isVPN = false,
+        isProxy = false,
+        isDatacenter = false,
+        isNewDevice = false,
+        isNewBrowser = false,
+        isHeadless = false,
+        isBot = false,
+        isDisposableEmail = false,
+        isTurnstileFailed = false,
+        isNonIndia = false,
+        failedAttemptsCount = 0
+    } = options;
+
+    if (isVPN) {
+        score += 30;
+        reasons.push('VPN Detected (+30)');
+    }
+    if (isProxy) {
+        score += 30;
+        reasons.push('Proxy Detected (+30)');
+    }
+    if (isDatacenter) {
+        score += 40;
+        reasons.push('Datacenter Traffic (+40)');
+    }
+    if (isNewDevice) {
+        score += 20;
+        reasons.push('New Device (+20)');
+    }
+    if (isNewBrowser) {
+        score += 15;
+        reasons.push('New Browser profile (+15)');
+    }
+    if (isHeadless) {
+        score += 80;
+        reasons.push('Headless Browser (+80)');
+    }
+    if (isBot) {
+        score += 100;
+        reasons.push('Automated Bot Signature (+100)');
+    }
+    if (isDisposableEmail) {
+        score += 50;
+        reasons.push('Disposable Email domain (+50)');
+    }
+    if (isTurnstileFailed) {
+        score += 100;
+        reasons.push('Cloudflare Challenge Failure (+100)');
+    }
+    if (isNonIndia) {
+        score += 80;
+        reasons.push('Non-India Traffic (+80)');
+    }
+    if (failedAttemptsCount > 0) {
+        const add = failedAttemptsCount * 10;
+        score += add;
+        reasons.push(`Multiple Failed Logins (+${add})`);
+    }
+
+    return { score, reasons };
+}
+
+/**
+ * Records a rich enterprise security event in the DB
+ */
+async function writeSecurityEvent(event) {
+    const { userId, userRole, eventType, riskScore, ip, country, city, device, browser, status, metadata } = event;
+    const db = require('../db');
+    try {
+        await db.query(
+            `INSERT INTO security_events (user_id, user_role, event_type, risk_score, ip, country, city, device, browser, status, metadata)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+            [
+                userId || null,
+                userRole || null,
+                eventType,
+                riskScore || 0,
+                ip || 'UNKNOWN_IP',
+                country || 'IN',
+                city || 'Unknown',
+                device || 'Unknown Device',
+                browser || 'Unknown Browser',
+                status || 'SUCCESS',
+                metadata ? JSON.stringify(metadata) : '{}'
+            ]
+        );
+        console.log(`🛡️ [ENTERPRISE EVENT] Logged: ${eventType} | Score: ${riskScore} | IP: ${ip}`);
+    } catch (err) {
+        console.error('❌ Failed to log security event:', err.message);
+    }
+}
+
 module.exports = {
     logSecurityEvent,
     isDisposableEmail,
@@ -629,5 +971,14 @@ module.exports = {
     OTP_PROTECTION_MIDDLEWARE,
     checkIPBlockStatus,
     checkHoneypot,
-    recordFailedAttempt
+    recordFailedAttempt,
+    // Enterprise utilities export
+    sendSecurityEmail,
+    getGeoIPData,
+    isDatacenterIP,
+    checkImpossibleTravel,
+    checkPwnedPassword,
+    calculateRiskScore,
+    writeSecurityEvent
 };
+

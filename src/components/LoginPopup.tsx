@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, ArrowRight, Loader2, CheckCircle, KeyRound } from 'lucide-react';
 import { useUserAuth } from '../context/UserAuthContext';
 import Turnstile from './Turnstile';
+import { startBehavioralTracking, stopBehavioralTracking, getBehavioralProfile } from '../utils/behavioralTracker';
 
 import { getApiUrl } from '../utils/url';
 const API_URL = getApiUrl();
@@ -27,6 +28,41 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileKey, setTurnstileKey] = useState(0);
   const [website, setWebsite] = useState('');
+
+  // Start/Stop behavioral tracking on open/close
+  useEffect(() => {
+    if (isOpen) {
+      startBehavioralTracking();
+    } else {
+      stopBehavioralTracking();
+    }
+    return () => {
+      stopBehavioralTracking();
+    };
+  }, [isOpen]);
+
+  const getDeviceId = () => {
+    try {
+      let id = localStorage.getItem('mm_device_id');
+      if (!id) {
+        id = 'dev_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('mm_device_id', id);
+      }
+      return id;
+    } catch (e) {
+      return 'fallback-device-id';
+    }
+  };
+
+  const getDeviceMetadata = () => {
+    return {
+      deviceId: getDeviceId(),
+      browser: navigator.userAgent,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      language: navigator.language,
+      screenResolution: `${window.screen.width}x${window.screen.height}`
+    };
+  };
 
   const getBrowserFingerprint = () => {
     try {
@@ -60,7 +96,13 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/check-user`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, website, browserFingerprint: getBrowserFingerprint() })
+        body: JSON.stringify({ 
+          phone: phoneNumber, 
+          website, 
+          browserFingerprint: getBrowserFingerprint(),
+          deviceMetadata: getDeviceMetadata(),
+          behavioralProfile: getBehavioralProfile()
+        })
       });
 
       const data = await response.json();
@@ -110,7 +152,9 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
           email: targetEmail, 
           recaptchaToken: token,
           website,
-          browserFingerprint: getBrowserFingerprint()
+          browserFingerprint: getBrowserFingerprint(),
+          deviceMetadata: getDeviceMetadata(),
+          behavioralProfile: getBehavioralProfile()
         })
       });
       if (!response.ok) {
@@ -140,7 +184,14 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phoneNumber, otp, website, browserFingerprint: getBrowserFingerprint() })
+        body: JSON.stringify({ 
+          phone: phoneNumber, 
+          otp, 
+          website, 
+          browserFingerprint: getBrowserFingerprint(),
+          deviceMetadata: getDeviceMetadata(),
+          behavioralProfile: getBehavioralProfile()
+        })
       });
 
       const data = await response.json();
@@ -179,7 +230,9 @@ export default function LoginPopup({ isOpen, onClose }: LoginPopupProps) {
           email: email,
           is_verified: true,
           website,
-          browserFingerprint: getBrowserFingerprint()
+          browserFingerprint: getBrowserFingerprint(),
+          deviceMetadata: getDeviceMetadata(),
+          behavioralProfile: getBehavioralProfile()
         })
       });
 

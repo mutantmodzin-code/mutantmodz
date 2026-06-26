@@ -12,9 +12,28 @@ const updateAdmin = async (username, password) => {
             process.exit(1);
         }
 
+        // Validate password complexity
+        if (password.length < 12) {
+            console.error('❌ Error: Password must be at least 12 characters.');
+            process.exit(1);
+        }
+        if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+            console.error('❌ Error: Password must contain uppercase, lowercase, number, and special character.');
+            process.exit(1);
+        }
+
+        // Check Have I Been Pwned
+        const { checkPwnedPassword } = require('../utils/security');
+        console.log('🔍 Checking Have I Been Pwned database for credential leaks...');
+        const pwned = await checkPwnedPassword(password);
+        if (pwned.isBreached) {
+            console.error(`❌ Error: This password was found in ${pwned.count} public data breaches. Please choose a different password.`);
+            process.exit(1);
+        }
+
         console.log(`🔄 Updating admin credentials for: ${username}`);
         
-        const saltRounds = 10;
+        const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         // 1. Update Database

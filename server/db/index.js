@@ -2,6 +2,9 @@ const { Pool } = require('pg');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
+// Bypass self-signed SSL certificate validation for PostgreSQL TLS connections
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }

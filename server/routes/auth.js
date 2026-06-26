@@ -1027,7 +1027,7 @@ router.get('/security-stats', async (req, res, next) => {
 });
 
 // Auth Middleware (Legacy compatibility)
-const authenticateToken = (req, res, next) => {
+function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     
@@ -1038,7 +1038,7 @@ const authenticateToken = (req, res, next) => {
         req.user = user;
         next();
     });
-};
+}
 
 // Send OTP for Email Update
 const handleSendEmailOTP = async (req, res) => {

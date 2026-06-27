@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { MailerSend } = require('../utils/mailersend');
+const { Resend } = require('resend');
 
-function getMailerSend() {
-    const apiKey = process.env.MAILERSEND_API_KEY || process.env.RESEND_API_KEY;
-    if (!apiKey) return null;
-    return new MailerSend(apiKey);
+function getResend() {
+    if (!process.env.RESEND_API_KEY) return null;
+    return new Resend(process.env.RESEND_API_KEY);
 }
 
 // POST /api/contact — sends contact form submission to admin email
@@ -17,7 +16,7 @@ router.post('/', async (req, res) => {
     }
 
     const adminEmail = process.env.ADMIN_CONTACT_EMAIL || 'info@mutantmodz.in';
-    const fromEmail  = process.env.MAILERSEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'info@mutantmodz.in';
+    const fromEmail  = process.env.RESEND_FROM_EMAIL  || 'onboarding@resend.dev';
 
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #111; color: #fff; padding: 32px; border-radius: 12px;">
@@ -52,8 +51,8 @@ router.post('/', async (req, res) => {
         </div>
     `;
 
-    const mailerSend = getMailerSend();
-    if (!mailerSend) {
+    const resend = getResend();
+    if (!resend) {
         // Dev mode — just log it
         console.log('\n📩 CONTACT FORM SUBMISSION (Mock Mode):');
         console.log('  Name:', name);
@@ -65,7 +64,7 @@ router.post('/', async (req, res) => {
     }
 
     try {
-        const { error } = await mailerSend.emails.send({
+        const { error } = await resend.emails.send({
             from: fromEmail,
             to: [adminEmail],
             replyTo: email,
@@ -75,7 +74,7 @@ router.post('/', async (req, res) => {
         });
 
         if (error) {
-            console.error('MAILERSEND ERROR (contact):', error);
+            console.error('RESEND ERROR (contact):', error);
             return res.status(500).json({ error: 'Failed to send email. Please try again.' });
         }
 

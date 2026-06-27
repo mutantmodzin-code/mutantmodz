@@ -4,7 +4,7 @@ const db = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { MailerSend } = require('../utils/mailersend');
+const { Resend } = require('resend');
 const {
     OTP_PROTECTION_MIDDLEWARE,
     checkIPBlockStatus,
@@ -31,19 +31,18 @@ const {
     behavioralCheck
 } = require('../middleware/enterpriseSecurity');
 
-// Initialize MailerSend with API key
-let mailerSendClient = null;
-function getMailerSend() {
-    const apiKey = process.env.MAILERSEND_API_KEY || process.env.RESEND_API_KEY;
-    if (!mailerSendClient && apiKey) {
+// Initialize Resend with API key
+let resendClient = null;
+function getResend() {
+    if (!resendClient && process.env.RESEND_API_KEY) {
         try {
-            mailerSendClient = new MailerSend(apiKey);
+            resendClient = new Resend(process.env.RESEND_API_KEY);
         } catch (err) {
-            console.error('Failed to instantiate MailerSend client in auth.js:', err);
-            mailerSendClient = null;
+            console.error('Failed to instantiate Resend client in auth.js:', err);
+            resendClient = null;
         }
     }
-    return mailerSendClient;
+    return resendClient;
 }
 
 // User-Agent parser utility
@@ -316,8 +315,8 @@ router.post('/send-otp', checkIPBlockStatus, checkHoneypot, indiaAccessPolicy, O
         }
 
         // Send OTP
-        const mailerSendInstance = getMailerSend();
-        if (!mailerSendInstance) {
+        const resendInstance = getResend();
+        if (!resendInstance) {
             console.log('--- OTP BYPASS (MOCK MODE) ---');
             console.log(`[DEV MODE] OTP CODE for ${emailToUse}: ${otp}`);
             console.log('------------------------------');
@@ -328,8 +327,8 @@ router.post('/send-otp', checkIPBlockStatus, checkHoneypot, indiaAccessPolicy, O
         }
 
         try {
-            const fromEmail = process.env.MAILERSEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'info@mutantmodz.in';
-            const { data, error } = await mailerSendInstance.emails.send({
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+            const { data, error } = await resendInstance.emails.send({
                 from: fromEmail,
                 to: [emailToUse],
                 subject: 'MutantModz Verification Code',
@@ -344,7 +343,7 @@ router.post('/send-otp', checkIPBlockStatus, checkHoneypot, indiaAccessPolicy, O
             });
 
             if (error) {
-                console.error('MAILERSEND ERROR:', error);
+                console.error('RESEND ERROR:', error);
                 console.log(`[EMERGENCY FALLBACK] OTP CODE for ${emailToUse}: ${otp}`);
                 return res.json({ 
                     dev: true, 
@@ -665,11 +664,11 @@ router.post('/login', checkIPBlockStatus, checkHoneypot, indiaAccessPolicy, beha
             await db.query('UPDATE users SET otp_hash = $1, otp_expiry = $2 WHERE id = $3', [otpHash, expires, user.id]);
 
             if (user.email) {
-                const mailerSendInstance = getMailerSend();
-                const fromEmail = process.env.MAILERSEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'info@mutantmodz.in';
+                const resendInstance = getResend();
+                const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
                 
-                if (mailerSendInstance) {
-                    await mailerSendInstance.emails.send({
+                if (resendInstance) {
+                    await resendInstance.emails.send({
                         from: fromEmail,
                         to: [user.email],
                         subject: 'Admin Verification Required - MutantModz',
@@ -1076,15 +1075,15 @@ const handleSendEmailOTP = async (req, res) => {
             );
         }
 
-        const mailerSendInstance = getMailerSend();
-        if (!mailerSendInstance) {
+        const resendInstance = getResend();
+        if (!resendInstance) {
             console.log(`[DEV MODE] OTP for Email Update to ${newEmail}: ${otp}`);
             return res.json({ dev: true, message: 'OTP sent to terminal (Mock Mode)' });
         }
 
         try {
-            const fromEmail = process.env.MAILERSEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'info@mutantmodz.in';
-            await mailerSendInstance.emails.send({
+            const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+            await resendInstance.emails.send({
                 from: fromEmail,
                 to: [newEmail],
                 subject: 'MutantModz Email Verification',

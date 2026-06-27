@@ -690,35 +690,34 @@ const OTP_PROTECTION_MIDDLEWARE = async (req, res, next) => {
 // ENTERPRISE SECURITY UTILITIES
 // ==========================================
 
-const { MailerSend } = require('./mailersend');
-let mailerSendClientInstance = null;
+const { Resend } = require('resend');
+let resendClientInstance = null;
 
-function getMailerSendClient() {
-    const apiKey = process.env.MAILERSEND_API_KEY || process.env.RESEND_API_KEY;
-    if (!mailerSendClientInstance && apiKey) {
+function getResendClient() {
+    if (!resendClientInstance && process.env.RESEND_API_KEY) {
         try {
-            mailerSendClientInstance = new MailerSend(apiKey);
+            resendClientInstance = new Resend(process.env.RESEND_API_KEY);
         } catch (err) {
-            console.error('Failed to instantiate MailerSend client in security.js:', err);
-            mailerSendClientInstance = null;
+            console.error('Failed to instantiate Resend client in security.js:', err);
+            resendClientInstance = null;
         }
     }
-    return mailerSendClientInstance;
+    return resendClientInstance;
 }
 
 /**
- * Sends a security email notification using MailerSend
+ * Sends a security email notification using Resend
  */
 async function sendSecurityEmail(email, subject, html) {
-    const mailerSend = getMailerSendClient();
-    const fromEmail = process.env.MAILERSEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'info@mutantmodz.in';
-    if (!mailerSend) {
+    const resend = getResendClient();
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    if (!resend) {
         console.log(`[MOCK EMAIL] to: ${email} | Subject: ${subject}`);
         console.log(`[MOCK EMAIL BODY] ${html.replace(/<[^>]*>/g, '')}`);
         return;
     }
     try {
-        await mailerSend.emails.send({
+        await resend.emails.send({
             from: fromEmail,
             to: [email],
             subject: subject,

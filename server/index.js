@@ -52,7 +52,7 @@ const adminLoginLimiter = rateLimit({
 console.log('--- Server Debug ---');
 console.log('PORT:', PORT);
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'PRESENT' : 'MISSING');
-console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'PRESENT' : 'MISSING');
+console.log('MAILERSEND_API_KEY:', process.env.MAILERSEND_API_KEY ? 'PRESENT' : 'MISSING');
 console.log('TURNSTILE_SECRET_KEY:', process.env.TURNSTILE_SECRET_KEY ? 'PRESENT ✅' : 'MISSING ⚠️');
 console.log('RECAPTCHA_SECRET_KEY:', process.env.RECAPTCHA_SECRET_KEY ? 'PRESENT ✅' : 'MISSING ⚠️');
 console.log('--------------------');
